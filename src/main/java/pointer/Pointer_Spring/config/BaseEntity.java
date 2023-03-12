@@ -1,7 +1,6 @@
 package pointer.Pointer_Spring.config;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -20,7 +19,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @DynamicInsert
-@DiscriminatorColumn
 @NoArgsConstructor
 public abstract class BaseEntity {
     @CreatedDate

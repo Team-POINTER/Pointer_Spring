@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.config;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class Time {
@@ -12,7 +13,7 @@ public class Time {
     }
     public static String calculateTime(LocalDateTime updateAt) {
         long curTime = System.currentTimeMillis();
-        long updateTime = java.sql.Timestamp.valueOf(updateAt).getTime();
+        long updateTime = Timestamp.valueOf(updateAt).getTime();
         long diffTime = (curTime - updateTime) / 1000;
         String time;
         if (diffTime < TIME_MAX.SEC) {
