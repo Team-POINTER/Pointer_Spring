@@ -19,8 +19,8 @@ public class SwaggerConfig {
         return new Docket(DocumentationType.OAS_30)
                 .useDefaultResponseMessages(false)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage(" pointer.Pointer_Spring.swagger"))//pagkage명과  동일
-                .paths(PathSelectors.any())
+                .apis(RequestHandlerSelectors.basePackage("pointer.Pointer_Spring.swagger"))//pagkage명과 동일
+                .paths(PathSelectors.any())//전체 API에 대한 문서를 Swagger를 통해 나타낼 수 있다.
                 .build()
                 .apiInfo(apiInfo());
     }
