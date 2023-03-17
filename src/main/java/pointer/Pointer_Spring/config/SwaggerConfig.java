@@ -1,6 +1,10 @@
 package pointer.Pointer_Spring.config;
 
 import com.fasterxml.classmate.TypeResolver;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pointer.Pointer_Spring.swagger.SwaggerTestDto;
@@ -21,7 +25,16 @@ import java.util.List;
 
 
 @Configuration
-
+//변경필요
+@OpenAPIDefinition(
+        info = @Info(title = "Pointer API 명세서",
+                description = "API 명세서",
+                version = "v1",
+                contact = @Contact(name = "pointer", email = "pointer@gmail.com"),
+                license = @License(name = "Apache 2.0",
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.html")
+        )
+)
 public class SwaggerConfig {
 
     @Bean
