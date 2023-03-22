@@ -9,12 +9,15 @@ public enum ExceptionCode {
      * 회원가입 및 로그인
      */
     SIGNUP_CREATED_OK(CREATED, "A000", "회원가입 성공"),
-    SIGNUP_DUPLICATED_ID(DUPLICATED_VALUE, "A001", "ID 중복"),
-    SIGNUP_DUPLICATED_NICKNAME(DUPLICATED_VALUE, "A002", "NICKNAME 중복"),
+    SIGNUP_COMPLETE(CREATED, "A001", "이미 존재하는 회원"),
+    SIGNUP_DUPLICATED_ID(DUPLICATED_VALUE, "A002", "ID 중복"),
+    SIGNUP_DUPLICATED_USERNAME(DUPLICATED_VALUE, "A003", "USERNAME 중복"),
 
     LOGIN_OK(SUCCESS, "B000", "로그인 성공"),
     LOGIN_NOT_FOUND_ID(NOT_FOUND_VALUE, "B001", "로그인 실패"),
     LOGIN_NOT_FOUND_PW(NOT_FOUND_VALUE, "B002", "로그인 실패"),
+    LOGOUT_OK(SUCCESS, "B003", "로그아웃 성공"),
+    LOGOUT_STATE(UNAUTHORIZED, "B004", "로그아웃 상태"),
 
     /**
      * 회원정보
@@ -36,6 +39,13 @@ public enum ExceptionCode {
      */
     AUTHORITY_HAVE(SUCCESS, "F000", "수정/삭제 권한이 있습니다"),
     AUTHORITY_NOT_HAVE(NOT_FOUND_VALUE, "F001", "수정/삭제 권한이 없습니다."),
+
+    /**
+     *  토큰
+     */
+    VALID_TOKEN(SUCCESS, "G000","유효한 토큰입니다"),
+    INVALID_TOKEN(INVALID_ACCESS, "G001","유효하지 않은 토큰입니다"),
+    MISMATCHED_TOKEN(INVALID_ACCESS, "G002", "토큰 정보가 일치하지 않습니다"),
 
     /**
      * 잘못된 ExceptionCode
