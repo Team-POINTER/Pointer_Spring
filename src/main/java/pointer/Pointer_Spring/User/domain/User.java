@@ -1,18 +1,24 @@
 package pointer.Pointer_Spring.User.domain;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import lombok.AccessLevel;
-import lombok.*;
-import javax.persistence.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "USER")
 public class User extends BaseEntity {
-    @Getter(AccessLevel.NONE)
+
+    //    @Getter(AccessLevel.NONE)
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", unique = true)
     private Long userId;
 
