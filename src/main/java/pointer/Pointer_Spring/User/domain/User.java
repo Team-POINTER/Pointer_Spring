@@ -8,12 +8,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "USER")
 public class User extends BaseEntity {
 
-    //    @Getter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", unique = true)
@@ -26,40 +28,50 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
-    private String username;
+    //private String username;
     private String password;
-    private Authority authority;
 
+    // social login
     public enum Type {
         APP, KAKAO, APPLE
     }
-
-    @Column(nullable = false)
     private Type type;
+    private boolean social;
 
-
-    @Builder
-    public User(String id, String email, String nickname, Type type) {
-        this.id = id;
-        this.email = email;
-        this.nickname = nickname;
-        this.type = type;
-
+    // role
+    public enum Role {
+        USER, ADMIN
     }
 
+    private Role role;
+
+
+
+    // builder
+
     @Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String nickanme, String username) {
+    public User(String email, String id, String nickname, String password) {
         this.email = email;
         this.id = id;
-        this.nickname = nickanme;
-        this.username = username;
-        this.authority = Authority.ROLE_USER;
+        this.nickname = nickname;
+        this.password = password;
+        this.type = Type.KAKAO;
+        this.social = true;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
-    public User(String email, String password, Authority authority) {
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
-        this.authority = authority;
+        this.role = role;
     }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    public void addRole(Role role) {
+        this.role = role;
+    }
+
 }

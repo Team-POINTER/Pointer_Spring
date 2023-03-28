@@ -1,4 +1,4 @@
-package pointer.Pointer_Spring.jwt;
+package pointer.Pointer_Spring.security.handler;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
