@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+
 	id 'org.springframework.boot' version '2.7.7' //swagger사용을 위해 다운그레이드
 	id 'io.spring.dependency-management' version '1.1.0'
 }
@@ -19,10 +20,26 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	// social login
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.2'
+	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.2'
+	implementation 'com.google.code.gson:gson:2.10.1'
+
+	compileOnly 'org.projectlombok:lombok'
+
+	runtimeOnly 'com.h2database:h2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testCompileOnly 'org.projectlombok:lombok'
 	//validation
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	//swagger
