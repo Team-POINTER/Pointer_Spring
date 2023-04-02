@@ -1,15 +1,15 @@
 package pointer.Pointer_Spring.User.service;
 
 import pointer.Pointer_Spring.User.domain.User;
+//import pointer.Pointer_Spring.User.dto.JoinRequestDto;
 import pointer.Pointer_Spring.User.dto.KakaoRequestDto;
 import pointer.Pointer_Spring.User.response.ResponseKakaoUser;
 
 import java.util.Optional;
 
 public interface AuthService {
-
-    User join(KakaoRequestDto kakaoRequestDto);
-    Optional<User> login(KakaoRequestDto kakaoRequestDto);
+    User signup(KakaoRequestDto kakaoRequestDto);
+    Optional<User> login(String email);
 
     ResponseKakaoUser kakaoCheck(String accessToken);
 

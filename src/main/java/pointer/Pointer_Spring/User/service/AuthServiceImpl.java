@@ -2,13 +2,13 @@ package pointer.Pointer_Spring.User.service;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import pointer.Pointer_Spring.User.domain.Token;
+import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.User.response.ResponseKakaoUser;
 import pointer.Pointer_Spring.User.domain.User;
 import pointer.Pointer_Spring.User.dto.*;
-import pointer.Pointer_Spring.User.repository.TokenRepository;
 import pointer.Pointer_Spring.User.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,20 +26,19 @@ import java.util.Optional;
 @PropertySource("classpath:config.properties")
 public class AuthServiceImpl implements AuthService {
 
-//    @Value("${kakao.restAPI}")
-//    private String restApiKey;
+    @Value("${kakao.restAPI}")
+    private String restApiKey;
 
-//    @Value("${kakao.redirectURI}")
-//    private String redirectUri;
+    @Value("${kakao.redirectURI}")
+    private String redirectUri;
 
     private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    /*public String getKakaoAccessToken(String code) {
-        String access_Token = "";
-        String refresh_Token = "";
+    public String getKakaoAccessToken(String code) {
+        String access_Token;
+        //String refresh_Token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token";
 
         try {
@@ -72,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
             JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
             access_Token = jsonObject.get("access_token").getAsString();
-            refresh_Token = jsonObject.get("refresh_token").getAsString();
+            //refresh_Token = jsonObject.get("refresh_token").getAsString();
 
             br.close();
             bw.close();
@@ -80,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid code");
         }
         return access_Token;
-    }*/
+    }
 
     @Override
     public KakaoRequestDto getKakaoUser(String token) {
@@ -114,9 +113,9 @@ public class AuthServiceImpl implements AuthService {
             String nickname = element.get("properties").getAsJsonObject().get("nickname").getAsString();
 
             //System.out.println("response body : " + result);
-            //System.out.println("id = " + id);
-            //System.out.println("email : " + email);
-            //System.out.println("nickname : " + nickname);
+            System.out.println("id = " + id);
+            System.out.println("email : " + email);
+            System.out.println("nickname : " + nickname);
 
             return KakaoRequestDto.builder()
                     .id(id)
@@ -136,13 +135,13 @@ public class AuthServiceImpl implements AuthService {
             return new ResponseKakaoUser(ExceptionCode.USER_NOT_FOUND);
         }
 
-        Optional<User> findUser = login(kakaoDto); // 회원 여부
+        Optional<User> findUser = login(kakaoDto.getEmail()); // 회원 여부
 
         User user;
         ExceptionCode exception;
 
         if (findUser.isEmpty()) { // 회원가입
-            user = join(kakaoDto);
+            user = signup(kakaoDto);
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         }
         else {
@@ -150,32 +149,33 @@ public class AuthServiceImpl implements AuthService {
             exception = ExceptionCode.SIGNUP_COMPLETE;
         }
 
-        String token = checkToken(user.getEmail(), user.getPassword());
-        return new ResponseKakaoUser(exception, token);
+        return new ResponseKakaoUser(exception, user.getToken());
     }
 
+    @Transactional
     @Override
     public String checkToken(String email, String password) {
-        Optional<Token> findToken = tokenRepository.findByEmail(email);
+        Optional<User> findUser = userRepository.findByEmailAndStatus(email, 1);
         String token;
 
         // token 존재 여부 or 유효기간 확인 후 (재)발급하는 함수
-        if (findToken.isEmpty() || jwtUtil.isTokenExpired(findToken.get().getValue())) {
+        if (findUser.isEmpty() || jwtUtil.isTokenExpired(findUser.get().getToken())) {
             token = jwtUtil.generateToken(
                     Map.of("mEmail", email, "mPassword",password), 7); // 유효 기간 7일
-            Token refreshToken = Token.builder().email(email).value(token).build();
-            tokenRepository.save(refreshToken);
+            User user = findUser.get();
+            user.setToken(token);
+            //userRepository.save(user);
         }
         else {
-            token = findToken.get().getValue();
+            token = findUser.get().getToken();
         }
         return token;
     }
 
     @Override
-    public User join(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
+    public User signup(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
         String mEmail = kakaoRequestDto.getEmail();
-        boolean exist = userRepository.existsByEmail(mEmail);
+        boolean exist = userRepository.existsByEmailAndStatus(mEmail, 1);
 
         User user = User.KakaoBuilder()
                 .id(kakaoRequestDto.getId())
@@ -185,12 +185,26 @@ public class AuthServiceImpl implements AuthService {
         user.changePassword(passwordEncoder.encode("1111"));
         user.addRole(User.Role.USER);
 
+        String token = checkToken(user.getEmail(), user.getPassword());
+        user.setToken(token);
+
         return userRepository.save(user);
     }
 
     @Override
-    public Optional<User> login(KakaoRequestDto kakaoRequestDto){
-        return userRepository.findByEmail(kakaoRequestDto.getEmail());
+    public Optional<User> login(String email){
+        return userRepository.findByEmailAndStatus(email, 1);
     }
 
+    public ResponseKakaoUser reissue(TokenRequest tokenRequest) {
+        Optional<User> findUser = userRepository.findByTokenAndStatus(tokenRequest.getToken(),1);
+        if (findUser.isEmpty()) {
+            return new ResponseKakaoUser(ExceptionCode.INVALID_TOKEN);
+        }
+
+        User user = userRepository.findByEmailAndStatus(findUser.get().getEmail(),1).get();
+
+        String jwt = checkToken(user.getEmail(), user.getPassword());
+        return new ResponseKakaoUser(ExceptionCode.REISSUE_TOKEN, jwt);
+    }
 }

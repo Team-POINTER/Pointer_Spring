@@ -44,8 +44,11 @@ public enum ExceptionCode {
      *  토큰
      */
     VALID_TOKEN(SUCCESS, "G000","유효한 토큰입니다"),
-    INVALID_TOKEN(INVALID_ACCESS, "G001","유효하지 않은 토큰입니다"),
-    MISMATCHED_TOKEN(INVALID_ACCESS, "G002", "토큰 정보가 일치하지 않습니다"),
+    MALFORMED_TOKEN(INVALID_ACCESS, "G001","올바르지 않은 토큰입니다"),
+    EXPIRED_TOKEN(INVALID_ACCESS, "G002","유효 기간이 만료된 토큰입니다"),
+    UNAUTHORIZED_TOKEN(INVALID_ACCESS, "G003", "유효하지 않은 토큰입니다"),
+    INVALID_TOKEN(INVALID_ACCESS, "G004", "존재하지 않은 토큰입니다"),
+    REISSUE_TOKEN(INVALID_ACCESS, "G005", "재발급한 토큰입니다"),
 
     /**
      * 잘못된 ExceptionCode
