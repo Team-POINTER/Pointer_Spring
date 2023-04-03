@@ -43,12 +43,15 @@ public enum ExceptionCode {
     /**
      *  토큰
      */
-    VALID_TOKEN(SUCCESS, "G000","유효한 토큰입니다"),
-    MALFORMED_TOKEN(INVALID_ACCESS, "G001","올바르지 않은 토큰입니다"),
-    EXPIRED_TOKEN(INVALID_ACCESS, "G002","유효 기간이 만료된 토큰입니다"),
-    UNAUTHORIZED_TOKEN(INVALID_ACCESS, "G003", "유효하지 않은 토큰입니다"),
-    INVALID_TOKEN(INVALID_ACCESS, "G004", "존재하지 않은 토큰입니다"),
-    REISSUE_TOKEN(INVALID_ACCESS, "G005", "재발급한 토큰입니다"),
+    EXPIRED_TOKEN(INVALID_ACCESS, "G000","expired access-token"),
+    MALFORMED_TOKEN(INVALID_ACCESS, "G001","incorrect access-token"),
+    UNAUTHORIZED_TOKEN(INVALID_ACCESS, "G002", "invalid access-token"),
+
+    REISSUE_TOKEN(SUCCESS, "H000", "reissued token"),
+    INVALID_REFRESH_TOKEN(INVALID_ACCESS, "H001", "non-existent refresh-token"),
+    //OLD_REFRESH(INVALID_ACCESS,"H002", "올바르지 않은 refresh 토큰입니다"),
+    //NO_REFRESH(INVALID_ACCESS, "H003", "유효하지 않는 refresh 토큰입니다"),
+    //NO_ACCESS(INVALID_ACCESS, "H004", "유효하지 않은 refresh 토큰입니다"),
 
     /**
      * 잘못된 ExceptionCode

@@ -43,6 +43,8 @@ public class User extends BaseEntity {
     private Role role;
     private boolean agreement;
     private boolean options;
+
+    @Column(length = 1000)
     private String token;
 
     // builder

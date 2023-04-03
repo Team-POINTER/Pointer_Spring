@@ -1,10 +1,13 @@
 package pointer.Pointer_Spring.User.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class TokenRequest {
+@Builder
+public class TokenDto {
+    private String accessToken;
     private String refreshToken;
 }

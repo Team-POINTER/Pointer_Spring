@@ -136,7 +136,6 @@ public class AuthServiceImpl implements AuthService {
         }
 
         Optional<User> findUser = login(kakaoDto.getEmail()); // 회원 여부
-
         User user;
         ExceptionCode exception;
 
@@ -149,27 +148,27 @@ public class AuthServiceImpl implements AuthService {
             exception = ExceptionCode.SIGNUP_COMPLETE;
         }
 
-        return new ResponseKakaoUser(exception, user.getToken());
+        TokenDto tokenDto = createToken(user.getEmail(), user.getPassword());
+        return new ResponseKakaoUser(exception, tokenDto);
     }
 
     @Transactional
     @Override
-    public String checkToken(String email, String password) {
-        Optional<User> findUser = userRepository.findByEmailAndStatus(email, 1);
-        String token;
+    public TokenDto createToken(String email, String password) { // token 발급
+        User user = userRepository.findByEmailAndStatus(email, 1).get();
+        TokenDto tokenDto;
 
         // token 존재 여부 or 유효기간 확인 후 (재)발급하는 함수
-        if (findUser.isEmpty() || jwtUtil.isTokenExpired(findUser.get().getToken())) {
-            token = jwtUtil.generateToken(
-                    Map.of("mEmail", email, "mPassword",password), 7); // 유효 기간 7일
-            User user = findUser.get();
-            user.setToken(token);
-            //userRepository.save(user);
-        }
-        else {
-            token = findUser.get().getToken();
-        }
-        return token;
+        // user.getToken().isEmpty() || jwtUtil.isTokenExpired(user.getToken())
+        String accessToken = jwtUtil.generateToken(Map.of("mEmail", email, "mPassword",password), 7); // 유효 기간 7일
+        String refreshToken = jwtUtil.generateToken(Map.of("mEmail", email, "mPassword",password), 14); // 유효 기간 14일
+        tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        user.setToken(refreshToken);
+        return tokenDto;
     }
 
     @Override
@@ -185,9 +184,6 @@ public class AuthServiceImpl implements AuthService {
         user.changePassword(passwordEncoder.encode("1111"));
         user.addRole(User.Role.USER);
 
-        String token = checkToken(user.getEmail(), user.getPassword());
-        user.setToken(token);
-
         return userRepository.save(user);
     }
 
@@ -197,14 +193,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public ResponseKakaoUser reissue(TokenRequest tokenRequest) {
-        Optional<User> findUser = userRepository.findByTokenAndStatus(tokenRequest.getToken(),1);
-        if (findUser.isEmpty()) {
-            return new ResponseKakaoUser(ExceptionCode.INVALID_TOKEN);
+        Optional<User> findUser = userRepository.findByTokenAndStatus(tokenRequest.getRefreshToken(),1);
+        String getRefreshToken = tokenRequest.getRefreshToken();
+        if (findUser.isEmpty() || !(findUser.get().getToken().equals(getRefreshToken))) {
+            return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
         }
 
-        User user = userRepository.findByEmailAndStatus(findUser.get().getEmail(),1).get();
-
-        String jwt = checkToken(user.getEmail(), user.getPassword());
-        return new ResponseKakaoUser(ExceptionCode.REISSUE_TOKEN, jwt);
+        User user = findUser.get();
+        TokenDto tokenDto = createToken(user.getEmail(), user.getPassword());
+        return new ResponseKakaoUser(ExceptionCode.REISSUE_TOKEN, tokenDto);
     }
 }

@@ -1,9 +1,7 @@
 package pointer.Pointer_Spring.security;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
@@ -38,16 +36,18 @@ public class JwtFilter extends GenericFilterBean {
         String jwt = resolveToken((HttpServletRequest) request);
 
         // validateToken 으로 토큰 유효성 검사
-        if (StringUtils.hasText(jwt)) {
-            System.out.println("jwt = " + jwt);
-            ContentCachingResponseWrapper responseWrapper =
-                    new ContentCachingResponseWrapper((HttpServletResponse) response);
-            try {
-                Map<String, Object> values = jwtUtil.validateToken(jwt);
-                chain.doFilter(request, responseWrapper);
-            } catch (ExpiredJwtException expiredJwtException) {
-                response = createResponse(ExceptionCode.EXPIRED_TOKEN, response);
+        String path = ((HttpServletRequest) request).getRequestURI();
+        if (StringUtils.hasText(jwt) && !path.startsWith("/auth/reissue")) {
+            ContentCachingResponseWrapper responseWrapper
+                    =  new ContentCachingResponseWrapper((HttpServletResponse) response);
 
+            try {
+                if (jwtUtil.isTokenExpired(jwt).equals(false)) {
+                    Map<String, Object> values = jwtUtil.validateToken(jwt);
+                }
+                else {
+                    response = createResponse(ExceptionCode.EXPIRED_TOKEN, response);
+                }
             } catch (MalformedJwtException malformedJwtException) {
                 response = createResponse(ExceptionCode.MALFORMED_TOKEN, response);
 

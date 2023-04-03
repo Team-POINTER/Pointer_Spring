@@ -34,7 +34,7 @@ public class AuthController {
     public ResponseEntity<Object> login(@RequestBody TokenRequest tokenRequest) {
         System.out.println("AuthController.login");
         System.out.println("tokenRequest = " + tokenRequest);
-        return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getToken()), HttpStatus.OK);
+        return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getRefreshToken()), HttpStatus.OK);
     }
 
     @PostMapping("/auth/reissue") // token 재발급
