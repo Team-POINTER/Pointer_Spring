@@ -73,9 +73,9 @@ public class JwtUtil {
         }
     }
 
-    // 토큰 만료 3일전인지
+    // 토큰 유효 여부 -> 만료시, false
     public Boolean isTokenExpired(String token){
         Date expiration = parseClaims(token).getExpiration();
-        return expiration.before(Date.from(ZonedDateTime.now().minusDays(3).toInstant()));
+        return expiration.before(Date.from(ZonedDateTime.now().minusDays(1).toInstant()));
     }
 }

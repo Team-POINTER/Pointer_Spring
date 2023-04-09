@@ -8,9 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "USER")
@@ -28,7 +25,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
-    //private String username;
+    private String username;
     private String password;
 
     // social login
@@ -44,8 +41,11 @@ public class User extends BaseEntity {
     }
 
     private Role role;
+    private boolean agreement;
+    private boolean options;
 
-
+    @Column(length = 1000)
+    private String token;
 
     // builder
 
@@ -70,8 +70,20 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public void addRole(Role role) {
         this.role = role;
+    }
+
+    public void setOption(boolean options) {
+        this.options = options;
+    }
+
+    public void setAgreement(boolean agreement) {
+        this.agreement = agreement;
     }
 
 }

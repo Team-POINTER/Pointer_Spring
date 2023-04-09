@@ -1,15 +1,22 @@
 package pointer.Pointer_Spring.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.util.ContentCachingResponseWrapper;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class JwtFilter extends GenericFilterBean {
@@ -29,12 +36,27 @@ public class JwtFilter extends GenericFilterBean {
         String jwt = resolveToken((HttpServletRequest) request);
 
         // validateToken 으로 토큰 유효성 검사
-        if (StringUtils.hasText(jwt)) {
-            jwtUtil.validateToken(jwt);
+        String path = ((HttpServletRequest) request).getRequestURI();
+        if (StringUtils.hasText(jwt) && !path.startsWith("/auth/reissue")) {
+            ContentCachingResponseWrapper responseWrapper
+                    =  new ContentCachingResponseWrapper((HttpServletResponse) response);
+
+            try {
+                if (jwtUtil.isTokenExpired(jwt).equals(false)) {
+                    Map<String, Object> values = jwtUtil.validateToken(jwt);
+                }
+                else {
+                    response = createResponse(ExceptionCode.EXPIRED_TOKEN, response);
+                }
+            } catch (MalformedJwtException malformedJwtException) {
+                response = createResponse(ExceptionCode.MALFORMED_TOKEN, response);
+
+            } catch (Exception exception) {
+                response = createResponse(ExceptionCode.UNAUTHORIZED_TOKEN, response);
+            }
             //Authentication authentication = tokenProvider.getAuthentication(jwt);
             //SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-
         chain.doFilter(request, response);
     }
 
@@ -45,5 +67,19 @@ public class JwtFilter extends GenericFilterBean {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    private ServletResponse createResponse(ExceptionCode exceptionCode, ServletResponse response) throws IOException {
+        ObjectNode json = new ObjectMapper().createObjectNode();
+        json.put("state", exceptionCode.getStatus().getValue());
+        json.put("code", exceptionCode.getCode());
+        json.put("message", exceptionCode.getMessage());
+
+        String newResponse = new ObjectMapper().writeValueAsString(json);
+        response.setContentType("application/json");
+        response.setContentLength(newResponse.length());
+        response.getOutputStream().write(newResponse.getBytes());
+
+        return response;
     }
 }
