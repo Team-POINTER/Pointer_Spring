@@ -54,6 +54,15 @@ public enum ExceptionCode {
     //NO_ACCESS(INVALID_ACCESS, "H004", "유효하지 않은 refresh 토큰입니다"),
 
     /**
+     * 초대
+     */
+    INVITATION_GET_OK(SUCCESS, "I000", "초대 링크 조회 성공"),
+    INVITATION_NOT_FOUND(SUCCESS, "I001", "초대 링크 접근 실패"),
+    INVITATION_DUPLICATED_PERSON(DUPLICATED_VALUE, "I002", "이미 초대된 사용자"),
+
+
+
+    /**
      * 잘못된 ExceptionCode
      */
     EMPTY(null, "", "");

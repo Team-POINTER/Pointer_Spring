@@ -48,6 +48,14 @@ public class User extends BaseEntity {
     private String token;
 
     // builder
+    @Builder
+    public User(String id, String email, String nickname, Type type) {
+        this.id = id;
+        this.email = email;
+        this.nickname = nickname;
+        this.type = type;
+    }
+
 
     @Builder(builderMethodName = "KakaoBuilder")
     public User(String email, String id, String nickname, String password) {
