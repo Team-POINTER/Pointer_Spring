@@ -1,8 +1,10 @@
 package pointer.Pointer_Spring.room.service;
 
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.User.domain.User;
@@ -18,6 +20,10 @@ import pointer.Pointer_Spring.room.dto.RoomDto.InviteResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.ListResponse;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.room.response.ResponseInvitation;
+import pointer.Pointer_Spring.room.response.ResponseNoRoom;
+import pointer.Pointer_Spring.room.response.ResponseRoom;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 @Service
 @Transactional
@@ -27,6 +33,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ListResponse getRoomList(HttpServletRequest request) {
         List<Room> roomList = roomRepository.findAll();
@@ -50,20 +57,46 @@ public class RoomServiceImpl implements RoomService {
                 throw new RuntimeException("유저를 조회할 수 없습니다.");
             }
         );
+
         Room createdRoom = new Room(foundUser, dto.getRoomNm());
         roomRepository.save(createdRoom);
-
         Room savedRoom = roomRepository.findById(createdRoom.getRoomId()).orElseThrow(
             () -> {
                 throw new RuntimeException("방 생성에 실패했습니다.");
             }
         );
 
+        createdRoom.setInvitation(createLink(createdRoom));
+
         DetailResponse detailResponse = new DetailResponse(savedRoom);
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
 
         return new CreateResponse(accessToken, refreshToken, detailResponse);
+    }
+
+    public String createLink(Room room) {
+        return room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
+    }
+
+    @Override
+    public Object findLink(Long roomId) {
+        Optional<Room> room = roomRepository.findById(roomId);
+        if (room.isEmpty()) {
+            return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
+        }
+        return new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, room.get().getInvitation());
+    }
+
+    @Override
+    public Object findRoom(String invitation) {
+        Optional<Room> room = roomRepository.findByInvitation(invitation);
+        if (room.isEmpty()) {
+            return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
+        }
+
+        List<RoomMember> members = roomMemberRepository.findByRoomMemberId(room.get().getRoomId());
+        return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, room.get(), members);
     }
 
     public InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request) {

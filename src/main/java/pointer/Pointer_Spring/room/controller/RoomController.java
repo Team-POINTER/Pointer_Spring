@@ -2,6 +2,8 @@ package pointer.Pointer_Spring.room.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +43,18 @@ public class RoomController {
     public RoomDto.InviteResponse inviteMembers(@RequestBody RoomDto.InviteRequest dto,
         HttpServletRequest request) {
         return roomService.inviteMembers(dto, request);
+    }
+
+    // 초대 링크 조회
+    @GetMapping("/{room-id}/invitation")
+    public ResponseEntity<Object> createInvitation(@PathVariable("room-id") Long roomId) {
+        return new ResponseEntity<>(roomService.findLink(roomId), HttpStatus.OK);
+    }
+
+    // 링크를 통한 진입
+    @GetMapping("/invitation/{invitation}")
+    public ResponseEntity<Object> getRoom(@PathVariable String invitation) {
+        return new ResponseEntity<>(roomService.findRoom(invitation), HttpStatus.OK);
     }
 
 }

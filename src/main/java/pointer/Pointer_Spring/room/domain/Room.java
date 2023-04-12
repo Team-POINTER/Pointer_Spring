@@ -17,7 +17,7 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "room")
+@Entity(name = "ROOM")
 public class Room extends BaseEntity {
 
     @Id
@@ -26,15 +26,21 @@ public class Room extends BaseEntity {
     private Long roomId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id")
+    @JoinColumn(name = "user_id")
     private User writer;
 
     @Column(nullable = false)
     private String name;
 
+    private String invitation;
+
     @Builder
     public Room(User user, String name) {
         this.writer = user;
         this.name = name;
+    }
+
+    public void setInvitation(String invitation) {
+        this.invitation = invitation;
     }
 }

@@ -1,6 +1,8 @@
 package pointer.Pointer_Spring.room.service;
 
 import javax.servlet.http.HttpServletRequest;
+
+import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
@@ -17,4 +19,7 @@ public interface RoomService {
     CreateResponse createRoom(CreateRequest dto, HttpServletRequest request);
 
     InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
+
+    Object findLink(Long roomId);
+    Object findRoom(String invitation);
 }

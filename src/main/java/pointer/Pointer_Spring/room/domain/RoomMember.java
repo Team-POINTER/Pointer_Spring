@@ -17,12 +17,12 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "room_member")
+@Entity(name = "ROOM_MEMBER")
 public class RoomMember extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "room_member_id", unique = true)
+    @Column(name = "room_member_id")
     private Long roomMemberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
