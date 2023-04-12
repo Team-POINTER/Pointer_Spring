@@ -23,20 +23,20 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:config.properties")
+//@PropertySource("classpath:application.properties")
 public class AuthServiceImpl implements AuthService {
 
-    @Value("${kakao.restAPI}")
+    /*@Value("${kakao.restAPI}")
     private String restApiKey;
 
     @Value("${kakao.redirectURI}")
-    private String redirectUri;
+    private String redirectUri;*/
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public String getKakaoAccessToken(String code) {
+    /*public String getKakaoAccessToken(String code) {
         String access_Token;
         //String refresh_Token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token";
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid code");
         }
         return access_Token;
-    }
+    }*/
 
     @Override
     public KakaoRequestDto getKakaoUser(String token) {
