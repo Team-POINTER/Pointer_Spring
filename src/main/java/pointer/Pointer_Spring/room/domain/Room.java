@@ -17,24 +17,36 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "room")
+@Entity(name = "Room")
 public class Room extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_id", unique = true)
     private Long roomId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writer_id")
-    private User writer;
-
     @Column(nullable = false)
     private String name;
+    @Column(name = "member_num")
+    private Integer memberNum;//룸 안 멤버
+    @Column(name = "voting_num")
+    private Integer votingNum;
+    private String code;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "writer_id")
+//    @JoinColumn(name = "user_id")
+    @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
+    private Long creatorId;
+
+    private String invitation;
 
     @Builder
-    public Room(User user, String name) {
-        this.writer = user;
+    public Room(Long creatorId, String name) {
+        this.creatorId = creatorId;
         this.name = name;
     }
+    public void setInvitation(String invitation) {
+        this.invitation = invitation;
+    }
+
 }
