@@ -25,7 +25,7 @@ public class ResponseRoom extends ResponseType {
 
         friends = new ArrayList<>();
         for (RoomMember member : members) {
-            friends.add(member.getUser().getUsername());
+            friends.add(member.getUser().getName());
         }
     }
 

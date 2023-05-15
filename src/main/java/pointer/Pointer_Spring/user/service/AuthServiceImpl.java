@@ -1,15 +1,14 @@
-package pointer.Pointer_Spring.User.service;
+package pointer.Pointer_Spring.user.service;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
-import pointer.Pointer_Spring.User.response.ResponseKakaoUser;
-import pointer.Pointer_Spring.User.domain.User;
-import pointer.Pointer_Spring.User.dto.*;
-import pointer.Pointer_Spring.User.repository.UserRepository;
+import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
+import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.dto.*;
+import pointer.Pointer_Spring.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.security.JwtUtil;
@@ -23,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-//@PropertySource("classpath:application.properties")
+@PropertySource("classpath:config.properties")
 public class AuthServiceImpl implements AuthService {
 
     /*@Value("${kakao.restAPI}")
@@ -110,17 +109,17 @@ public class AuthServiceImpl implements AuthService {
             if (hasEmail) {
                 email = element.get("kakao_account").getAsJsonObject().get("email").getAsString();
             }
-            String nickname = element.get("properties").getAsJsonObject().get("nickname").getAsString();
+            String name = element.get("properties").getAsJsonObject().get("nickname").getAsString();
 
             //System.out.println("response body : " + result);
-            System.out.println("id = " + id);
-            System.out.println("email : " + email);
-            System.out.println("nickname : " + nickname);
+            //System.out.println("id = " + id);
+            //System.out.println("email : " + email);
+            //System.out.println("name : " + name);
 
             return KakaoRequestDto.builder()
                     .id(id)
                     .email(email)
-                    .nickname(nickname)
+                    .name(name)
                     .build();
         } catch (Exception e) {
             throw new RuntimeException("Invalid token");
@@ -179,10 +178,9 @@ public class AuthServiceImpl implements AuthService {
         User user = User.KakaoBuilder()
                 .id(kakaoRequestDto.getId())
                 .email(kakaoRequestDto.getEmail())
-                .nickname(kakaoRequestDto.getNickname())
+                .name(kakaoRequestDto.getName())
                 .build();
         user.changePassword(passwordEncoder.encode("1111"));
-        user.addRole(User.Role.USER);
 
         return userRepository.save(user);
     }

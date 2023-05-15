@@ -1,4 +1,4 @@
-package pointer.Pointer_Spring.User.dto;
+package pointer.Pointer_Spring.user.dto;
 
 import lombok.Builder;
 import lombok.Getter;

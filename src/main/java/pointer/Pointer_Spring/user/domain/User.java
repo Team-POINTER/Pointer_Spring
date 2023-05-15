@@ -1,4 +1,4 @@
-package pointer.Pointer_Spring.User.domain;
+package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
@@ -10,7 +10,7 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "USER")
+@Entity(name = "user")
 public class User extends BaseEntity {
 
     @Id
@@ -22,18 +22,18 @@ public class User extends BaseEntity {
     private String id;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false)
-    private String nickname;
 
-    private String username;
+    @Column(nullable = false)
+    private String name;
+
     private String password;
 
+
     // social login
-    public enum Type {
-        APP, KAKAO, APPLE
+    public enum SignupType {
+        KAKAO, APPLE
     }
-    private Type type;
-    private boolean social;
+    private SignupType type;
 
     // role
     public enum Role {
@@ -41,30 +41,30 @@ public class User extends BaseEntity {
     }
 
     private Role role;
-    private boolean agreement;
-    private boolean options;
+    private boolean serviceAgree; // 필수
+    private boolean serviceAge;
+    private boolean marketing;
 
     @Column(length = 1000)
     private String token;
 
     // builder
     @Builder
-    public User(String id, String email, String nickname, Type type) {
+    public User(String id, String email, String name, SignupType type) {
         this.id = id;
         this.email = email;
-        this.nickname = nickname;
+        this.name = name;
         this.type = type;
     }
 
 
     @Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String nickname, String password) {
+    public User(String email, String id, String name, String password) {
         this.email = email;
         this.id = id;
-        this.nickname = nickname;
+        this.name = name;
         this.password = password;
-        this.type = Type.KAKAO;
-        this.social = true;
+        this.type = SignupType.KAKAO;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -81,17 +81,4 @@ public class User extends BaseEntity {
     public void setToken(String token) {
         this.token = token;
     }
-
-    public void addRole(Role role) {
-        this.role = role;
-    }
-
-    public void setOption(boolean options) {
-        this.options = options;
-    }
-
-    public void setAgreement(boolean agreement) {
-        this.agreement = agreement;
-    }
-
 }

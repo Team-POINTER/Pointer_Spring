@@ -1,6 +1,6 @@
-package pointer.Pointer_Spring.User.dto;
+package pointer.Pointer_Spring.user.dto;
 
-import pointer.Pointer_Spring.User.domain.User;
+import pointer.Pointer_Spring.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
-package pointer.Pointer_Spring.User.repository;
+package pointer.Pointer_Spring.user.repository;
 
-import pointer.Pointer_Spring.User.domain.User;
+import pointer.Pointer_Spring.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
