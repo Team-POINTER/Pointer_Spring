@@ -15,8 +15,6 @@ import pointer.Pointer_Spring.config.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "USER")
 public class User extends BaseEntity {
-
-    //    @Getter(AccessLevel.NONE)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", unique = true)
@@ -29,15 +27,29 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
+    private String username;
     private String password;
 
+    // social login
     public enum Type {
         APP, KAKAO, APPLE
     }
-
-    @Column(nullable = false)
     private Type type;
+    private boolean social;
 
+    // role
+    public enum Role {
+        USER, ADMIN
+    }
+
+    private Role role;
+    private boolean agreement;
+    private boolean options;
+
+    @Column(length = 1000)
+    private String token;
+
+    // builder
     @Builder
     public User(String id, String email, String nickname, Type type) {
         this.id = id;
@@ -45,4 +57,43 @@ public class User extends BaseEntity {
         this.nickname = nickname;
         this.type = type;
     }
+
+
+    @Builder(builderMethodName = "KakaoBuilder")
+    public User(String email, String id, String nickname, String password) {
+        this.email = email;
+        this.id = id;
+        this.nickname = nickname;
+        this.password = password;
+        this.type = Type.KAKAO;
+        this.social = true;
+    }
+
+    @Builder(builderMethodName = "AuthorityBuilder")
+    public User(String email, String password, Role role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    public void changePassword(String password) {
+        this.password = password;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void addRole(Role role) {
+        this.role = role;
+    }
+
+    public void setOption(boolean options) {
+        this.options = options;
+    }
+
+    public void setAgreement(boolean agreement) {
+        this.agreement = agreement;
+    }
+
 }

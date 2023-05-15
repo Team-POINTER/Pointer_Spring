@@ -1,11 +1,18 @@
 package pointer.Pointer_Spring.config;
 
+
 import lombok.*;
+//원래 코드
+//import lombok.Getter;
+//import lombok.NoArgsConstructor;
+//import lombok.Setter;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
