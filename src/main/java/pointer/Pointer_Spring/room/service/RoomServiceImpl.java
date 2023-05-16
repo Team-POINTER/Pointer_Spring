@@ -1,8 +1,11 @@
 package pointer.Pointer_Spring.room.service;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.User.domain.User;
@@ -15,18 +18,25 @@ import pointer.Pointer_Spring.room.dto.RoomDto.CreateResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteResponse;
-import pointer.Pointer_Spring.room.dto.RoomDto.ListResponse;
+import pointer.Pointer_Spring.room.dto.RoomDto.*;
+import pointer.Pointer_Spring.room.dto.RoomMemberDto.*;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.room.response.ResponseInvitation;
+import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
+import pointer.Pointer_Spring.room.response.ResponseNoRoom;
+import pointer.Pointer_Spring.validation.CustomException;
+import pointer.Pointer_Spring.validation.ExceptionCode;
+
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
-
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
+    //private final PasswordEncoder passwordEncoder;
 
     public ListResponse getRoomList(HttpServletRequest request) {
         List<Room> roomList = roomRepository.findAll();
@@ -47,10 +57,10 @@ public class RoomServiceImpl implements RoomService {
     public CreateResponse createRoom(CreateRequest dto, HttpServletRequest request) {
         User foundUser = userRepository.findById(dto.getUserId()).orElseThrow(
             () -> {
-                throw new RuntimeException("유저를 조회할 수 없습니다.");
+                return new CustomException(ExceptionCode.USER_NOT_FOUND);
             }
         );
-        Room createdRoom = new Room(foundUser, dto.getRoomNm());
+        Room createdRoom = new Room(foundUser.getUserId(), dto.getRoomNm());
         roomRepository.save(createdRoom);
 
         Room savedRoom = roomRepository.findById(createdRoom.getRoomId()).orElseThrow(
@@ -59,11 +69,42 @@ public class RoomServiceImpl implements RoomService {
             }
         );
 
+        createdRoom.setInvitation(createLink(createdRoom));
+
         DetailResponse detailResponse = new DetailResponse(savedRoom);
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
 
         return new CreateResponse(accessToken, refreshToken, detailResponse);
+    }
+
+    @Override
+    public ResponseMemberRoom updateRoomNm(ModifyRoomNmRequest modifyRoomNmRequestDto){
+//        Optional<RoomMember> roomMemberOptional = roomMemberRepository.findByRoomRoomIdAndUserUserId
+//                (modifyRoomNmRequestDto.getRoomId(), modifyRoomNmRequestDto.getUserId()).orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+        RoomMember roomMember = roomMemberRepository
+                .findByRoomRoomIdAndUserUserId(modifyRoomNmRequestDto.getRoomId(), modifyRoomNmRequestDto.getUserId())
+                .orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+        System.out.println(modifyRoomNmRequestDto.getPrivateRoomNm());
+//        roomMemberOptional.ifPresent(roomMember -> {
+//            roomMember.updateRoomMember(modifyRoomNmRequestDto.getPrivateRoomNm());
+//        });
+        roomMember.updateRoomMember(modifyRoomNmRequestDto.getPrivateRoomNm());
+        return new ResponseMemberRoom(ExceptionCode.ROOMNAME_VERIFY_OK);
+    }
+
+    public String createLink(Room room) {
+        return room.getCode();
+                //room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
+    }
+
+    @Override
+    public Object findLink(Long roomId) {
+        Optional<Room> room = roomRepository.findById(roomId);
+        if (room.isEmpty()) {
+            return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
+        }
+        return new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, room.get().getInvitation());
     }
 
     public InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request) {

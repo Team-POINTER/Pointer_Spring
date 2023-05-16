@@ -29,6 +29,9 @@ public class RoomMember extends BaseEntity {
     @JoinColumn(name = "room_id")
     private Room room;
 
+    @Column(name = "private_room_name")
+    private String privateRoomNm;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -39,5 +42,9 @@ public class RoomMember extends BaseEntity {
     public RoomMember(Room room, User user) {
         this.room = room;
         this.user = user;
+    }
+
+    public void updateRoomMember (String privateRoomNm) {
+        this.privateRoomNm = privateRoomNm;
     }
 }

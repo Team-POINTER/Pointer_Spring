@@ -60,7 +60,11 @@ public enum ExceptionCode {
     INVITATION_NOT_FOUND(SUCCESS, "I001", "초대 링크 접근 실패"),
     INVITATION_DUPLICATED_PERSON(DUPLICATED_VALUE, "I002", "이미 초대된 사용자"),
 
-
+    /**
+     * room
+     */
+    ROOMNAME_VERIFY_OK(SUCCESS, "J000", "룸 이름 변경 성공"),
+    ROOMMEMBER_NOT_EXIST(INVALID_ACCESS, "J001", "룸 멤버 존재하지 않음"),
 
     /**
      * 잘못된 ExceptionCode
