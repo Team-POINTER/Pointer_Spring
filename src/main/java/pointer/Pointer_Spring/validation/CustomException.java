@@ -1,5 +1,7 @@
 package pointer.Pointer_Spring.validation;
+import lombok.Getter;
 
+@Getter
 public class CustomException extends RuntimeException {
     private final ExceptionCode exceptionCode;
 

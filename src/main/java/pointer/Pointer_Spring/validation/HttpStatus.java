@@ -16,7 +16,5 @@ public enum HttpStatus {
     HttpStatus(int value) {
         this.value = value;
     }
-
-    스프링 validation을 쓰면 method not aur~error -> 이 예외를 exeoption controller에서 다 처리를 하게 되고
-            유효성 검사 말고 exception class는 추가해야할 수 있다.
+    
 }
