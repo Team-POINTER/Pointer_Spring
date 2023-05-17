@@ -13,60 +13,66 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "USER")
+@Entity(name = "User")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", unique = true)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String id;
     @Column(nullable = false, unique = true)
     private String email;
-    @Column(nullable = false)
-    private String nickname;
 
-    private String username;
+    @Column(nullable = false)
+    private String name;
     private String password;
 
     // social login
-    public enum Type {
-        APP, KAKAO, APPLE
+
+    public enum SignupType {
+        KAKAO, APPLE
     }
-    private Type type;
-    private boolean social;
+    @Column(name = "signup_type")
+    private SignupType type;
 
     // role
     public enum Role {
         USER, ADMIN
     }
-
+    @Column(name = "role")
     private Role role;
-    private boolean agreement;
-    private boolean options;
+    @Column(name = "service_agree")
+    private boolean serviceAgree;//필수동의
+    @Column(name = "marketing")
+    private boolean marketing;
+    @Column(name = "service_age")
+    private boolean serviceAge;
+
+    @Column(name = "room_limit")
+    private Integer roomLimit;
 
     @Column(length = 1000)
     private String token;
 
     // builder
     @Builder
-    public User(String id, String email, String nickname, Type type) {
+    public User(String id, String email, String name, SignupType type) {
         this.id = id;
         this.email = email;
-        this.nickname = nickname;
+        this.name = name;
         this.type = type;
     }
 
 
     @Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String nickname, String password) {
+    public User(String email, String id, String name, String password) {
         this.email = email;
         this.id = id;
-        this.nickname = nickname;
+        this.name = name;
         this.password = password;
-        this.type = Type.KAKAO;
-        this.social = true;
+        this.type = SignupType.KAKAO;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -88,12 +94,16 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void setOption(boolean options) {
-        this.options = options;
+    public void setOption(boolean marketing) {
+        this.marketing = marketing;
     }
 
-    public void setAgreement(boolean agreement) {
-        this.agreement = agreement;
+    public void setAgreement(boolean serviceAgree) {
+        this.serviceAgree = serviceAgree;
+    }
+
+    public void updateRoomLimit(Integer roomLimit) {
+        this.roomLimit = roomLimit;
     }
 
 }

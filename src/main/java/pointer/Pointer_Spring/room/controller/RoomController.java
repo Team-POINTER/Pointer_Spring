@@ -5,12 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
@@ -41,9 +36,8 @@ public class RoomController {
         return roomService.createRoom(dto, request);
     }
 
-    @PostMapping("/verify/room-name")
+    @PatchMapping("/verify/room-name")
     public Object updateRoomName(@RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
-        System.out.println(dto.getPrivateRoomNm());
         return roomService.updateRoomNm(dto);
     }
 
@@ -51,6 +45,11 @@ public class RoomController {
     public RoomDto.InviteResponse inviteMembers(@RequestBody RoomDto.InviteRequest dto,
         HttpServletRequest request) {
         return roomService.inviteMembers(dto, request);
+    }
+
+    @PostMapping("/{room-id}/exit")
+    public Object exitRoom(@PathVariable(name = "room-id") Long roomId, @RequestBody RoomDto.ExitRequest dto, HttpServletRequest request) {
+        return roomService.exitRoom(roomId, dto);
     }
 
     // 초대 링크 조회

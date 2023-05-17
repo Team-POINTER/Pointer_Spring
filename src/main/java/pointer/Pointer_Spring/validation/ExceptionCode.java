@@ -65,6 +65,12 @@ public enum ExceptionCode {
      */
     ROOMNAME_VERIFY_OK(SUCCESS, "J000", "룸 이름 변경 성공"),
     ROOMMEMBER_NOT_EXIST(INVALID_ACCESS, "J001", "룸 멤버 존재하지 않음"),
+    ROOM_CREATE_SUCCESS(CREATED, "J002", "룸 생성 성공"),
+    ROOM_CREATE_FAIL(INVALID_ACCESS, "J003", "룸 생성 실패"),
+    ROOM_NOT_FOUND(INVALID_ACCESS, "J004", "룸 조회 실패"),
+    ROOM_CREATE_OVER_LIMIT(INVALID_ACCESS, "J005", "룸 생성 가능 개수 초과"),
+    ROOM_EXIT_SUCCESS(SUCCESS, "J006", "룸 나가기 성공"),
+    ROOM_NAME_INVALID(INVALID_ACCESS, "J007", "형식에 맞지 않는 룸 이름"),
 
     /**
      * 잘못된 ExceptionCode

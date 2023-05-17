@@ -38,13 +38,17 @@ public class Room extends BaseEntity {
     @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
     private Long creatorId;
 
+    public void updateMemberNum(Integer memberNum){
+        this.memberNum = memberNum;
+    }
+
     //private String invitation;
 
     @Builder
     public Room(Long creatorId, String name) {
         this.creatorId = creatorId;
         this.name = name;
-        this.memberNum = 0;
+        this.memberNum = 1;
         this.votingNum = 0;
     }
 

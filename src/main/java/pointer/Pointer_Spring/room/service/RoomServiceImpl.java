@@ -55,8 +55,10 @@ public class RoomServiceImpl implements RoomService {
     }
 
     //초대 로직, 채팅방도 추가
-    //validation 정해지면 (최소 1자, 최대 15자, 룸 이름 중복 가능), 방 제한
+    //validation 정해지면 ( 룸 이름 중복 가능)
     public ResponseRoom createRoom(CreateRequest createRoomDto, HttpServletRequest request) {
+        isValidRoomNmLength(createRoomDto.getRoomNm());
+
         User foundUser = userRepository.findById(createRoomDto.getUserId()).orElseThrow(//이후 토큰으로 변경 필요
             () -> {
                 throw new CustomException(ExceptionCode.USER_NOT_FOUND);
@@ -89,19 +91,37 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseMemberRoom updateRoomNm(ModifyRoomNmRequest modifyRoomNmRequestDto){//validation정해지면 (최소 1자, 최대 15자, 룸 이름 중복 가능)
+    public ResponseMemberRoom updateRoomNm(ModifyRoomNmRequest modifyRoomNmRequestDto){//validation정해지면 ( 룸 이름 중복 가능)
         RoomMember roomMember = roomMemberRepository
                 .findByRoom_RoomIdAndUser_UserIdAndStatus(modifyRoomNmRequestDto.getRoomId(), modifyRoomNmRequestDto.getUserId(), 1)
                 .orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
 
-        roomMember.updateRoomMember(modifyRoomNmRequestDto.getPrivateRoomNm());
+        String privateRoomNm = modifyRoomNmRequestDto.getPrivateRoomNm();
+        String roomNm = privateRoomNm == null || privateRoomNm.isEmpty() || isValidRoomNmLength(privateRoomNm)?
+                roomRepository.findById(modifyRoomNmRequestDto.getRoomId()).get().getName() : privateRoomNm;
+
+        roomMember.updatePrivateRoomNm(roomNm);
         return new ResponseMemberRoom(ExceptionCode.ROOMNAME_VERIFY_OK);
     }
 
+    private boolean isValidRoomNmLength(String roomNm) {
+        if (roomNm.length() <= 15 && roomNm.length() >= 1) {
+            return true;
+        } else {
+            throw new CustomException(ExceptionCode.ROOM_NAME_INVALID);
+        }
+    }
+
+
+
     @Override
-    public ResponseRoom exitRoom(ExitRequest exitRequestDto){
+    public ResponseRoom exitRoom(Long roomId, ExitRequest exitRequestDto){
         User foundUser = userRepository.findById(exitRequestDto.getId()).orElseThrow(()->new CustomException(ExceptionCode.USER_NOT_FOUND));
-        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(exitRequestDto.getRoomId(), foundUser.getUserId(), 1).orElseThrow(()->new CustomException(ExceptionCode.ROOM_NOT_FOUND));
+        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(roomId, foundUser.getUserId(), 1).orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+
+        Room room = roomRepository.findById(roomId).orElseThrow(()->new CustomException(ExceptionCode.ROOM_NOT_FOUND));
+        room.updateMemberNum(room.getMemberNum()-1);
+
         roomMember.setStatus(0);
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }
@@ -146,6 +166,7 @@ public class RoomServiceImpl implements RoomService {
                 .map(RoomDto.InviteMember::new).toList();
         return new InviteResponse(accessToken, refreshToken, invitedMemberList);
     }
+
 
 //    public String createLink(Room room) {
 //        return room.getCode();

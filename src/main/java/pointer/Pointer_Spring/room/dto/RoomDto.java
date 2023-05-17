@@ -78,9 +78,8 @@ public class RoomDto {
     }
 
     @Data
-    public static class ExitRequest{//나중에 token으로 user 구분 시 없애고 roomId만 받아오기
-        Long roomId;
-        String Id;//user 고유 string id
+    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
+        String id;//user 고유 string id
     }
 
     @Data

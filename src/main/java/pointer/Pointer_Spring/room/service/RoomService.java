@@ -18,12 +18,10 @@ public interface RoomService {
     DetailResponse getRoom(Long roomId, HttpServletRequest request);
 //    DetailResponse getRooms(User user, HttpServletRequest request);//검색까지
 //    void modifyRoomInfo(Long roomId);
-//    void exitRoom(Long roomId);
-//    void entryRoom(Long roomId);
 
     ResponseRoom createRoom(CreateRequest dto, HttpServletRequest request);
     ResponseMemberRoom updateRoomNm(RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
-    ResponseRoom exitRoom(RoomDto.ExitRequest dto);
+    ResponseRoom exitRoom(Long roomId, RoomDto.ExitRequest dto);
 
     InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
 

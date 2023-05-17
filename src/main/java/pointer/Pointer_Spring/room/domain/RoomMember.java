@@ -41,7 +41,7 @@ public class RoomMember extends BaseEntity {
         this.vote = false;
     }
 
-    public void updateRoomMember (String privateRoomNm) {
+    public void updatePrivateRoomNm (String privateRoomNm) {
         this.privateRoomNm = privateRoomNm;
     }
 }
