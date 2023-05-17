@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
+import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.room.service.RoomService;
 
 @Controller
@@ -34,13 +35,13 @@ public class RoomController {
         return roomService.getRoom(roomId, request);
     }
 
-    @PostMapping
-    public RoomDto.CreateResponse createRoom(@RequestBody RoomDto.CreateRequest dto,
-        HttpServletRequest request) {
+    @PostMapping("create")
+    public ResponseRoom createRoom(@RequestBody RoomDto.CreateRequest dto,
+                                   HttpServletRequest request) {//원래 return RoomDto.CreateResponse
         return roomService.createRoom(dto, request);
     }
 
-    @PostMapping("verify/room-name")
+    @PostMapping("/verify/room-name")
     public Object updateRoomName(@RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
         System.out.println(dto.getPrivateRoomNm());
         return roomService.updateRoomNm(dto);
@@ -53,10 +54,10 @@ public class RoomController {
     }
 
     // 초대 링크 조회
-    @GetMapping("/{room-id}/invitation")
-    public ResponseEntity<Object> createInvitation(@PathVariable("room-id") Long roomId) {
-        return new ResponseEntity<>(roomService.findLink(roomId), HttpStatus.OK);
-    }
+//    @GetMapping("/{room-id}/invitation")
+//    public ResponseEntity<Object> createInvitation(@PathVariable("room-id") Long roomId) {
+//        return new ResponseEntity<>(roomService.findLink(roomId), HttpStatus.OK);
+//    }
 
     // 링크를 통한 진입
 //    @GetMapping("/invitation/{invitation}")

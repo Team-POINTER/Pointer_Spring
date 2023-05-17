@@ -24,8 +24,8 @@ public class Room extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "room_id", unique = true)
     private Long roomId;
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "name", nullable = false)
+    private String name; //default room name
     @Column(name = "member_num")
     private Integer memberNum;//룸 안 멤버
     @Column(name = "voting_num")
@@ -38,15 +38,18 @@ public class Room extends BaseEntity {
     @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
     private Long creatorId;
 
-    private String invitation;
+    //private String invitation;
 
     @Builder
     public Room(Long creatorId, String name) {
         this.creatorId = creatorId;
         this.name = name;
+        this.memberNum = 0;
+        this.votingNum = 0;
     }
-    public void setInvitation(String invitation) {
-        this.invitation = invitation;
-    }
+
+    //public void setInvitation(String invitation) {
+//        this.invitation = invitation;
+//    }
 
 }

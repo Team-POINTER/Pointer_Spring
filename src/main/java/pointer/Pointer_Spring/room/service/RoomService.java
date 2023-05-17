@@ -2,16 +2,15 @@ package pointer.Pointer_Spring.room.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import pointer.Pointer_Spring.User.domain.User;
-import pointer.Pointer_Spring.room.domain.Room;
+import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
-import pointer.Pointer_Spring.room.dto.RoomDto.CreateResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.ListResponse;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
+import pointer.Pointer_Spring.room.response.ResponseRoom;
 
 public interface RoomService {
     ListResponse getRoomList(HttpServletRequest request);
@@ -22,10 +21,11 @@ public interface RoomService {
 //    void exitRoom(Long roomId);
 //    void entryRoom(Long roomId);
 
-    CreateResponse createRoom(CreateRequest dto, HttpServletRequest request);
+    ResponseRoom createRoom(CreateRequest dto, HttpServletRequest request);
     ResponseMemberRoom updateRoomNm(RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
+    ResponseRoom exitRoom(RoomDto.ExitRequest dto);
 
     InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
 
-    Object findLink(Long roomId);
+    //Object findLink(Long roomId);
 }

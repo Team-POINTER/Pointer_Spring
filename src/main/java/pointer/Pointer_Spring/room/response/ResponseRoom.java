@@ -15,18 +15,28 @@ public class ResponseRoom extends ResponseType {
 
     private Long roomId;
     private String roomNm;
-    private List<String> friends;
+    private Integer memberNum;
+    private Integer votingNum;
+    private List<RoomMember> roomMembers;
 
+    public ResponseRoom(ExceptionCode exceptionCode){
+        super(exceptionCode);
+    }
 
-    public ResponseRoom(ExceptionCode exceptionCode, Room room, List<RoomMember> members) {
+    public ResponseRoom(ExceptionCode exceptionCode, Room room) {
         super(exceptionCode);
         this.roomId = room.getRoomId();
         this.roomNm = room.getName();
-
-        friends = new ArrayList<>();
-        for (RoomMember member : members) {
-            friends.add(member.getUser().getUsername());
-        }
+        this.memberNum = room.getMemberNum();
+        this.votingNum = room.getVotingNum();
+    }
+    public ResponseRoom(ExceptionCode exceptionCode, Room room, List<RoomMember> roomMembers) {
+        super(exceptionCode);
+        this.roomId = room.getRoomId();
+        this.roomNm = room.getName();
+        this.memberNum = room.getMemberNum();
+        this.votingNum = room.getVotingNum();
+        this.roomMembers = roomMembers;
     }
 
 }

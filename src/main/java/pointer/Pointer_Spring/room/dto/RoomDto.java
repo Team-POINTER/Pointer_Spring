@@ -41,9 +41,8 @@ public class RoomDto {
 
     @Data
     public static class CreateRequest {
-
         Long userId;
-        String roomNm;
+        String roomNm;//roomName
     }
 
     @Data
@@ -66,11 +65,22 @@ public class RoomDto {
 
         Long roomId;
         String roomNm;
+        private Integer memberNum;
+        private Integer votingNum;
+        private List<RoomMember> roomMembers;
 
         public DetailResponse(Room room) {
             this.roomId = room.getRoomId();
             this.roomNm = room.getName();
+            this.memberNum = room.getMemberNum();
+            this.votingNum = room.getVotingNum();
         }
+    }
+
+    @Data
+    public static class ExitRequest{//나중에 token으로 user 구분 시 없애고 roomId만 받아오기
+        Long roomId;
+        String Id;//user 고유 string id
     }
 
     @Data
@@ -103,7 +113,7 @@ public class RoomDto {
 
         public InviteMember(RoomMember roomMember) {
             this.userId = roomMember.getUser().getUserId();
-            this.nickNm = roomMember.getUser().getNickname();
+            this.nickNm = roomMember.getUser().getName();
         }
     }
 

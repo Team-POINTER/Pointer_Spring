@@ -1,13 +1,7 @@
 package pointer.Pointer_Spring.room.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +12,7 @@ import pointer.Pointer_Spring.config.BaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "RoomMember")
+@Table(name = "RoomMember")
 public class RoomMember extends BaseEntity {
 
     @Id
@@ -26,14 +21,14 @@ public class RoomMember extends BaseEntity {
     private Long roomMemberId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "Room_room_id")
     private Room room;
 
     @Column(name = "private_room_name")
     private String privateRoomNm;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "User_user_id")
     private User user;
 
     private Boolean vote;
@@ -42,6 +37,8 @@ public class RoomMember extends BaseEntity {
     public RoomMember(Room room, User user) {
         this.room = room;
         this.user = user;
+        this.privateRoomNm = room.getName();
+        this.vote = false;
     }
 
     public void updateRoomMember (String privateRoomNm) {
