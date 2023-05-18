@@ -71,6 +71,7 @@ public enum ExceptionCode {
     ROOM_CREATE_OVER_LIMIT(INVALID_ACCESS, "J005", "룸 생성 가능 개수 초과"),
     ROOM_EXIT_SUCCESS(SUCCESS, "J006", "룸 나가기 성공"),
     ROOM_NAME_INVALID(INVALID_ACCESS, "J007", "형식에 맞지 않는 룸 이름"),
+    ROOM_NAME_INVITATION(SUCCESS, "J008", "초대 성공"),
 
     /**
      * 잘못된 ExceptionCode

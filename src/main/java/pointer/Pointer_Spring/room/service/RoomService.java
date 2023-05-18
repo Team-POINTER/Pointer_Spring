@@ -23,7 +23,8 @@ public interface RoomService {
     ResponseMemberRoom updateRoomNm(RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
     ResponseRoom exitRoom(Long roomId, RoomDto.ExitRequest dto);
 
-    InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
+    //InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
+    ResponseRoom inviteMembers(InviteRequest dto, HttpServletRequest request);
 
     //Object findLink(Long roomId);
 }

@@ -41,8 +41,8 @@ public class RoomController {
         return roomService.updateRoomNm(dto);
     }
 
-    @PostMapping("/{room-id}/members")
-    public RoomDto.InviteResponse inviteMembers(@RequestBody RoomDto.InviteRequest dto,
+    @PostMapping("/invite/members")
+    public ResponseRoom inviteMembers(@RequestBody RoomDto.InviteRequest dto, //원래 return 값 - RoomDto.InviteResponse
         HttpServletRequest request) {
         return roomService.inviteMembers(dto, request);
     }

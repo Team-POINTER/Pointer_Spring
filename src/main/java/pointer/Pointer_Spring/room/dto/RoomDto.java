@@ -84,9 +84,8 @@ public class RoomDto {
 
     @Data
     public static class InviteRequest {
-
         Long roomId;
-        Long[] userIdArr;
+        List<String> friendIdList;
     }
 
     @Data

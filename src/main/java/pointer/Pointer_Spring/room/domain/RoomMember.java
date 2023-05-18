@@ -27,8 +27,8 @@ public class RoomMember extends BaseEntity {
     @Column(name = "private_room_name")
     private String privateRoomNm;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "User_user_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name = "User_user_id")
     private User user;
 
     private Boolean vote;

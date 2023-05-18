@@ -16,14 +16,11 @@ import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteRequest;
-import pointer.Pointer_Spring.room.dto.RoomDto.InviteResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.*;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto.*;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
-import pointer.Pointer_Spring.room.response.ResponseInvitation;
 import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
-import pointer.Pointer_Spring.room.response.ResponseNoRoom;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
@@ -31,7 +28,7 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 
 @Service
 @Transactional
-@RequiredArgsConstructor
+@RequiredArgsConstructor//룸 입장 = 조회<질문 투표수 등등까지> / 룸 전체 조회(정렬), 초대 / RoomResponse 결과 고치기(updateRoomNm) / 이후 링크로 초대<웹 초대> /
 public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
@@ -45,7 +42,7 @@ public class RoomServiceImpl implements RoomService {
         return new ListResponse(roomListDto);
     }
 
-    public DetailResponse getRoom(Long roomId, HttpServletRequest request) {
+    public DetailResponse getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기
         Room foundRoom = roomRepository.findById(roomId).orElseThrow(
             () -> {
                 throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
@@ -126,45 +123,35 @@ public class RoomServiceImpl implements RoomService {
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }
 
-    public InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request) {
-        Room foundRoom = roomRepository.findById(dto.getRoomId()).orElseThrow(
+    public ResponseRoom inviteMembers(InviteRequest inviteDto, HttpServletRequest request) {
+        Room foundRoom = roomRepository.findById(inviteDto.getRoomId()).orElseThrow(
                 () -> {
-                    throw new RuntimeException("방 조회에 실패했습니다.");
+                    throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
                 }
         );
 
-//        if (createRoomDto.getFriendsIdList().size()>50) {//초대 가능 인원 수 제한
-//            return new ResponseRoom(ExceptionCode.ROOM_CREATE_OVER_LIMIT);
-//        }
-
-        for (Long userId : dto.getUserIdArr()) {
-            User foundUser = userRepository.findById(userId).orElseThrow(
-                    () -> {
-                        throw new RuntimeException("유저를 조회할 수 없습니다.");
-                    }
-            );
-            RoomMember newRoomMember = new RoomMember(foundRoom, foundUser);
-            roomMemberRepository.save(newRoomMember);
+        Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getFriendIdList().size();
+        if (totalRoomMemberNum>50) {//초대 가능 인원 수 제한
+            throw new CustomException(ExceptionCode.ROOM_CREATE_OVER_LIMIT);
         }
+        foundRoom.updateMemberNum(totalRoomMemberNum);
+
+
+        //RoomMember저장
+        List<RoomMember> roomMembers = inviteDto.getFriendIdList().stream()
+                .map((friendId) ->
+                        new RoomMember(foundRoom, userRepository.findById(friendId).orElseThrow(
+                                () -> new CustomException(ExceptionCode.USER_NOT_FOUND)) )
+                ).collect(Collectors.toList());
+        roomMemberRepository.saveAllAndFlush(roomMembers);
+        List<RoomMember> roomMemberList = roomMemberRepository.findAllByRoom(foundRoom);
+//        List<RoomDto.InviteMember> invitedMemberList = roomMemberList.stream()
+//                .map(RoomDto.InviteMember::new).toList();
 
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-
-//        //RoomMember저장
-//        List<RoomMember> roomMembers = createRoomDto.getFriendsIdList().stream()
-//                .map((friendId) -> new RoomMember(createdRoom, userRepository.findById(friendId).orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND)) ))
-//                .collect(Collectors.toList());
-//        roomMemberRepository.saveAll(roomMembers);
-//
-//        //RoomMember 다 저장됐는지 확인 로직 추후 고려 고민
-//        List<RoomMember> savedRoomMembers = createRoomDto.getFriendsIdList().stream()
-//                .map((friendId) -> roomMemberRepository.findByUserId(friendId).orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND)) )
-//                .collect(Collectors.toList());
-
-        List<RoomMember> roomMemberList = roomMemberRepository.findAllByRoom(foundRoom);
-        List<RoomDto.InviteMember> invitedMemberList = roomMemberList.stream()
-                .map(RoomDto.InviteMember::new).toList();
-        return new InviteResponse(accessToken, refreshToken, invitedMemberList);
+        //return new InviteResponse(accessToken, refreshToken, invitedMemberList);
+        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION,foundRoom,roomMemberList);
     }
 
 
