@@ -60,6 +60,18 @@ public enum ExceptionCode {
     INVITATION_NOT_FOUND(SUCCESS, "I001", "초대 링크 접근 실패"),
     INVITATION_DUPLICATED_PERSON(DUPLICATED_VALUE, "I002", "이미 초대된 사용자"),
 
+    /**
+     * 친구
+     */
+    FRIEND_REQUEST_OK(SUCCESS, "J000", "친구 요청 성공"),
+    FRIEND_REQUEST_NOT(INVALID_ACCESS, "J001", "친구 요청 실패"),
+    FRIEND_ACCEPT_OK(SUCCESS, "J002", "친구 수락 성공"),
+    FRIEND_ACCEPT_NOT(SUCCESS, "J003", "친구 수락 실패"),
+    FRIEND_CANCEL_OK(SUCCESS, "J004", "친구 요청 취소"),
+    FRIEND_REFUSE_OK(SUCCESS, "J005", "친구 거절 성공"),
+    FRIEND_FIND_OK(SUCCESS, "J006", "친구 조회 성공"),
+    USER_FIND_FRIEND_OK(SUCCESS, "J007", "유저 조회 성공"),
+
 
 
     /**

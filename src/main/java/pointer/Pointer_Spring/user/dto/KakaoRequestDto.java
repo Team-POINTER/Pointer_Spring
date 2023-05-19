@@ -1,9 +1,6 @@
-package pointer.Pointer_Spring.User.dto;
+package pointer.Pointer_Spring.user.dto;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import pointer.Pointer_Spring.User.domain.User;
 import lombok.*;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @Getter
 @Builder
@@ -13,7 +10,7 @@ public class KakaoRequestDto {
 
     private String id;
     private String email;
-    private String nickname;
+    private String name;
     //private String password;
 
     /*public UsernamePasswordAuthenticationToken toAuthentication() {

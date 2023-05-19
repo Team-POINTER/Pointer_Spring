@@ -1,10 +1,10 @@
-package pointer.Pointer_Spring.User.response;
+package pointer.Pointer_Spring.user.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
-import pointer.Pointer_Spring.User.dto.TokenDto;
+import pointer.Pointer_Spring.user.dto.TokenDto;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 

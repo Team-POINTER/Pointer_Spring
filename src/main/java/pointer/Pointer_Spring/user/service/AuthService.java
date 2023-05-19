@@ -1,9 +1,9 @@
-package pointer.Pointer_Spring.User.service;
+package pointer.Pointer_Spring.user.service;
 
-import pointer.Pointer_Spring.User.domain.User;
-import pointer.Pointer_Spring.User.dto.KakaoRequestDto;
-import pointer.Pointer_Spring.User.dto.TokenDto;
-import pointer.Pointer_Spring.User.response.ResponseKakaoUser;
+import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.dto.KakaoRequestDto;
+import pointer.Pointer_Spring.user.dto.TokenDto;
+import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
 
 import java.util.Optional;
 

@@ -11,5 +11,4 @@ public class PointerSpringApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PointerSpringApplication.class, args);
 	}
-
 }

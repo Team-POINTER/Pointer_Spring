@@ -1,4 +1,4 @@
-package pointer.Pointer_Spring.User;
+package pointer.Pointer_Spring.user;
 
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.validation.Regex;

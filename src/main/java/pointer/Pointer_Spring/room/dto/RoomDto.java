@@ -103,7 +103,7 @@ public class RoomDto {
 
         public InviteMember(RoomMember roomMember) {
             this.userId = roomMember.getUser().getUserId();
-            this.nickNm = roomMember.getUser().getNickname();
+            this.nickNm = roomMember.getUser().getName();
         }
     }
 
