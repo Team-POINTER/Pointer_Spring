@@ -21,6 +21,9 @@ public class SendbirdService {
     @Value("${sendbird.api}")
     private String API_TOKEN;
 
+    @Value("${sendbird.feign.url}")
+    private String API_URL;
+
     public Map<String, Object> createUser(String userId, String userNickname,
         String userAvatarUrl) {
 

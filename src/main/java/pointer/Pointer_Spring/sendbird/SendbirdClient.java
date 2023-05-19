@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "sendbird", url = "https://api-${sendbird.app}.sendbird.com/v3")
+@FeignClient(name = "sendbird", url = "${sendbird.feign.url}")
 public interface SendbirdClient {
 
     @PostMapping("/users")
