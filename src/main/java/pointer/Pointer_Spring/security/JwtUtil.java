@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -16,6 +17,7 @@ import java.util.Map;
 
 @Component
 @Log4j2
+@PropertySource("classpath:application.properties")
 public class JwtUtil {
 
     /*@Value("${jwt.secret}")
