@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Component
 @Log4j2
-@PropertySource("classpath:config.properties")
+@PropertySource("classpath:application.properties")
 public class JwtUtil {
 
     /*@Value("${jwt.secret}")
