@@ -27,22 +27,50 @@ public class FriendController {
         return friendService.getFriendList(dto, request);
     }
 
-    @PostMapping("/friend") // 요청 및 수락
+    // 친구 관계 설정
+
+    @PostMapping("/friend/request") // 친구 요청
     public Object requestFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                 HttpServletRequest request) {
         return friendService.requestFriend(dto, request);
     }
 
-    @PutMapping("/friend")
+    @PostMapping("/friend/accept") // 친구 수락
+    public Object acceptFriend(@RequestBody FriendDto.RequestFriendDto dto,
+                                HttpServletRequest request) {
+        return friendService.acceptFriend(dto, request);
+    }
+
+    @PutMapping("/friend/request") // 친구 요청 취소
+    public Object cancelRequestFriend(@RequestBody FriendDto.RequestFriendDto dto,
+                                HttpServletRequest request) {
+        return friendService.cancelRequest(dto, request);
+    }
+
+    @PostMapping("/friend/cancel") // 친구 취소 : 관계 끊어짐
     public Object cancelFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                HttpServletRequest request) {
         return friendService.cancelFriend(dto, request);
     }
 
-    @DeleteMapping("/friend")
+    @PutMapping("/friend/refuse") // 친구 거절 : 알림 삭제
     public Object refuseFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                 HttpServletRequest request) {
         return friendService.refuseFriend(dto, request);
+    }
+
+    // 차단
+
+    @GetMapping("/friend/block") // 차단 친구 조회
+    public FriendDto.FriendInfoListResponse getRefuseFriendList(@RequestBody FriendDto.FriendUserDto dto,
+                                                          HttpServletRequest request) {
+        return friendService.getBlockFriendList(dto, request);
+    }
+
+    @PostMapping("/friend/block") // 차단
+    public Object getBlockFriendList(@RequestBody FriendDto.RequestFriendDto dto,
+                                                                HttpServletRequest request) {
+        return friendService.blockFriend(dto, request);
     }
 
 
