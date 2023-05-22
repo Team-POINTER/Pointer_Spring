@@ -71,6 +71,7 @@ public enum ExceptionCode {
     FRIEND_REFUSE_OK(SUCCESS, "J005", "친구 거절 성공"),
     FRIEND_FIND_OK(SUCCESS, "J006", "친구 조회 성공"),
     USER_FIND_FRIEND_OK(SUCCESS, "J007", "유저 조회 성공"),
+    FRIEND_BLOCK_OK(SUCCESS, "J008", "친구 차단 성공"),
 
 
 

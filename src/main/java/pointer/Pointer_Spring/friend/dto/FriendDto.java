@@ -31,12 +31,12 @@ public class FriendDto {
     @Data
     public static class FriendList {
 
-        String friendId;
+        Long friendId;
         String friendName;
         String file;
 
         public FriendList(User user) {
-            this.friendId = user.getId();
+            this.friendId = user.getUserId();
             this.friendName = user.getName();
         }
 
@@ -49,13 +49,13 @@ public class FriendDto {
     @Data
     public static class FriendInfoList {
 
-        String friendId;
+        Long friendId;
         String friendName;
         String file;
         Friend.Relation relationship;
 
         public FriendInfoList(User user, Friend.Relation relationship) {
-            this.friendId = user.getId();
+            this.friendId = user.getUserId();
             this.friendName = user.getName();
             this.relationship = relationship;
         }
@@ -68,11 +68,12 @@ public class FriendDto {
 
     @Data
     public static class FriendUserDto {
-        private String id;
+        private Long userId;
     }
 
     @Data
     public static class FindFriendDto {
+        private Long userId;
         private String keyword;
     }
 
@@ -83,7 +84,7 @@ public class FriendDto {
 
     @Data
     public static class RequestFriendDto {
-        private String id;
-        private String memberId;
+        private Long userId;
+        private Long memberId;
     }
 }
