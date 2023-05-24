@@ -66,12 +66,15 @@ public enum ExceptionCode {
     FRIEND_REQUEST_OK(SUCCESS, "J000", "친구 요청 성공"),
     FRIEND_REQUEST_NOT(INVALID_ACCESS, "J001", "친구 요청 실패"),
     FRIEND_ACCEPT_OK(SUCCESS, "J002", "친구 수락 성공"),
-    FRIEND_ACCEPT_NOT(SUCCESS, "J003", "친구 수락 실패"),
+    FRIEND_ACCEPT_NOT(INVALID_ACCESS, "J003", "친구 수락 실패"),
     FRIEND_CANCEL_OK(SUCCESS, "J004", "친구 요청 취소"),
     FRIEND_REFUSE_OK(SUCCESS, "J005", "친구 거절 성공"),
     FRIEND_FIND_OK(SUCCESS, "J006", "친구 조회 성공"),
     USER_FIND_FRIEND_OK(SUCCESS, "J007", "유저 조회 성공"),
     FRIEND_BLOCK_OK(SUCCESS, "J008", "친구 차단 성공"),
+    FRIEND_CANCEL_NOT(INVALID_ACCESS, "J009", "친구 취소 요청 실패"),
+    FRIEND_REQUEST_CANCEL_OK(SUCCESS, "J010", "요청 취소 성공"),
+    FRIEND_REQUEST_CANCEL_NOT(SUCCESS, "J011", "요청 취소 실패"),
 
 
 

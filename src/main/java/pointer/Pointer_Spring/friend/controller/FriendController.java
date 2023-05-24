@@ -32,6 +32,7 @@ public class FriendController {
     @PostMapping("/friend/request") // 친구 요청
     public Object requestFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                 HttpServletRequest request) {
+        System.out.println("dto.getUserId() + \" \"+  dto.getMemberId() = " + dto.getUserId() + " "+  dto.getMemberId());
         return friendService.requestFriend(dto, request);
     }
 
@@ -47,19 +48,21 @@ public class FriendController {
         return friendService.cancelRequest(dto, request);
     }
 
+    // 취소와 거절 설정
+
     @PostMapping("/friend/cancel") // 친구 취소 : 관계 끊어짐
     public Object cancelFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                HttpServletRequest request) {
         return friendService.cancelFriend(dto, request);
     }
 
-    @PutMapping("/friend/refuse") // 친구 거절 : 알림 삭제
+    @PostMapping("/friend/refuse") // 친구 거절 : 알림 삭제
     public Object refuseFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                 HttpServletRequest request) {
         return friendService.refuseFriend(dto, request);
     }
 
-    // 차단
+    // 차단 : 상대의 차단전 마지막 상태 유지
 
     @GetMapping("/friend/block") // 차단 친구 조회
     public FriendDto.FriendInfoListResponse getRefuseFriendList(@RequestBody FriendDto.FriendUserDto dto,

@@ -32,11 +32,13 @@ public class FriendDto {
     public static class FriendList {
 
         Long friendId;
+        String id;
         String friendName;
         String file;
 
         public FriendList(User user) {
             this.friendId = user.getUserId();
+            this.id = user.getId();
             this.friendName = user.getName();
         }
 
@@ -50,12 +52,14 @@ public class FriendDto {
     public static class FriendInfoList {
 
         Long friendId;
+        String id;
         String friendName;
         String file;
         Friend.Relation relationship;
 
         public FriendInfoList(User user, Friend.Relation relationship) {
             this.friendId = user.getUserId();
+            this.id = user.getId();
             this.friendName = user.getName();
             this.relationship = relationship;
         }
