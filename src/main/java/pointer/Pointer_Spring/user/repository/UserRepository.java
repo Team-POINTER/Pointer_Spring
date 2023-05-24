@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.user.repository;
 
+import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,5 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByTokenAndStatus(String token, int status);
     boolean existsByEmailAndStatus(String email, int status);
 
-    List<User> findByIdContainingOrNameContainingAndStatus(String id, String name, int status);
+    List<User> findAllByIdContainingOrNameContainingAndStatus(String id, String name, int status);
 }
