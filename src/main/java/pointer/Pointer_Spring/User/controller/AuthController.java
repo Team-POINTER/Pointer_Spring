@@ -1,4 +1,4 @@
-package pointer.Pointer_Spring.User.controller;
+package pointer.Pointer_Spring.user.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -6,10 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 //import pointer.Pointer_Spring.User.dto.JoinRequestDto;
-import pointer.Pointer_Spring.User.dto.KakaoRequestDto;
-import pointer.Pointer_Spring.User.dto.TokenRequest;
-import pointer.Pointer_Spring.User.response.ResponseKakaoUser;
-import pointer.Pointer_Spring.User.service.AuthServiceImpl;
+import pointer.Pointer_Spring.user.dto.KakaoRequestDto;
+import pointer.Pointer_Spring.user.dto.TokenRequest;
+import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
+import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
 @Controller
@@ -18,7 +18,7 @@ public class AuthController {
     private final AuthServiceImpl authServiceImpl;
 
     //  test
-    @GetMapping("/auth/kakao")
+    /*@GetMapping("/auth/kakao")
     public Object kakaoLogin(@RequestParam String code) {
         // code와 username이 들어올 예정
         System.out.println("AuthController.kakaoLogin - code = " + code);
@@ -26,7 +26,7 @@ public class AuthController {
         ResponseKakaoUser responseKakaoUser = authServiceImpl.kakaoCheck(accessToken);
         System.out.println("responseKakaoUser.getMessage() = " + responseKakaoUser.getMessage());
         return new ResponseEntity<>(ExceptionCode.SIGNUP_CREATED_OK, HttpStatus.OK);
-    }
+    }*/
 
     // real
 
