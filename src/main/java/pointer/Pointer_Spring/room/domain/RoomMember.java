@@ -6,8 +6,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pointer.Pointer_Spring.User.domain.User;
+import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.config.BaseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,10 +31,12 @@ public class RoomMember extends BaseEntity {
     private String privateRoomNm;
 
     @OneToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "User_user_id")
+    @JoinColumn(name = "User_user_id")
     private User user;
 
     private Boolean vote;
+
+    private List<Room> roomList = new ArrayList<>();
 
     @Builder
     public RoomMember(Room room, User user) {
