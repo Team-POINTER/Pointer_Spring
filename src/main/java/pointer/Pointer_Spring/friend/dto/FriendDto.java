@@ -21,9 +21,11 @@ public class FriendDto {
     @Data
     public static class FriendInfoListResponse {
 
+        Long total;
         List<FriendInfoList> friendInfoList;
 
-        public FriendInfoListResponse(List<FriendInfoList> friendInfoList) {
+        public FriendInfoListResponse(Long total, List<FriendInfoList> friendInfoList) {
+            this.total = total;
             this.friendInfoList = friendInfoList;
         }
     }
@@ -73,12 +75,17 @@ public class FriendDto {
     @Data
     public static class FriendUserDto {
         private Long userId;
+        // pageable
+        private Long lastId;
+        private int size;
     }
 
     @Data
     public static class FindFriendDto {
         private Long userId;
         private String keyword;
+        // pageable
+        private Long lastId;
     }
 
     @Data

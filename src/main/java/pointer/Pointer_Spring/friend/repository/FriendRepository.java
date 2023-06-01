@@ -10,12 +10,16 @@ import java.util.Optional;
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<Friend> findAllByUserUserIdAndRelationshipAndStatus(Long userUserId, Friend.Relation relation, int status);
+    Long countByUserUserIdAndRelationshipAndStatus(Long userUserId, Friend.Relation relation, int status);
+
+    List<Friend> findAllByUserUserIdAndRelationshipNotAndStatus(Long userUserId, Friend.Relation relation, int status);
+    Long countByUserUserIdAndRelationshipNotAndStatus(Long userUserId, Friend.Relation relation, int status);
+    // pageable
+    //List<Friend> findAllByUserUserIdAndRelationshipNotAndStatusOrderByNameDesc(Long userUserId, Friend.Relation relation, int status, String name, Pageable pageable);
+    //List<Friend> findAllByUserFriendIdLessThanAndUserUserIdAndRelationshipNotAndStatusOrderByNameDesc(Long userFriendId, Long userUserId, Friend.Relation relation, int status, String name, Pageable pageable);
+
     List<Friend> findAllByUserUserIdAndStatus(Long userUserId, int status);
     Optional<Friend> findByUserUserIdAndUserFriendIdAndStatus(Long userUserId, Long userFriendId, int status);
     Optional<Friend> findByUserUserIdAndUserFriendIdAndRelationshipNotAndStatus(Long userUserId, Long userFriendId, Friend.Relation relation, int status);
-    List<Friend> findAllByUserUserIdAndRelationshipNotAndStatus
-            (Long userUserId, Friend.Relation relation, int status);
-
-
     Friend save(Friend friend);
 }

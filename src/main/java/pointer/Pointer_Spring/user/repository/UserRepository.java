@@ -1,5 +1,8 @@
 package pointer.Pointer_Spring.user.repository;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,5 +19,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByTokenAndStatus(String token, int status);
     boolean existsByEmailAndStatus(String email, int status);
 
-    List<User> findAllByIdContainingOrNameContainingAndStatus(String id, String name, int status);
+    // pageable
+    List<User> findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
+    (String id, String name, int status, Pageable pageable);
+
+    List<User> findAllByUserIdLessThanAndIdContainingOrNameContainingAndStatusOrderByUserIdDesc
+            (Long userId, String id, String name, int status, Pageable pageable);
 }

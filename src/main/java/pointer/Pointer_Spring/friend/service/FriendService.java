@@ -9,6 +9,7 @@ public interface FriendService {
 
     FriendDto.FriendListResponse getUserList(FriendDto.FindFriendDto dto, HttpServletRequest request);
     FriendDto.FriendInfoListResponse getFriendList(FriendDto.FriendUserDto dto, HttpServletRequest request);
+
     FriendDto.FriendInfoListResponse getBlockFriendList(FriendDto.FriendUserDto dto, HttpServletRequest request);
     ResponseFriend requestFriend(FriendDto.RequestFriendDto dto, HttpServletRequest request);
     ResponseFriend acceptFriend(FriendDto.RequestFriendDto dto, HttpServletRequest request);

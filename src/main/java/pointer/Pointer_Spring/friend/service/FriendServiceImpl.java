@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.friend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.friend.domain.Friend;
@@ -33,17 +34,27 @@ public class FriendServiceImpl implements FriendService {
     private final Image.ImageType PROFILE_TYPE = Image.ImageType.PROFILE;
 
     // 친구 요청, 취소만 알림 -> 친구 성공시, 알림 갱신
+    private List<User> fetchPages(FriendDto.FindFriendDto findFriendDto)  {
+        PageRequest pageRequest = PageRequest.of(0, 20);
+        if (findFriendDto.getLastId() == null) { // 처음 조회
+            return userRepository.findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
+                    (findFriendDto.getKeyword(), findFriendDto.getKeyword(), STATUS, pageRequest);
+        }
+        else { // 불러오기
+            return userRepository.findAllByUserIdLessThanAndIdContainingOrNameContainingAndStatusOrderByUserIdDesc
+                    (findFriendDto.getLastId(), findFriendDto.getKeyword(), findFriendDto.getKeyword(), STATUS, pageRequest);
+        }
+    }
 
     @Override
     public FriendDto.FriendListResponse getUserList(FriendDto.FindFriendDto dto, HttpServletRequest request) {
-        List<User> userList = userRepository
-                .findAllByIdContainingOrNameContainingAndStatus(dto.getKeyword(), dto.getKeyword(), STATUS);
+        List<User> userList = fetchPages(dto); // 차단에 의해 10개 이하가 반환될 수도 있음
         List<Friend> blockFriendList = friendRepository
                 .findAllByUserUserIdAndRelationshipAndStatus(dto.getUserId(), Friend.Relation.BLOCK, STATUS);
 
         List<FriendDto.FriendList> friendList = new ArrayList<>();
         for (User user : userList) {
-            if (blockFriendList.stream().filter(f -> user.getUserId().equals(f.getUserFriendId())).findAny().isEmpty()) { // 차단
+            if (!user.getUserId().equals(dto.getUserId()) && blockFriendList.stream().filter(f -> user.getUserId().equals(f.getUserFriendId())).findAny().isEmpty()) { // 차단
                 Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
                 if (image.isPresent()) {
                     friendList.add(new FriendDto.FriendList(user).setFile(image.get().getImageUrl()));
@@ -75,14 +86,30 @@ public class FriendServiceImpl implements FriendService {
                 friendInfoList.add(new FriendDto.FriendInfoList(user, Friend.Relation.BLOCK));
             }
         }
-        return new FriendDto.FriendInfoListResponse(friendInfoList);
+
+        Long total = friendRepository.countByUserUserIdAndRelationshipAndStatus(dto.getUserId(), Friend.Relation.BLOCK, STATUS);
+        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
     }
+
+    /*private List<Friend> fetchPages(FriendDto.FindFriendDto findFriendDto)  { // findFriendDto에 lastName의 userId 추가 필요
+        PageRequest pageRequest = PageRequest.of(0, findFriendDto.getSize());
+        if (findFriendDto.getLastId() == null) { // 처음 조회
+            return friendRepository.findAllByUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
+                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
+        }
+        else { // 불러오기
+            return friendRepository.findAllByUserFriendIdLessThanAndUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
+                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
+        }
+    }*/
 
     @Override
     public FriendDto.FriendInfoListResponse getFriendList(FriendDto.FriendUserDto dto, HttpServletRequest request) {
-        // 차단 친구도 보여주는 상태
+        // pageable 이전
         List<Friend> friendList = friendRepository
                 .findAllByUserUserIdAndRelationshipNotAndStatus(dto.getUserId(), Friend.Relation.BLOCK, STATUS);
+        // pageable
+        //List<Friend> friendList = fetchPages(dto);
 
         List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : friendList) {
@@ -114,7 +141,9 @@ public class FriendServiceImpl implements FriendService {
                 }
             }
         }
-        return new FriendDto.FriendInfoListResponse(friendInfoList);
+
+        Long total = friendRepository.countByUserUserIdAndRelationshipNotAndStatus(dto.getUserId(), Friend.Relation.BLOCK, STATUS);
+        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
     }
 
     @Override
