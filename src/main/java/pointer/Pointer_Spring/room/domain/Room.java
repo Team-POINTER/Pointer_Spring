@@ -1,16 +1,16 @@
 package pointer.Pointer_Spring.room.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
+import pointer.Pointer_Spring.question.domain.Question;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -35,6 +35,8 @@ public class Room extends BaseEntity {
     @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
     private Long creatorId;
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<Question> questions = new ArrayList<>();
     public void updateMemberNum(Integer memberNum){
         this.memberNum = memberNum;
     }

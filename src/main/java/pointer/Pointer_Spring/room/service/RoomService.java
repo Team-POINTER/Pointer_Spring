@@ -29,7 +29,7 @@ public interface RoomService {
     //InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
     List<RoomDto.RoomMemberResopnose> getInviteMembers(Long roomId);
     ResponseRoom inviteMembers(InviteRequest dto, HttpServletRequest request);
-    List<RoomDto.IsInviteMember> isInviteMembersList(Long userId, Long roomId, int currentPage, int pageSize, HttpServletRequest request);
+    List<RoomDto.IsInviteMember> isInviteMembersList(Long userId, Long userFriendId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request);
 
     //Object findLink(Long roomId);
 }

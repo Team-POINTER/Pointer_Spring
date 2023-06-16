@@ -36,7 +36,6 @@ public class RoomMember extends BaseEntity {
 
     private Boolean vote;
 
-    private List<Room> roomList = new ArrayList<>();
 
     @Builder
     public RoomMember(Room room, User user) {

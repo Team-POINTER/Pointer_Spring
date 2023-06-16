@@ -61,8 +61,8 @@ public class RoomController {
     }
 
     @GetMapping("/paging/friend/invitation")
-    public Object invitationFriendList(@RequestParam Integer page, Integer size, long userId,long roomId, HttpServletRequest request) {
-        return roomService.isInviteMembersList(userId, roomId, page,size,request);
+    public Object invitationFriendList(@RequestParam Long userId, Long userFriendId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
+        return roomService.isInviteMembersList(userId, userFriendId, roomId, currentPage, pageSize,kwd, request);
     }
 
     @PostMapping("/{room-id}/exit")
