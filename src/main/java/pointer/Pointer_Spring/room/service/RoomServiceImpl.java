@@ -66,7 +66,7 @@ public class RoomServiceImpl implements RoomService {
             }
         );
 
-        createdRoom.setInvitation(createLink(createdRoom));
+        //createdRoom.setInvitation(createLink(createdRoom));
 
         DetailResponse detailResponse = new DetailResponse(savedRoom);
         String accessToken = "accessToken";
@@ -85,7 +85,7 @@ public class RoomServiceImpl implements RoomService {
         if (room.isEmpty()) {
             return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
         }
-        return new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, room.get().getInvitation());
+        return new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, null);
     }
 
     @Override
