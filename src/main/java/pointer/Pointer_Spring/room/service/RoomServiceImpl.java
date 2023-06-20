@@ -1,20 +1,21 @@
 package pointer.Pointer_Spring.room.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
+import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -45,15 +46,24 @@ public class RoomServiceImpl implements RoomService {
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ListResponse getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
-        List<RoomMember> roomMemberList = new ArrayList<>();
-        if(kwd == null){
-            roomMemberList = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), 1);//질문도 추가해야함
-        }else{
-            roomMemberList = roomMemberRepository.findAllByUserUserIdAndPrivateRoomNmContainingAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), kwd, 1);
+        //List<RoomMember> roomList = new ArrayList<>();
+        List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
+        if (kwd == null) {
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), 1)
+                    .stream()
+                    .map(RoomDto.ListRoom::new).toList();
+        } else {
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), 1).stream()
+                    .filter(roomMember -> {
+                        Room room = roomMember.getRoom();
+                        Optional<Question> latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdateAt));//updatedAt 기준
+                        return roomMember.getPrivateRoomNm().contains(kwd) || latestQuestion.map(question -> question.getQuestion().contains(kwd)).orElse(false);
+                    })
+                    .map(RoomDto.ListRoom::new)
+                    .collect(Collectors.toList());
         }
-        List<RoomDto.ListRoom> roomListDto = roomMemberList.stream().map(RoomDto.ListRoom::new).toList();
-        //질문으로 검색 -> 나오면 room get -> 그 room으로 rooMemberList에서 검색[roomIlist 뽑아서 그 안에 있는지]
-        return new ListResponse(roomListDto); //updatedAt 기준
+        return new ListResponse(roomListDto);
     }
 
     public DetailResponse getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기[합친 후에]
@@ -204,9 +214,9 @@ public class RoomServiceImpl implements RoomService {
 
     //초대 가능 여부 리스트 보내기 - 여기서 해당 유저가 초대 가능한 지 따짐
     @Override
-    public List<IsInviteMember> isInviteMembersList(Long userId,Long roomId, int currentPage, int pageSize, HttpServletRequest request){
-
-        List<Friend> friendList = fetchPages(userId, currentPage, pageSize);
+    public List<IsInviteMember> isInviteMembersList(Long userId, Long userFriendId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+        //pageSize는 상수로
+        List<Friend> friendList = fetchPagesOffset(userId, currentPage, pageSize, kwd);
         for(Friend f : friendList){
             System.out.println(f.getUserFriendId());
         }
@@ -231,13 +241,26 @@ public class RoomServiceImpl implements RoomService {
         return roomMemberResponoseList;
     }
 
-    private List<Friend> fetchPages(Long userId, int currentPage, int pageSize){//lastboardid로 할지
-        //이렇게 할거면 size 지정해줘야하고
-        //커서
-        PageRequest pageRequest = PageRequest.of(currentPage, pageSize, Sort.by("friendName"));//이름순 정렬 물어보기....?
+
+    private List<Friend> fetchPagesOffset(Long userId, int currentPage, int pageSize, String kwd){
+        PageRequest pageRequest = PageRequest.of(currentPage, pageSize, Sort.by("friendName"));
         System.out.println(pageRequest);
-        return friendRepository.findByUserUserIdAndRelationshipAndStatus(userId, Friend.Relation.SUCCESS, 1, pageRequest);
+        return friendRepository.findAllByUserUserIdAndRelationshipAndStatusAndFriendNameContaining(userId, Friend.Relation.SUCCESS, 1,kwd, pageRequest);
     }
+
+
+
+    private List<Friend> fetchPagesCursor(Long userId, Long userFriendId, String cursorNm, int pageSize, String kwd) {//이름 중복시 처리
+        Sort sort = Sort.by("friendName").ascending();
+        Pageable pageable = PageRequest.of(0, pageSize, sort);
+        if (cursorNm != null) {
+            return friendRepository.findAllByFriendNameAfterAndUserUserIdAndRelationshipAndStatusAndFriendNameContainingOrderByFriendNameAsc(userFriendId, cursorNm, userId, Friend.Relation.SUCCESS, 1, kwd, pageable);
+        }
+
+        return friendRepository.findAllByUserUserIdAndRelationshipAndStatus(userId, Friend.Relation.SUCCESS, 1, pageable);
+    }
+
+
 
 //    public String createLink(Room room) {
 //        return room.getCode();
