@@ -61,10 +61,10 @@ public class FriendDto {
         String file;
         Friend.Relation relationship;
 
-        public FriendInfoList(User user, Friend.Relation relationship) {
-            this.friendId = user.getUserId();
+        public FriendInfoList(Friend friend, User user, Friend.Relation relationship) {
+            this.friendId = friend.getId();
             this.id = user.getId();
-            this.friendName = user.getName();
+            this.friendName = friend.getUserFriendName();
             this.relationship = relationship;
         }
 

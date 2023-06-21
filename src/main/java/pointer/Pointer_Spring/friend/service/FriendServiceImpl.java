@@ -44,13 +44,13 @@ public class FriendServiceImpl implements FriendService {
     }
 
     private List<Friend> fetchPagesOffsetFriend(FriendDto.FriendUserDto dto){
-        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userUserId"));
+        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userFriendName"));
         return friendRepository.findAllByUserUserIdAndRelationshipNotAndStatus
                 (dto.getUserId(), Friend.Relation.BLOCK, STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetBlock(FriendDto.FriendUserDto dto){
-        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userUserId"));
+        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userFriendName"));
         return friendRepository.findAllByUserUserIdAndRelationshipAndStatus
                 (dto.getUserId(), Friend.Relation.BLOCK, STATUS, pageRequest);
     }
@@ -83,30 +83,30 @@ public class FriendServiceImpl implements FriendService {
         List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : friendList) {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                    }
+            );
+
             if (Objects.equals(friend.getUserFriendId(), dto.getUserId())) {
                 if (friend.getRelationship().equals(Friend.Relation.SUCCESS)) { // 중복 방지
                     continue;
                 }
 
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendInfoList(friend.getUser(), friend.getRelationship())
+                    friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
                             .setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendInfoList(friend.getUser(), friend.getRelationship()));
+                    friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
                 }
             }
             else {
-                User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                        () -> {
-                            throw new RuntimeException("유저를 조회할 수 없습니다.");
-                        }
-                );
-
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship())
+                    friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
                             .setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship()));
+                    friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
                 }
             }
         }
@@ -126,12 +126,20 @@ public class FriendServiceImpl implements FriendService {
                         throw new RuntimeException("유저를 조회할 수 없습니다.");
                     }
             );
+
+            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                    }
+            );
+
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+
             if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(user, Friend.Relation.BLOCK)
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK)
                         .setFile(image.get().getImageUrl()));
             } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(user, Friend.Relation.BLOCK));
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK));
             }
         }
 
@@ -174,7 +182,7 @@ public class FriendServiceImpl implements FriendService {
             Friend friendUser = Friend.builder()
                     .user(user)
                     .relationship(Friend.Relation.REQUEST)
-                    .userFriendId(dto.getMemberId())
+                    .friend(friend)
                     .build();
             friendRepository.save(friendUser);
 
@@ -183,7 +191,7 @@ public class FriendServiceImpl implements FriendService {
                 Friend userFriend = Friend.builder()
                         .user(friend)
                         .relationship(Friend.Relation.REQUESTED)
-                        .userFriendId(dto.getUserId())
+                        .friend(user)
                         .build();
                 friendRepository.save(userFriend);
                 // 차단이 안된 경우, 친구 요청 알림 전송
@@ -244,10 +252,16 @@ public class FriendServiceImpl implements FriendService {
                     }
             );
 
+            User friend = userRepository.findByUserIdAndStatus(dto.getMemberId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                    }
+            );
+
             Friend friendUser = Friend.builder()
                     .user(user)
                     .relationship(Friend.Relation.BLOCK)
-                    .userFriendId(dto.getMemberId())
+                    .friend(friend)
                     .build();
             friendRepository.save(friendUser);
         }

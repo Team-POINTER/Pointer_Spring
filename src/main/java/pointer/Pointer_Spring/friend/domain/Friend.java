@@ -22,6 +22,9 @@ public class Friend extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @Column(name = "user_friend_name", nullable = false)
+    private String userFriendName;
+
     @Column(name = "user_friend_id", nullable = false)
     private Long userFriendId;
 
@@ -39,9 +42,10 @@ public class Friend extends BaseEntity {
 
     // builder
     @Builder
-    public Friend(User user, Long userFriendId, Relation relationship) {
+    public Friend(User user, User friend, Relation relationship) {
         this.user = user;
-        this.userFriendId = userFriendId;
+        this.userFriendName = friend.getName();
+        this.userFriendId = friend.getUserId();
         this.relationship = relationship;
     }
 
