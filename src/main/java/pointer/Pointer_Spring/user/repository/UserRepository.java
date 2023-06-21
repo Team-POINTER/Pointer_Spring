@@ -18,7 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserIdAndStatus(Long userId, int status);
     Optional<User> findByTokenAndStatus(String token, int status);
     boolean existsByEmailAndStatus(String email, int status);
-
     // pageable
     List<User> findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
     (String id, String name, int status, Pageable pageable);

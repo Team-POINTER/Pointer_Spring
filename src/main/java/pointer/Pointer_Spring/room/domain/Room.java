@@ -17,7 +17,7 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "ROOM")
+@Entity(name = "Room")
 public class Room extends BaseEntity {
 
     @Id

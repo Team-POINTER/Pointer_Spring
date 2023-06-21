@@ -11,5 +11,5 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
     List<RoomMember> findAllByRoom(Room room);
     List<RoomMember> findByRoomMemberId(Long RoomMemberId);
-
+    int countByRoom(Room room);
 }

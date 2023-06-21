@@ -23,7 +23,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
     private String password;
@@ -33,6 +33,7 @@ public class User extends BaseEntity {
     public enum SignupType {
         KAKAO, APPLE
     }
+    @Enumerated(EnumType.ORDINAL)
     private SignupType type;
 
     // role
@@ -40,6 +41,7 @@ public class User extends BaseEntity {
         USER, ADMIN
     }
 
+    @Enumerated(EnumType.ORDINAL)
     private Role role;
     @Column(name = "service_agree")
     private boolean serviceAgree; // 필수
