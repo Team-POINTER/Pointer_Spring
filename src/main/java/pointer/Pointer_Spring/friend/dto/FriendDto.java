@@ -12,8 +12,10 @@ public class FriendDto {
     public static class FriendListResponse {
 
         List<FriendList> userList;
+        Long total;
 
-        public FriendListResponse(List<FriendList> userList) {
+        public FriendListResponse(List<FriendList> userList, Long total) {
+            this.total = total;
             this.userList = userList;
         }
     }
@@ -21,8 +23,8 @@ public class FriendDto {
     @Data
     public static class FriendInfoListResponse {
 
-        Long total;
         List<FriendInfoList> friendInfoList;
+        Long total;
 
         public FriendInfoListResponse(Long total, List<FriendInfoList> friendInfoList) {
             this.total = total;
@@ -76,8 +78,7 @@ public class FriendDto {
     public static class FriendUserDto {
         private Long userId;
         // pageable
-        private Long lastId;
-        private int size;
+        private int lastPage;
     }
 
     @Data
@@ -85,7 +86,7 @@ public class FriendDto {
         private Long userId;
         private String keyword;
         // pageable
-        private Long lastId;
+        private int lastPage;
     }
 
     @Data

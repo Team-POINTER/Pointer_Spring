@@ -2,12 +2,13 @@ package pointer.Pointer_Spring.friend.service;
 
 import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.response.ResponseFriend;
+import pointer.Pointer_Spring.user.dto.UserDto;
 
 import javax.servlet.http.HttpServletRequest;
 
 public interface FriendService {
 
-    FriendDto.FriendListResponse getUserList(FriendDto.FindFriendDto dto, HttpServletRequest request);
+    UserDto.UserListResponse getUserList(FriendDto.FindFriendDto dto, HttpServletRequest request);
     FriendDto.FriendInfoListResponse getFriendList(FriendDto.FriendUserDto dto, HttpServletRequest request);
 
     FriendDto.FriendInfoListResponse getBlockFriendList(FriendDto.FriendUserDto dto, HttpServletRequest request);

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.service.FriendService;
+import pointer.Pointer_Spring.user.dto.UserDto;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,8 +17,8 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping("/search") // 유저 검색
-    public FriendDto.FriendListResponse getUserList(@RequestBody FriendDto.FindFriendDto dto,
-                                                    HttpServletRequest request) {
+    public UserDto.UserListResponse getUserList(@RequestBody FriendDto.FindFriendDto dto,
+                                                HttpServletRequest request) {
         return friendService.getUserList(dto, request);
     }
 

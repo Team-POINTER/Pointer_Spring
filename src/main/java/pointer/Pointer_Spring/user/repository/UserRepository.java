@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // pageable
     List<User> findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
     (String id, String name, int status, Pageable pageable);
+    Long countByIdContainingOrNameContainingAndStatus(String id, String name, int status);
 
-    List<User> findAllByUserIdLessThanAndIdContainingOrNameContainingAndStatusOrderByUserIdDesc
-            (Long userId, String id, String name, int status, Pageable pageable);
+    Optional<User> findByUserId(Long userId);
 }

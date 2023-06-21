@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:config.properties")
+//@PropertySource("classpath:application.properties")
 public class AuthServiceImpl implements AuthService {
 
     /*@Value("${kakao.restAPI}")
