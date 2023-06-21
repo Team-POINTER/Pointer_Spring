@@ -18,10 +18,10 @@ public class Image extends BaseEntity {
     @Column(name = "image_id", unique = true)
     private Long imageId;
 
-    @Column(nullable = false)
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    @Column(nullable = false)
+    @Column(name = "image_sort", nullable = false)
     private ImageType imageSort;
 
     @ManyToOne(fetch = FetchType.LAZY)

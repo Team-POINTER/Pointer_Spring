@@ -43,8 +43,11 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.ORDINAL)
     private Role role;
+    @Column(name = "service_agree")
     private boolean serviceAgree; // 필수
+    @Column(name = "service_age")
     private boolean serviceAge;
+    @Column(name = "marketing")
     private boolean marketing;
 
     @Column(length = 1000)
@@ -74,6 +77,12 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public void setService(boolean serviceAgree, boolean serviceAge, boolean marketing) {
+        this.serviceAge = serviceAge;
+        this.serviceAgree = serviceAgree;
+        this.marketing = marketing;
     }
 
     public void changePassword(String password) {

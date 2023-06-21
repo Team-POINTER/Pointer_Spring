@@ -21,9 +21,11 @@ public class FriendDto {
     @Data
     public static class FriendInfoListResponse {
 
+        Long total;
         List<FriendInfoList> friendInfoList;
 
-        public FriendInfoListResponse(List<FriendInfoList> friendInfoList) {
+        public FriendInfoListResponse(Long total, List<FriendInfoList> friendInfoList) {
+            this.total = total;
             this.friendInfoList = friendInfoList;
         }
     }
@@ -31,12 +33,14 @@ public class FriendDto {
     @Data
     public static class FriendList {
 
-        String friendId;
+        Long friendId;
+        String id;
         String friendName;
         String file;
 
         public FriendList(User user) {
-            this.friendId = user.getId();
+            this.friendId = user.getUserId();
+            this.id = user.getId();
             this.friendName = user.getName();
         }
 
@@ -49,13 +53,15 @@ public class FriendDto {
     @Data
     public static class FriendInfoList {
 
-        String friendId;
+        Long friendId;
+        String id;
         String friendName;
         String file;
         Friend.Relation relationship;
 
         public FriendInfoList(User user, Friend.Relation relationship) {
-            this.friendId = user.getId();
+            this.friendId = user.getUserId();
+            this.id = user.getId();
             this.friendName = user.getName();
             this.relationship = relationship;
         }
@@ -68,12 +74,18 @@ public class FriendDto {
 
     @Data
     public static class FriendUserDto {
-        private String id;
+        private Long userId;
+        // pageable
+        private Long lastId;
+        private int size;
     }
 
     @Data
     public static class FindFriendDto {
+        private Long userId;
         private String keyword;
+        // pageable
+        private Long lastId;
     }
 
     @Data
@@ -83,7 +95,7 @@ public class FriendDto {
 
     @Data
     public static class RequestFriendDto {
-        private String id;
-        private String memberId;
+        private Long userId;
+        private Long memberId;
     }
 }
