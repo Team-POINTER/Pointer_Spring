@@ -147,7 +147,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public ResponseRoom exitRoom(Long roomId, ExitRequest exitRequestDto){//남은 사람 있는지 확인
-        User foundUser = userRepository.findById(exitRequestDto.getId()).orElseThrow(()->new CustomException(ExceptionCode.USER_NOT_FOUND));
+        User foundUser = userRepository.findById(exitRequestDto.getUserId()).orElseThrow(()->new CustomException(ExceptionCode.USER_NOT_FOUND));
         RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(roomId, foundUser.getUserId(), 1).orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
 
         foundUser.updateRoomLimit(foundUser.getRoomLimit() - 1);
@@ -163,9 +163,6 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public ResponseRoom inviteMembers(InviteRequest inviteDto, HttpServletRequest request) {
-        if(!roomMemberRepository.existsByUserId(inviteDto.getId())){
-                throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
-        }
 
         Room foundRoom = roomRepository.findById(inviteDto.getRoomId()).orElseThrow(
                 () -> {
@@ -173,7 +170,7 @@ public class RoomServiceImpl implements RoomService {
                 }
         );
 
-        Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getFriendIdList().size();
+        Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getUserFriendIdList().size();
         if (totalRoomMemberNum>50) {//초대 가능 인원 수 제한
             throw new CustomException(ExceptionCode.ROOM_CREATE_OVER_LIMIT);
         } // 룸 자체적으로 초대 가능한지
@@ -182,13 +179,25 @@ public class RoomServiceImpl implements RoomService {
 
         //RoomMember저장
         List<RoomMember> roomMembers;
-        roomMembers = inviteDto.getFriendIdList().stream()
-                .map((friendId) -> {
-                        User foundUser = userRepository.findById(friendId).orElseThrow(
-                                () -> new CustomException(ExceptionCode.USER_NOT_FOUND));
-                        foundUser.updateRoomLimit(foundUser.getRoomLimit() + 1);
-                        return new RoomMember(foundRoom, foundUser);
-                }).collect(Collectors.toList());
+        roomMembers = inviteDto.getUserFriendIdList().stream()
+                .map((userFriendId) -> {
+                        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus
+                                (inviteDto.getRoomId(), userFriendId, 0).orElse(null);
+                        if(roomMember != null){
+                            roomMember.setStatus(1);
+                            System.out.println("up"+ userFriendId);
+                            return null;
+                        }
+                        else {
+                            System.out.println("down"+ userFriendId);
+                            User foundUser = userRepository.findById(userFriendId).orElseThrow( // 이미 fetchpage에서 status 0인거로 골라옴
+                                    () -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+                            foundUser.updateRoomLimit(foundUser.getRoomLimit() + 1);
+                            return new RoomMember(foundRoom, foundUser);
+                        }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         roomMemberRepository.saveAllAndFlush(roomMembers);
 
         List<RoomMember> invitedRoomMemberInfoList = roomMemberRepository.findAllByRoom(foundRoom);
@@ -206,7 +215,7 @@ public class RoomServiceImpl implements RoomService {
     //이미 초대된 멤버 get(getRoomMember)
     @Override
     public List<RoomMemberResopnose> getInviteMembers(Long roomId){
-        List<RoomMember> roomMember = roomMemberRepository.findAllByRoom_RoomId(roomId);
+        List<RoomMember> roomMember = roomMemberRepository.findAllByRoom_RoomIdAndStatusEquals(roomId, 1);
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMember.stream()
                 .map(RoomMemberResopnose::new).toList();
         return roomMemberResopnoseList;
@@ -214,9 +223,12 @@ public class RoomServiceImpl implements RoomService {
 
     //초대 가능 여부 리스트 보내기 - 여기서 해당 유저가 초대 가능한 지 따짐
     @Override
-    public List<IsInviteMember> isInviteMembersList(Long userId, Long userFriendId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+    public List<IsInviteMember> isInviteMembersList(Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, 1)){//초대하려는 유저가 룸 멤버가 아닐 때
+            throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
+        }
         //pageSize는 상수로
-        List<Friend> friendList = fetchPagesOffset(userId, currentPage, pageSize, kwd);
+        List<Friend> friendList = fetchPagesOffset(userId, currentPage, pageSize, kwd);//status가 1인 것만 가져옴
         for(Friend f : friendList){
             System.out.println(f.getUserFriendId());
         }
@@ -225,9 +237,10 @@ public class RoomServiceImpl implements RoomService {
         List<IsInviteMember> roomMemberResponoseList = new ArrayList<>();
 
         for(Friend f : friendList){
-            Long id = f.getUserFriendId();
-            IsInviteMember isInviteMember = new IsInviteMember(userRepository.findById(id).get(), f);
-            if(roomMemberRepository.existsByUserUserIdAndRoomRoomId(id, roomId)){
+            Long userFriendId = f.getUserFriendId();
+
+            IsInviteMember isInviteMember = new IsInviteMember(userRepository.findById(userFriendId).get(), f);
+            if(roomMemberRepository.existsByUserUserIdAndRoomRoomId(userFriendId, roomId)){
                 isInviteMember.updateIsInvite(false, IsInviteMember.Reason.ALREADY);
             } else if (userRepository.findById(f.getUserFriendId()).get().getRoomLimit()>30) {
                 isInviteMember.updateIsInvite(false, IsInviteMember.Reason.OVERLIMIT);

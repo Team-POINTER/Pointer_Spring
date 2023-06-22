@@ -31,44 +31,32 @@ public class FriendDto {
     @Data
     public static class FriendList {
 
-        String friendId;
+        Long userFriendId;//친구의 고유 아이디
         String friendName;
-        String file;
 
         public FriendList(User user) {
-            this.friendId = user.getId();
+            this.userFriendId = user.getUserId();
             this.friendName = user.getName();
-        }
-
-        public FriendList setFile(String file) {
-            this.file = file;
-            return this;
         }
     }
 
     @Data
     public static class FriendInfoList {
 
-        String friendId;
+        Long userFriendId;
         String friendName;
-        String file;
         Friend.Relation relationship;
 
         public FriendInfoList(User user, Friend.Relation relationship) {
-            this.friendId = user.getId();
+            this.userFriendId = user.getUserId();
             this.friendName = user.getName();
             this.relationship = relationship;
-        }
-
-        public FriendInfoList setFile(String file) {
-            this.file = file;
-            return this;
         }
     }
 
     @Data
     public static class FriendUserDto {
-        private String id;
+        private Long userFriendId;
     }
 
     @Data
@@ -81,9 +69,9 @@ public class FriendDto {
         private User user;
     }
 
-    @Data
-    public static class RequestFriendDto {
-        private String id;
-        private String memberId;
-    }
+//    @Data
+//    public static class RequestFriendDto {
+//        private String id;
+//        private String memberId;
+//    }
 }

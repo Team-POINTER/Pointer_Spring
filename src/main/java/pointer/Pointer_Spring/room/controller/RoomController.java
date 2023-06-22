@@ -19,6 +19,8 @@ import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.room.service.RoomService;
 import pointer.Pointer_Spring.swagger.SwaggerTestDto;
 
+import java.util.List;
+
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
@@ -28,7 +30,7 @@ public class RoomController {
     private final RoomService roomService;
 
     @PostMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
-    public RoomDto.ListResponse getRoomList(@RequestBody RoomDto.FindRoomRequest dto, @Nullable @RequestParam String kwd, HttpServletRequest request) {
+    public RoomDto.ListResponse getRoomList(@RequestBody RoomDto.FindRoomRequest dto, @RequestParam(required = false) String kwd, HttpServletRequest request) {
         return roomService.getRoomList(dto, kwd, request);
     }
 
@@ -61,8 +63,13 @@ public class RoomController {
     }
 
     @GetMapping("/paging/friend/invitation")
-    public Object invitationFriendList(@RequestParam Long userId, Long userFriendId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
-        return roomService.isInviteMembersList(userId, userFriendId, roomId, currentPage, pageSize,kwd, request);
+    public Object invitationFriendList(@RequestParam Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
+        return roomService.isInviteMembersList(userId, roomId, currentPage, pageSize,kwd, request); //여기 kwd는 Nickname에 있는가 없는가
+    }
+
+    @GetMapping("/get/{room-id}/members")
+    public List<RoomDto.RoomMemberResopnose>  getInviteMembers(@PathVariable("room-id") Long roomId){
+        return roomService.getInviteMembers(roomId);
     }
 
     @PostMapping("/{room-id}/exit")

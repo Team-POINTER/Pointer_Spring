@@ -101,14 +101,14 @@ public class RoomDto {
     }
     @Data
     public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
-        String id;//user 고유 string id
+        Long userId;//user 고유 string id
     }
 
     @Data
     public static class InviteRequest {
-        Long id;//초대하는 유저
+        Long userId;//초대하는 유저
         Long roomId;
-        List<Long> friendIdList;
+        List<Long> userFriendIdList;
     }
 
     @Data
