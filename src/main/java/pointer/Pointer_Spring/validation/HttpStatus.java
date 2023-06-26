@@ -16,4 +16,5 @@ public enum HttpStatus {
     HttpStatus(int value) {
         this.value = value;
     }
+    
 }

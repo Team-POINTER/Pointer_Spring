@@ -1,11 +1,18 @@
 package pointer.Pointer_Spring.room.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
+import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
+import pointer.Pointer_Spring.user.domain.User;
 
 public class RoomDto {
+    @Data
+    public static class FindRoomRequest{
+        Long userId;
+    }
 
     @Data
     public static class ListResponse {
@@ -22,28 +29,27 @@ public class RoomDto {
 
         Long roomId;
         String roomNm;
-        String questionNm;
+        String question;
         int memberCnt;
-        String firstNm;
+        //String firstNm;
 
-        public ListRoom(Room room) {
-            this.roomId = room.getRoomId();
-            this.roomNm = room.getName();
+        public ListRoom(RoomMember roomMember) {
+            this.roomId = roomMember.getRoom().getRoomId();
+            this.roomNm = roomMember.getPrivateRoomNm();
         }
 
         public void setRoomInfo() {
-            this.questionNm = questionNm;
+            this.question = question;
             this.memberCnt = memberCnt;
-            this.firstNm = firstNm;
+            //this.firstNm = firstNm;
         }
     }
 
 
     @Data
     public static class CreateRequest {
-
         Long userId;
-        String roomNm;
+        String roomNm;//roomName
     }
 
     @Data
@@ -66,18 +72,43 @@ public class RoomDto {
 
         Long roomId;
         String roomNm;
+        private Integer memberNum;
+        private Integer votingNum;
+        LocalDateTime updatedAt;
+        private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room) {
+        public DetailResponse(Room room, List<RoomMemberResopnose> roomMembers) {
             this.roomId = room.getRoomId();
-            this.roomNm = room.getName();
+            this.roomNm = room.getName(); // defaultname
+            this.memberNum = room.getMemberNum();
+            this.votingNum = room.getVotingNum();
+            this.updatedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.roomMembers = roomMembers;
         }
+    }
+    @Data
+    public static class RoomMemberResopnose{//나중에 token으로 user 구분 시 없애기
+        Long userId;
+        String id;
+        String name;
+        String privateRoomNm;
+        public RoomMemberResopnose(RoomMember roomMember){
+            this.userId = roomMember.getUser().getUserId();
+            this.id = roomMember.getUser().getId();
+            this.name = roomMember.getUser().getName();
+            this.privateRoomNm = roomMember.getPrivateRoomNm();
+        }
+    }
+    @Data
+    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
+        Long userId;//user 고유 string id
     }
 
     @Data
     public static class InviteRequest {
-
+        Long userId;//초대하는 유저
         Long roomId;
-        Long[] userIdArr;
+        List<Long> userFriendIdList;
     }
 
     @Data
@@ -105,6 +136,40 @@ public class RoomDto {
             this.userId = roomMember.getUser().getUserId();
             this.nickNm = roomMember.getUser().getName();
         }
+    }
+
+    @Data
+    public static class IsInviteMember{
+        boolean isInvite;
+        public enum Reason{
+            INVITE, OVERLIMIT, ALREADY
+        }
+        Reason reason;
+        Long userId;
+        String nickNm;
+        LocalDateTime updateAt;
+
+        public IsInviteMember( User user, Friend f) {
+            this.isInvite = true;
+            this.userId = user.getUserId();
+            this.nickNm = f.getUserFriendName();
+            this.reason = Reason.INVITE;
+            this.updateAt = f.getUpdatedAt();
+        }
+        public void updateIsInvite(boolean isInvite, Reason reason){
+            this.isInvite = isInvite;
+            this.reason = reason;
+        }
+    }
+
+    @Data
+    public static class InviteMemberResponse{
+        List<IsInviteMember> isInviteMembers;
+
+        public InviteMemberResponse(List<IsInviteMember> isInviteMembers) {
+            this.isInviteMembers = isInviteMembers;
+        }
+
     }
 
 }

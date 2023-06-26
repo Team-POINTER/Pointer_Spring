@@ -2,24 +2,34 @@ package pointer.Pointer_Spring.room.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import pointer.Pointer_Spring.room.domain.Room;
+import pointer.Pointer_Spring.room.domain.RoomMember;
+import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
-import pointer.Pointer_Spring.room.dto.RoomDto.CreateResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteRequest;
-import pointer.Pointer_Spring.room.dto.RoomDto.InviteResponse;
+import pointer.Pointer_Spring.room.dto.RoomDto.InviteMemberResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.ListResponse;
+import pointer.Pointer_Spring.room.dto.RoomMemberDto;
+import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
+import pointer.Pointer_Spring.room.response.ResponseRoom;
+
+import java.util.List;
 
 public interface RoomService {
-
-    ListResponse getRoomList(HttpServletRequest request);
+    ListResponse getRoomList(RoomDto.FindRoomRequest dto, String kwd, HttpServletRequest request);
 
     DetailResponse getRoom(Long roomId, HttpServletRequest request);
+//    DetailResponse getRooms(user user, HttpServletRequest request);//검색까지
+//    void modifyRoomInfo(Long roomId);
 
-    CreateResponse createRoom(CreateRequest dto, HttpServletRequest request);
+    ResponseRoom createRoom(CreateRequest dto, HttpServletRequest request);
+    ResponseMemberRoom updateRoomNm(RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
+    ResponseRoom exitRoom(Long roomId, RoomDto.ExitRequest dto);
 
-    InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
+    //InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
+    List<RoomDto.RoomMemberResopnose> getInviteMembers(Long roomId);
+    ResponseRoom inviteMembers(InviteRequest dto, HttpServletRequest request);
+    List<RoomDto.IsInviteMember> isInviteMembersList(Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request);
 
-    Object findLink(Long roomId);
-    Object findRoom(String invitation);
+    //Object findLink(Long roomId);
 }

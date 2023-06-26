@@ -25,6 +25,7 @@ public class Friend extends BaseEntity {
     @Column(name = "user_friend_name", nullable = false)
     private String userFriendName;
 
+
     @Column(name = "user_friend_id", nullable = false)
     private Long userFriendId;
 
@@ -50,3 +51,5 @@ public class Friend extends BaseEntity {
     }
 
 }
+
+

@@ -57,7 +57,7 @@ public class QuestionService {
 
         Question question = Question.builder()
                 .room(room)
-                .user(user)
+                .creatorId(user.getUserId())
                 .question(request.getContent())
                 .build();
 
@@ -159,9 +159,9 @@ public class QuestionService {
             throw new RuntimeException("질문 조회에 실패했습니다.");
         });
 
-        if(question.getUser().getUserId() != user.getUserId()) {
-            throw new RuntimeException("질문 수정 권한이 없습니다.");
-        }
+//        if(question.getUser().getUserId() != user.getUserId()) {
+//            throw new RuntimeException("질문 수정 권한이 없습니다.");
+//        }
 
         question.modify(request.getContent());
     }
@@ -175,9 +175,9 @@ public class QuestionService {
             throw new RuntimeException("질문 조회에 실패했습니다.");
         });
 
-        if(question.getUser().getUserId() != user.getUserId()) {
-            throw new RuntimeException("질문 삭제 권한이 없습니다.");
-        }
+//        if(question.getUser().getUserId() != user.getUserId()) {
+//            throw new RuntimeException("질문 삭제 권한이 없습니다.");
+//        }
 
         questionRepository.delete(question);
     }

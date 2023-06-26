@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.room.domain.Room;
-import pointer.Pointer_Spring.user.domain.User;
 
 import javax.persistence.*;
 
@@ -24,16 +23,19 @@ public class Question extends BaseEntity {
     @JoinColumn(name = "Room_room_id")
     private Room room;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creater_id")
-    private User user;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "creater_id")
+//    private User user;
+    @Column(name = "creater_id", unique = true)//연관관계 맵핑 안 함
+    private Long creatorId;
 
     private String question;
 
     @Builder
-    public Question(Room room, User user, String question) {
+    public Question(Room room, Long creatorId, String question) {
         this.room = room;
-        this.user = user;
+        this.creatorId = creatorId;
         this.question = question;
     }
 

@@ -10,22 +10,20 @@ import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "user")
+@Entity(name = "User")
 public class User extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id", unique = true)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String id;
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(name = "name", nullable = false)
     private String name;
-
     private String password;
 
 
@@ -40,7 +38,6 @@ public class User extends BaseEntity {
     public enum Role {
         USER, ADMIN
     }
-
     @Enumerated(EnumType.ORDINAL)
     private Role role;
     @Column(name = "service_agree")
@@ -49,6 +46,9 @@ public class User extends BaseEntity {
     private boolean serviceAge;
     @Column(name = "marketing")
     private boolean marketing;
+
+    @Column(name = "room_limit")
+    private Integer roomLimit;
 
     @Column(length = 1000)
     private String token;
@@ -92,4 +92,9 @@ public class User extends BaseEntity {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public void updateRoomLimit(Integer roomLimit) {
+        this.roomLimit = roomLimit;
+    }
+
 }

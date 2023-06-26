@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.room.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import pointer.Pointer_Spring.config.ResponseType;
@@ -11,22 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Schema(name = "ResponseRoom", description = "ResponseRoom")
 public class ResponseRoom extends ResponseType {
 
-    private Long roomId;
-    private String roomNm;
-    private List<String> friends;
+//    private Long roomId;
+//    private String roomNm;
+//    private Integer memberNum;
+//    private Integer votingNum;
+//    private List<RoomMember> roomMembers;
+    Object data;
 
-
-    public ResponseRoom(ExceptionCode exceptionCode, Room room, List<RoomMember> members) {
+    public ResponseRoom(ExceptionCode exceptionCode, Object data){
         super(exceptionCode);
-        this.roomId = room.getRoomId();
-        this.roomNm = room.getName();
-
-        friends = new ArrayList<>();
-        for (RoomMember member : members) {
-            friends.add(member.getUser().getName());
-        }
+        this.data = data;
+    }
+    public ResponseRoom(ExceptionCode exceptionCode){
+        super(exceptionCode);
     }
 
 }
