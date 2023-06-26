@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.question.service;
 
 import org.springframework.stereotype.Service;
+import pointer.Pointer_Spring.common.exception.DynamicException;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
@@ -76,7 +77,7 @@ public class QuestionService {
 
             if(now.isBefore(prevQuestion.getCreatedAt().plusDays(1))) {
                 int roomMemberCount = roomMemberRepository.countByRoom(prevQuestion.getRoom());
-                int voteCount = voteRepository.countDistinctUsersByQuestion(prevQuestion);
+                int voteCount = voteRepository.countDistinctUserByQuestion(prevQuestion);
 
                 if(roomMemberCount == voteCount) {
                     prevQuestion.setCreatedAt(now);
@@ -120,11 +121,11 @@ public class QuestionService {
 
     public List<QuestionDto.GetResponse> getQuestions(Long userId, Long roomId) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
-            throw new RuntimeException("유저 조회에 실패했습니다.");
+            throw new DynamicException("유저 조회에 실패했습니다.");
         });
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> {
-            throw new RuntimeException("방 조회에 실패했습니다.");
+            throw new DynamicException("방 조회에 실패했습니다.");
         });
 
         List<Question> questions = questionRepository.findAllByRoomOrderByCreatedAtDesc(room);
@@ -133,7 +134,7 @@ public class QuestionService {
             //int roomMemberCount = roomMemberRepository.countByRoom(room);
             //int voteCount = voteRepository.countDistinctUsersByQuestion(question);
             int allVoteCount = voteRepository.countByQuestion(question);
-            int voteCount = voteRepository.countByCandidate(user);
+            int voteCount = voteRepository.countByCandidateAndQuestion(user, question);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
@@ -165,6 +166,7 @@ public class QuestionService {
         question.modify(request.getContent());
     }
 
+    @Transactional
     public void deleteQuestion(Long userId, Long questionId) {
         User user = userRepository.findById(userId).orElseThrow(() -> {
             throw new RuntimeException("유저 조회에 실패했습니다.");
