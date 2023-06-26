@@ -45,9 +45,9 @@ public class SwaggerConfig {
                 .securitySchemes(Arrays.asList(apiKey()))
                 .additionalModels(typeResolver.resolve(SwaggerTestDto.class))
                 .useDefaultResponseMessages(false)
-                .groupName("test1Api")//api 여러개일 때 지정
+                .groupName("room")//api 여러개일 때 지정
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("pointer.Pointer_Spring.swagger"))//pagkage명과 동일
+                .apis(RequestHandlerSelectors.basePackage("pointer.Pointer_Spring.room"))//pagkage명과 동일
                 .paths(PathSelectors.any())//전체 API에 대한 문서를 Swagger를 통해 나타낼 수 있다.
                 .build()
                 .apiInfo(apiInfo());
