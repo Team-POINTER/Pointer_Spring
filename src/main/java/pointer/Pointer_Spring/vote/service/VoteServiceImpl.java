@@ -117,7 +117,7 @@ public class VoteServiceImpl implements VoteService {
         }
 
         // 투표안한 유저 개수
-        int votedUserCnt = voteRepository.countDistinctUsersByQuestion(question);
+        int votedUserCnt = voteRepository.countDistinctUserByQuestion(question);
         int notVotedCnt = roomMembers.size() - votedUserCnt;
 
         return VoteDto.GetResponse.builder()
