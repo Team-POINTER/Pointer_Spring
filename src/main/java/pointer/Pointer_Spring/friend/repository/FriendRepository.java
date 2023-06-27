@@ -25,7 +25,6 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Long countByUserUserIdAndRelationshipNotAndStatus(Long userUserId, Friend.Relation relation, int status);
     Long countByUserUserIdAndRelationshipAndStatus(Long userUserId, Friend.Relation relation, int status);
 
-    List<Friend> findAllByUserUserIdAndStatus(Long userUserId, int status);
     Optional<Friend> findByUserUserIdAndUserFriendIdAndStatus(Long userUserId, Long userFriendId, int status);
     Optional<Friend> findByUserUserIdAndUserFriendIdAndRelationshipNotAndStatus(Long userUserId, Long userFriendId, Friend.Relation relation, int status);
     Friend save(Friend friend);

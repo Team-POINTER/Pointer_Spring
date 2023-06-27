@@ -24,7 +24,7 @@ public class FriendController {
 
     @GetMapping("/friend") // 친구 목록 조회
     public FriendDto.FriendInfoListResponse getFriendList(@RequestBody FriendDto.FriendUserDto dto,
-                                                        HttpServletRequest request) {
+                                                          HttpServletRequest request) {
         return friendService.getFriendList(dto, request);
     }
 
@@ -33,19 +33,18 @@ public class FriendController {
     @PostMapping("/friend/request") // 친구 요청
     public Object requestFriend(@RequestBody FriendDto.RequestFriendDto dto,
                                 HttpServletRequest request) {
-        System.out.println("dto.getUserId() + \" \"+  dto.getMemberId() = " + dto.getUserId() + " "+  dto.getMemberId());
         return friendService.requestFriend(dto, request);
     }
 
     @PostMapping("/friend/accept") // 친구 수락
     public Object acceptFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                                HttpServletRequest request) {
+                               HttpServletRequest request) {
         return friendService.acceptFriend(dto, request);
     }
 
     @PutMapping("/friend/request") // 친구 요청 취소
     public Object cancelRequestFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                                HttpServletRequest request) {
+                                      HttpServletRequest request) {
         return friendService.cancelRequest(dto, request);
     }
 
@@ -59,7 +58,7 @@ public class FriendController {
 
     @PostMapping("/friend/refuse") // 친구 거절 : 알림 삭제
     public Object refuseFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                                HttpServletRequest request) {
+                               HttpServletRequest request) {
         return friendService.refuseFriend(dto, request);
     }
 
@@ -67,13 +66,13 @@ public class FriendController {
 
     @GetMapping("/friend/block") // 차단 친구 조회
     public FriendDto.FriendInfoListResponse getRefuseFriendList(@RequestBody FriendDto.FriendUserDto dto,
-                                                          HttpServletRequest request) {
+                                                                HttpServletRequest request) {
         return friendService.getBlockFriendList(dto, request);
     }
 
     @PostMapping("/friend/block") // 차단
     public Object getBlockFriendList(@RequestBody FriendDto.RequestFriendDto dto,
-                                                                HttpServletRequest request) {
+                                     HttpServletRequest request) {
         return friendService.blockFriend(dto, request);
     }
 

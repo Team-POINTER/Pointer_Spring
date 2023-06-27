@@ -24,6 +24,7 @@ public enum ExceptionCode {
      */
     USER_GET_OK(SUCCESS, "C000", "회원정보 있음"),
     USER_NOT_FOUND(NOT_FOUND_VALUE, "C001", "회원정보 없음"),
+    USER_FRIEND_NOT_FOUND(NOT_FOUND_VALUE, "C002", "상대 회원정보 없음"),
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),

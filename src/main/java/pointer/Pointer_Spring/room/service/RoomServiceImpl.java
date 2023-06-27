@@ -49,11 +49,11 @@ public class RoomServiceImpl implements RoomService {
         //List<RoomMember> roomList = new ArrayList<>();
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         if (kwd == null) {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), 1)
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1)
                     .stream()
                     .map(RoomDto.ListRoom::new).toList();
         } else {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdateAtAsc(dto.getUserId(), 1).stream()
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
                     .filter(roomMember -> {
                         Room room = roomMember.getRoom();
                         Optional<Question> latestQuestion = room.getQuestions().stream()

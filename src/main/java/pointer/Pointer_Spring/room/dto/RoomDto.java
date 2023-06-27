@@ -152,7 +152,7 @@ public class RoomDto {
         public IsInviteMember( User user, Friend f) {
             this.isInvite = true;
             this.userId = user.getUserId();
-            this.nickNm = f.getUserFriendName();
+            this.nickNm = f.getFriendName();
             this.reason = Reason.INVITE;
             this.updateAt = f.getUpdatedAt();
         }

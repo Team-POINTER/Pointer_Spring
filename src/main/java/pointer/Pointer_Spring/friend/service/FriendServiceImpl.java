@@ -14,6 +14,7 @@ import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
+import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,24 +34,24 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final Integer STATUS = 1;
-    private final Integer PAGECOUNT = 30;
+    private final Integer PAGE_COUNT = 30;
     private final Image.ImageType PROFILE_TYPE = Image.ImageType.PROFILE;
 
     // 친구 요청, 취소만 알림 -> 친구 성공시, 알림 갱신
     private List<User> fetchPagesOffsetUser(FriendDto.FindFriendDto findFriendDto){
-        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGECOUNT, Sort.by("userId"));
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("userId"));
         return userRepository.findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
                 (findFriendDto.getKeyword(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetFriend(FriendDto.FriendUserDto dto){
-        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userFriendName"));
+        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGE_COUNT, Sort.by("friendName"));
         return friendRepository.findAllByUserUserIdAndRelationshipNotAndStatus
                 (dto.getUserId(), Friend.Relation.BLOCK, STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetBlock(FriendDto.FriendUserDto dto){
-        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGECOUNT, Sort.by("userFriendName"));
+        PageRequest pageRequest = PageRequest.of(dto.getLastPage(), PAGE_COUNT, Sort.by("friendName"));
         return friendRepository.findAllByUserUserIdAndRelationshipAndStatus
                 (dto.getUserId(), Friend.Relation.BLOCK, STATUS, pageRequest);
     }
@@ -85,7 +86,7 @@ public class FriendServiceImpl implements FriendService {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
             User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                     }
             );
 
@@ -123,13 +124,13 @@ public class FriendServiceImpl implements FriendService {
         for (Friend friend : friendList) {
             User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                     }
             );
 
             User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                     }
             );
 
@@ -137,7 +138,7 @@ public class FriendServiceImpl implements FriendService {
 
             if (image.isPresent()) {
                 friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK)
-                        .setFile(image.get().getImageUrl()));
+                        .setFile(image.get().getImageUrl()));throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
             } else {
                 friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK));
             }
@@ -169,13 +170,13 @@ public class FriendServiceImpl implements FriendService {
         if (findFriendUser.isEmpty()) { // 요청 삭제 -> 요청
             User user = userRepository.findByUserIdAndStatus(dto.getUserId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                     }
             );
 
             User friend = userRepository.findByUserIdAndStatus(dto.getMemberId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                     }
             );
 
@@ -207,12 +208,12 @@ public class FriendServiceImpl implements FriendService {
     public ResponseFriend acceptFriend(FriendDto.RequestFriendDto dto, HttpServletRequest request) {
         Friend findFriendUser = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getUserId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
         Friend findFriendMember = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getMemberId(), dto.getUserId(), STATUS)
                 .orElseThrow(() -> {
-                            throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                 });
 
         if (findFriendUser.getRelationship().equals(Friend.Relation.REQUESTED)) { // 수락
@@ -229,7 +230,7 @@ public class FriendServiceImpl implements FriendService {
     public ResponseFriend refuseFriend(FriendDto.RequestFriendDto dto, HttpServletRequest request) {
         Friend findFriend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getUserId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
         /*if (findFriend.getRelationship().equals(Friend.Relation.REQUEST)) { // 관계 존재
             // 보낸 친구 요청 알림 삭제
@@ -248,13 +249,13 @@ public class FriendServiceImpl implements FriendService {
         } else {
             User user = userRepository.findByUserIdAndStatus(dto.getUserId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                     }
             );
 
             User friend = userRepository.findByUserIdAndStatus(dto.getMemberId(), STATUS).orElseThrow(
                     () -> {
-                        throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                     }
             );
 
@@ -272,12 +273,12 @@ public class FriendServiceImpl implements FriendService {
     public ResponseFriend cancelRequest(FriendDto.RequestFriendDto dto, HttpServletRequest request) {
         Friend findFriendUser = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getUserId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
         Friend findFriendMember = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getMemberId(), dto.getUserId(), STATUS)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("상대 유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                 });
 
         if (findFriendUser.getRelationship().equals(Friend.Relation.REQUEST)) {
@@ -296,7 +297,7 @@ public class FriendServiceImpl implements FriendService {
         Friend findFriendUser = friendRepository
                 .findByUserUserIdAndUserFriendIdAndRelationshipNotAndStatus(dto.getUserId(), dto.getMemberId(), Friend.Relation.BLOCK, STATUS)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저를 조회할 수 없습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
         Optional<Friend> findFriendMember = friendRepository

@@ -67,9 +67,9 @@ public class FriendDto {
         Friend.Relation relationship;
 
         public FriendInfoList(Friend friend, User user, Friend.Relation relationship) {
-            this.friendId = friend.getId();
+            this.friendId = user.getUserId();
             this.id = user.getId();
-            this.friendName = friend.getUserFriendName();
+            this.friendName = friend.getFriendName();
             this.relationship = relationship;
         }
 

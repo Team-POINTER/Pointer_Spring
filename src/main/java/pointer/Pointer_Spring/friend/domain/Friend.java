@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name = "friend")
+@Entity(name = "Friend")
 public class Friend extends BaseEntity {
 
     @Id
@@ -22,8 +22,8 @@ public class Friend extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @Column(name = "user_friend_name", nullable = false)
-    private String userFriendName;
+    @Column(name = "friend_name", nullable = false)
+    private String friendName;
 
 
     @Column(name = "user_friend_id", nullable = false)
@@ -45,7 +45,7 @@ public class Friend extends BaseEntity {
     @Builder
     public Friend(User user, User friend, Relation relationship) {
         this.user = user;
-        this.userFriendName = friend.getName();
+        this.friendName = friend.getName();
         this.userFriendId = friend.getUserId();
         this.relationship = relationship;
     }
