@@ -74,7 +74,7 @@ public class RoomDto {
         String roomNm;
         private Integer memberNum;
         private Integer votingNum;
-        LocalDateTime updatedAt;
+        LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
         public DetailResponse(Room room, List<RoomMemberResopnose> roomMembers) {
@@ -82,7 +82,7 @@ public class RoomDto {
             this.roomNm = room.getName(); // defaultname
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
-            this.updatedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
             this.roomMembers = roomMembers;
         }
     }
