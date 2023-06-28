@@ -91,6 +91,14 @@ public enum ExceptionCode {
     ROOM_NAME_INVITATION(SUCCESS, "J008", "초대 성공"),
     ROOMMEMBER_DUPLICATE_VALUE(INVALID_ACCESS, "J009", "sql 룸 멤버 중복 에러"),
 
+    /**
+     * 질문
+     */
+    QUESTION_CREATED_FAILED(INVALID_ACCESS, "K000", "질문 생성 실패"),
+    CURRENT_QUESTION_NOT_FOUND(INVALID_ACCESS, "K001", "현재 질문이 없습니다."),
+    QUESTION_NOT_FOUND(INVALID_ACCESS, "K002", "질문이 없습니다."),
+    QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
+    QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
 
     /**
      * 잘못된 ExceptionCode

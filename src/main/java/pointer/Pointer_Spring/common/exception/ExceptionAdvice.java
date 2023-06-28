@@ -33,19 +33,4 @@ public class ExceptionAdvice {
 
     }
 
-    @ExceptionHandler(DynamicException.class)
-    public ResponseEntity<ErrorResponse> userNotFound(DynamicException e) {
-        int statusCode = e.getStatusCode();
-
-        ErrorResponse body = ErrorResponse.builder()
-                .code(String.valueOf(statusCode))
-                .message(e.getMessage())
-                .build();
-
-
-        ResponseEntity<ErrorResponse> response = ResponseEntity.status(statusCode)
-                .body(body);
-
-        return response;
-    }
 }
