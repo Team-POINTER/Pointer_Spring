@@ -5,9 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
-import pointer.Pointer_Spring.question.domain.Question;
-import pointer.Pointer_Spring.room.domain.Room;
-import pointer.Pointer_Spring.user.domain.User;
 
 import javax.persistence.*;
 
@@ -21,21 +18,21 @@ public class VoteHistory extends BaseEntity {
     @Column(name = "vote_history_id", unique = true)
     private Long voteHistoryId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
-    private Room room;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "room_id")
+    private Long roomId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private User user;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "member_id")
+    private Long memberId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id")
-    private Question question;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "question_id")
+    private Long questionId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id")
-    private User candidate;
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "candidate_id")
+    private Long candidateId;
 
     @Column(name = "candidate_name")
     private String candidateName;
@@ -48,13 +45,13 @@ public class VoteHistory extends BaseEntity {
 //    private VoteStatus status;
 
     @Builder
-    public VoteHistory(Room room, User user, User candidate, Question question, String candidateName, String hint) {
-        this.room = room;
-        this.user = user;
-        this.candidate = candidate;
+    public VoteHistory(Long roomId, Long memberId, Long questionId, Long candidateId, String candidateName, String hint) {
+        this.roomId = roomId;
+        this.memberId = memberId;
+        this.questionId = questionId;
+        this.candidateId = candidateId;
         this.candidateName = candidateName;
         this.hint = hint;
-        this.question = question;
     }
 
 }

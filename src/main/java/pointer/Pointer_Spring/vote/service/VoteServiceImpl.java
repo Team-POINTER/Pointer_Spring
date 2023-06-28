@@ -61,9 +61,9 @@ public class VoteServiceImpl implements VoteService {
                     });
 
             VoteHistory vote = VoteHistory.builder()
-                    .question(question)
-                    .user(user)
-                    .candidate(voteUser)
+                    .questionId(dto.getQuestionId())
+                    .memberId(dto.getUserId())
+                    .candidateId(userId)
                     .candidateName(voteUser.getName())
                     .hint(dto.getHint())
                     .build();
@@ -93,8 +93,8 @@ public class VoteServiceImpl implements VoteService {
         });
 
         // 해당 유저 정보 조회
-        int allVoteCnt = voteRepository.countByQuestion(question);
-        int targetVotedCnt = voteRepository.countByQuestionAndCandidate(question, user);
+        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
+        int targetVotedCnt = voteRepository.countByQuestionIdAndCandidateId(question.getId(), user.getUserId());
         VoteDto.GetMemberResponse targetUser = VoteDto.GetMemberResponse.builder()
                 .userId(user.getUserId())
                 .userName(user.getName())
@@ -108,7 +108,7 @@ public class VoteServiceImpl implements VoteService {
         List<VoteDto.GetMemberResponse> memberResponses = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
-            int votedCnt = voteRepository.countByQuestionAndCandidate(question, member);
+            int votedCnt = voteRepository.countByQuestionIdAndCandidateId(question.getId(), member.getUserId());
             memberResponses.add(VoteDto.GetMemberResponse.builder()
                     .userId(member.getUserId())
                     .userName(member.getName())
@@ -118,8 +118,11 @@ public class VoteServiceImpl implements VoteService {
         }
 
         // 투표안한 유저 개수
-        int votedUserCnt = voteRepository.countDistinctUserByQuestion(question);
+        int votedUserCnt = voteRepository.countDistinctUserByQuestion(question.getId());
         int notVotedCnt = roomMembers.size() - votedUserCnt;
+
+        System.out.println(roomMembers.size());
+        System.out.println(votedUserCnt);
 
         return VoteDto.GetResponse.builder()
                 .members(memberResponses)
@@ -140,7 +143,7 @@ public class VoteServiceImpl implements VoteService {
         List<VoteDto.GetNotVotedMember> notVotedMembers = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
-            boolean vote = voteRepository.existsByUser(member);
+            boolean vote = voteRepository.existsByMemberId(member.getUserId());
             if (!vote) {
                 notVotedMembers.add(VoteDto.GetNotVotedMember.builder()
                         .userId(member.getUserId())
@@ -163,8 +166,8 @@ public class VoteServiceImpl implements VoteService {
         });
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
-        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionAndCandidate(question, user);
-        int allVoteCnt = voteRepository.countByQuestion(question);
+        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());
+        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
         List<String> hints = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
             hints.add(vote.getHint());
