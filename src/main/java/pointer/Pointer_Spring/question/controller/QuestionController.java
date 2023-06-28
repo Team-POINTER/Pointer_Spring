@@ -3,7 +3,7 @@ package pointer.Pointer_Spring.question.controller;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
-import pointer.Pointer_Spring.question.service.QuestionService;
+import pointer.Pointer_Spring.question.service.QuestionServiceImpl;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.List;
 @RequestMapping("/questions")
 public class QuestionController {
 
-    private final QuestionService questionService;
+    private final QuestionServiceImpl questionService;
 
-    public QuestionController(QuestionService questionService) {
+    public QuestionController(QuestionServiceImpl questionService) {
         this.questionService = questionService;
     }
 

@@ -2,13 +2,14 @@ package pointer.Pointer_Spring.vote.service;
 
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.question.domain.Question;
-import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
+import pointer.Pointer_Spring.validation.CustomException;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 import pointer.Pointer_Spring.vote.domain.VoteHistory;
 import pointer.Pointer_Spring.vote.dto.VoteDto;
 import pointer.Pointer_Spring.vote.repository.VoteRepository;
@@ -41,13 +42,13 @@ public class VoteServiceImpl implements VoteService {
         // 질문 validation
         Question question = questionRepository.findById(dto.getQuestionId())
                 .orElseThrow(() -> {
-                    throw new RuntimeException("질문 조회에 실패했습니다.");
+                    throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
                 });
 
         // 유저 validation check
         User user = userRepository.findByUserId(dto.getUserId())
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저 조회에 실패했습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
         // 투표 생성
@@ -56,7 +57,7 @@ public class VoteServiceImpl implements VoteService {
             // 유저 validation check
             User voteUser = userRepository.findByUserId(userId)
                     .orElseThrow(() -> {
-                        throw new RuntimeException("유저 조회에 실패했습니다.");
+                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                     });
 
             VoteHistory vote = VoteHistory.builder()
@@ -85,10 +86,10 @@ public class VoteServiceImpl implements VoteService {
         // 유저 validation check
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저 조회에 실패했습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
         Question question = questionRepository.findById(questionId).orElseThrow(() -> {
-            throw new RuntimeException("질문 조회에 실패했습니다.");
+            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
 
         // 해당 유저 정보 조회
@@ -132,7 +133,7 @@ public class VoteServiceImpl implements VoteService {
     @Override
     public List<VoteDto.GetNotVotedMember> getNotVotedMember(Long questionId) {
         Question question = questionRepository.findById(questionId).orElseThrow(() -> {
-            throw new RuntimeException("질문 조회에 실패했습니다.");
+            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
         // 쿼리문 변경 예정
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
@@ -155,10 +156,10 @@ public class VoteServiceImpl implements VoteService {
     public VoteDto.GetHintResponse getHintResponse(Long userId, Long questionId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> {
-                    throw new RuntimeException("유저 조회에 실패했습니다.");
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
         Question question = questionRepository.findById(questionId).orElseThrow(() -> {
-            throw new RuntimeException("질문 조회에 실패했습니다.");
+            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
