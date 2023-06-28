@@ -84,7 +84,7 @@ public class QuestionServiceImpl implements QuestionService {
 
             if(now.isBefore(prevQuestion.getCreatedAt().plusDays(1))) {
                 int roomMemberCount = roomMemberRepository.countByRoom(prevQuestion.getRoom());
-                int voteCount = voteRepository.countDistinctUserByQuestion(prevQuestion);
+                int voteCount = voteRepository.countDistinctUserByQuestion(prevQuestion.getId());
 
                 if(roomMemberCount == voteCount) {
                     prevQuestion.setCreatedAt(now);
@@ -109,7 +109,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.CURRENT_QUESTION_NOT_FOUND);
         });
 
-        boolean isVoted = voteRepository.existsByUserUserIdAndQuestion(userId, currentQuestion);
+        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, currentQuestion.getId());
 
         List<QuestionDto.GetMemberResponse> roomMembers = roomMemberRepository.findAllByRoom(room).stream()
                 .map((m) -> QuestionDto.GetMemberResponse.builder()
@@ -142,8 +142,8 @@ public class QuestionServiceImpl implements QuestionService {
         for(Question question : questions) {
             //int roomMemberCount = roomMemberRepository.countByRoom(room);
             //int voteCount = voteRepository.countDistinctUsersByQuestion(question);
-            int allVoteCount = voteRepository.countByQuestion(question);
-            int voteCount = voteRepository.countByCandidateAndQuestion(user, question);
+            int allVoteCount = voteRepository.countByQuestionId(question.getId());
+            int voteCount = voteRepository.countByCandidateIdAndQuestionId(user.getUserId(), question.getId());
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 

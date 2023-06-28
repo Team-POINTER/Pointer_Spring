@@ -11,17 +11,17 @@ import java.util.List;
 public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
 
     @Query(value = "select count(distinct member_id) from VotingHistory where question_id = ?1", nativeQuery = true)
-    int countDistinctUserByQuestion(Question question);
+    int countDistinctUserByQuestion(Long questionId);
 
-    boolean existsByUserUserIdAndQuestion(Long userId, Question currentQuestion);
+    boolean existsByMemberIdAndQuestionId(Long userId, Long currentQuestionId);
 
-    int countByQuestion(Question question);
+    int countByQuestionId(Long questionId);
 
-    int countByCandidateAndQuestion(User user, Question question);
+    int countByCandidateIdAndQuestionId(Long userId, Long questionId);
 
-    boolean existsByUser(User member);
+    boolean existsByMemberId(Long memberId);
 
-    int countByQuestionAndCandidate(Question question, User member);
+    int countByQuestionIdAndCandidateId(Long questionId, Long userId);
 
-    List<VoteHistory> findAllByQuestionAndCandidate(Question question, User user);
+    List<VoteHistory> findAllByQuestionIdAndCandidateId(Long questionId, Long userId);
 }
