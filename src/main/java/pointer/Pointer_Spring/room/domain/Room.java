@@ -36,13 +36,13 @@ public class Room extends BaseEntity {
     @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
     private Long creatorId;
 
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();
     public void updateMemberNum(Integer memberNum){
         this.memberNum = memberNum;
     }
 
-    //private String invitation;
 
     @Builder
     public Room(Long creatorId, String name) {
@@ -52,8 +52,5 @@ public class Room extends BaseEntity {
         this.votingNum = 0;
     }
 
-    //public void setInvitation(String invitation) {
-//        this.invitation = invitation;
-//    }
 
 }
