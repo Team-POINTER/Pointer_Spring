@@ -28,7 +28,9 @@ public enum ExceptionCode {
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),
-
+    USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),
+    BACKGROUND_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D003", "배경 사진 수정 실패"),
+    IMAGE_INVALID(INVALID_ACCESS, "D004", "유효하지 않은 파일"),
     /**
      * 채팅
      */
