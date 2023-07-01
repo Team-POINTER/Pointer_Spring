@@ -45,16 +45,22 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         ));
     }
     @Override
-    public void uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {//이미지 업로드(수정)
+    public String uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {//이미지 업로드(수정)
          if(!userRepository.existsById(userId)){
              throw new CustomException(ExceptionCode.USER_NOT_FOUND);
          }
-        String fileNm = uploadImageInCloudinary(userId, multipartFile);
-        uploadImage(userId, fileNm, ImageType.PROFILE);
+        String publicId = uploadImageInCloudinary(userId, "profile-photos", multipartFile);
+        String extension = checkExtension(multipartFile);
+        return uploadImage(userId, publicId, extension, ImageType.PROFILE);
     }
 
-    public void uploadBackgroundImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {
-
+    public String uploadBackgroundImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {
+        if(!userRepository.existsById(userId)){
+            throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+        }
+        String publicId = uploadImageInCloudinary(userId, "background-photos", multipartFile);
+        String extension = checkExtension(multipartFile);
+        return uploadImage(userId, publicId, extension, ImageType.BACKGROUND);
     }
     public String getImage(Long userId){
         //imageRepository.
@@ -66,32 +72,35 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     }
 
 
-    private String uploadImageInCloudinary(Long userId, @NonNull MultipartFile multipartFile) throws IOException{
-        if (multipartFile.isEmpty()) {
-            throw new CustomException(ExceptionCode.USER_IMAGE_UPDATE_INVALID);
-        }
-
-        String extension = checkExtension(multipartFile);
-        String fileNm = userId.toString() + "_" + UUID.randomUUID().toString() + extension;
+    private String uploadImageInCloudinary(Long userId, String folderNm, @NonNull MultipartFile multipartFile) throws IOException{
+        String fileNm = userId.toString() + "_" + UUID.randomUUID().toString();
 
         Map<String, Object> params = new HashMap<>();
-        params.put("folder", "profile-photos"); // 프로필 사진을 저장할 폴더
+        params.put("folder", folderNm); // 프로필 사진을 저장할 폴더
         params.put("public_id", fileNm); // 파일의 고유 ID
 
-        cloudinary.uploader().upload(multipartFile.getBytes(), params); //public_id는 매개변수 이름, 뒤의 값이 저장될 이미지 이름
-
-        return fileNm;
+        // 이미지 업로드
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(multipartFile.getBytes(), params); //public_id는 매개변수 이름, 뒤의 값이 저장될 이미지 이름
+        // 업로드 응답에서 public_id 가져오기
+        String publicId = uploadResult.get("public_id").toString();
+        return publicId;
     }
-    private void uploadImage(Long userId, String fileNm, ImageType imageType) {
-        String imageUrl = cloudinary.url().generate(fileNm);
+    private String uploadImage(Long userId, String publicId, String extension, ImageType imageType) {
+
+        String imageUrl = cloudinary.url().generate(publicId) + extension;
 
         Image image = new Image(imageUrl, imageType, userRepository.findById(userId).get());
         imageRepository.save(image);
+
+        return imageUrl;
     }
     private void deleteImage(){
 
     }
     private String checkExtension(MultipartFile multipartFile){
+        if (multipartFile.isEmpty()) {
+            throw new CustomException(ExceptionCode.USER_IMAGE_UPDATE_INVALID);
+        }
 
         String contentName = multipartFile.getOriginalFilename();
         String originalFileExtension;

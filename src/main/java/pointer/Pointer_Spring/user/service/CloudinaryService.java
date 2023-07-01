@@ -7,5 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface CloudinaryService {
-    void uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException;
+    String uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException;
+    String uploadBackgroundImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException;
 }

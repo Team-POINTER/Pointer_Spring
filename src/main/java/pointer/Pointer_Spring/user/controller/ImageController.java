@@ -16,10 +16,14 @@ public class ImageController {
 
 
     @PostMapping("{userId}/upload/profile")
-    public String uploadFile(@PathVariable Long userId,  @RequestParam("image") MultipartFile image) throws IOException {
-        cloudinaryService.uploadProfileImage(userId, image);
-        // 업로드된 파일의 공개 URL 반환
-        return "fileUrl";
+    public String uploadProfileImage(@PathVariable Long userId,  @RequestParam("image") MultipartFile image) throws IOException {
+        return cloudinaryService.uploadProfileImage(userId, image);
+
+    }
+
+    @PostMapping("{userId}/upload/background")
+    public String uploadBackgroundImage(@PathVariable Long userId,  @RequestParam("image") MultipartFile image) throws IOException {
+        return cloudinaryService.uploadBackgroundImage(userId, image);
     }
 
 }
