@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Long> {
     Image save(Image image);
     Optional<Image> findByUserUserIdAndImageSortAndStatus(Long userUserId, Image.ImageType imageSort, int status);
+    Optional<Image> findByUserUserIdAndImageSort(Long userId, Image.ImageType imageSort);
 }

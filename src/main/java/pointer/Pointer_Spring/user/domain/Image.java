@@ -38,4 +38,8 @@ public class Image extends BaseEntity {
         this.imageSort = imageSort;
         this.user = user;
     }
+
+    public void updateImageUrl(String imageUrl){
+        this.imageUrl = imageUrl;
+    }
 }
