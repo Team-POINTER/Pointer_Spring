@@ -31,6 +31,7 @@ public enum ExceptionCode {
     USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),
     BACKGROUND_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D003", "배경 사진 수정 실패"),
     IMAGE_INVALID(INVALID_ACCESS, "D004", "유효하지 않은 파일"),
+    IMAGE_NOT_FOUND(NOT_FOUND_VALUE, "D005", "존재하지 않는 이미지"),
     /**
      * 채팅
      */
@@ -105,7 +106,9 @@ public enum ExceptionCode {
     /**
      * 잘못된 ExceptionCode
      */
+    INVALID_REQUEST(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
     EMPTY(null, "", "");
+
 
     private final HttpStatus status;
     private final String code;
