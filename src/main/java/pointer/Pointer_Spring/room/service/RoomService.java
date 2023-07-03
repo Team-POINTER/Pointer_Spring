@@ -2,12 +2,10 @@ package pointer.Pointer_Spring.room.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.InviteRequest;
-import pointer.Pointer_Spring.room.dto.RoomDto.InviteMemberResponse;
 import pointer.Pointer_Spring.room.dto.RoomDto.ListResponse;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseMemberRoom;

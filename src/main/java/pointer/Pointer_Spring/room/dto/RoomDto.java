@@ -31,11 +31,11 @@ public class RoomDto {
         String roomNm;
         String question;
         int memberCnt;
-        //String firstNm;
 
-        public ListRoom(RoomMember roomMember) {
+        public ListRoom(RoomMember roomMember, String question) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
+            this.question = question;
         }
 
         public void setRoomInfo() {
@@ -74,15 +74,17 @@ public class RoomDto {
         String roomNm;
         private Integer memberNum;
         private Integer votingNum;
+        String question;
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, String question, List<RoomMemberResopnose> roomMembers) {
             this.roomId = room.getRoomId();
             this.roomNm = room.getName(); // defaultname
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
             this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.question = question;
             this.roomMembers = roomMembers;
         }
     }
