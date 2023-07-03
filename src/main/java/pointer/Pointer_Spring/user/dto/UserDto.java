@@ -1,12 +1,40 @@
 package pointer.Pointer_Spring.user.dto;
 
 import lombok.Data;
-import pointer.Pointer_Spring.friend.dto.FriendDto;
+import lombok.Getter;
+import lombok.Setter;
+import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import java.util.List;
 
 public class UserDto {
+
+    @Setter
+    @Getter
+    public static class UserInfo {
+        Long userId;
+        String id;
+    }
+
+    @Getter
+    public static class UserResponse extends ResponseType {
+        Long userId;
+
+        public UserResponse(ExceptionCode exceptionCode, Long userId) {
+            super(exceptionCode);
+            this.userId = userId;
+        }
+    }
+
+    @Getter
+    public static class DuplicateUserResponse extends ResponseType {
+
+        public DuplicateUserResponse(ExceptionCode exceptionCode) {
+            super(exceptionCode);
+        }
+    }
 
     @Data
     public static class UserListResponse {
