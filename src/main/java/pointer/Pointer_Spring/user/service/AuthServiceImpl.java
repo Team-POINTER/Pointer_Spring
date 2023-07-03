@@ -165,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         if (user.getId().equals(User.SignupType.KAKAO+user.getEmail())) { // 회원가입 : SignupType + email
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         }
-        if (exception == null) {
+        if (exception != null) {
             exception = ExceptionCode.SIGNUP_COMPLETE;
         }
 
