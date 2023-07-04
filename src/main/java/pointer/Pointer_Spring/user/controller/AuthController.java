@@ -25,7 +25,7 @@ public class AuthController {
     // real
     @PostMapping("/auth/login") // kakao social login
     public ResponseEntity<Object> login(@RequestBody TokenRequest tokenRequest) {
-        return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getRefreshToken()), HttpStatus.OK);
+        return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
     }
 
     @PostMapping("/auth/reissue") // token 재발급
@@ -33,8 +33,13 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.reissue(tokenRequest), HttpStatus.OK);
     }
 
-    @PostMapping("/auth/userId")
+    @PostMapping("/auth/id") //
     public ResponseEntity<Object> saveId(@RequestBody UserDto.UserInfo info) {
         return new ResponseEntity<>(authServiceImpl.saveId(info), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/checkId") // 중복 확인
+    public ResponseEntity<Object> checkId(@RequestBody UserDto.UserInfo info) {
+        return new ResponseEntity<>(authServiceImpl.checkId(info), HttpStatus.OK);
     }
 }

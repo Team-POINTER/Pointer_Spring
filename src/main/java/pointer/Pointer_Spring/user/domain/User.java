@@ -38,6 +38,10 @@ public class User extends BaseEntity {
     public enum Role {
         USER, ADMIN
     }
+
+    @Column(nullable = false,columnDefinition = "boolean default false")
+    private boolean checkId;
+
     @Enumerated(EnumType.ORDINAL)
     private Role role;
     @Column(name = "service_agree")
@@ -95,6 +99,10 @@ public class User extends BaseEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public void setCheckId(boolean checkId) {
+        this.checkId = checkId;
     }
 
     public void updateRoomLimit(Integer roomLimit) {

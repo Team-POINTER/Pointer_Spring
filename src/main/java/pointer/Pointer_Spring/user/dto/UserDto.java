@@ -14,15 +14,15 @@ public class UserDto {
     @Setter
     @Getter
     public static class UserInfo {
-        Long userId;
+        int userId;
         String id;
     }
 
     @Getter
     public static class UserResponse extends ResponseType {
-        Long userId;
+        int userId;
 
-        public UserResponse(ExceptionCode exceptionCode, Long userId) {
+        public UserResponse(ExceptionCode exceptionCode, int userId) {
             super(exceptionCode);
             this.userId = userId;
         }

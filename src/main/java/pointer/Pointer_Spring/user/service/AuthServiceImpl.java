@@ -34,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${kakao.redirectURI}")
     private String redirectUri;
 
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -128,7 +129,29 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Object saveId(UserDto.UserInfo userInfo) {
-        User user = userRepository.findByUserIdAndStatus(userInfo.getUserId(), STATUS).orElseThrow(
+        User user = userRepository.findByUserIdAndStatus((long) userInfo.getUserId(), STATUS).orElseThrow(
+                () -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                }
+        );
+
+        ExceptionCode exceptionCode;
+        Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
+        if (findUser.isPresent()) { // 상대 id
+                return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
+        }
+        else if (user.isCheckId()) {
+            user.setId(userInfo.getId());
+            return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK, Math.toIntExact(user.getUserId()));
+        }
+        return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID, Math.toIntExact(user.getUserId()));
+
+    }
+
+    @Transactional
+    @Override
+    public Object checkId(UserDto.UserInfo userInfo) {
+        User user = userRepository.findByUserIdAndStatus((long) userInfo.getUserId(), STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
@@ -138,9 +161,9 @@ public class AuthServiceImpl implements AuthService {
         if (findUser.isPresent()) {
             return new UserDto.DuplicateUserResponse(ExceptionCode.SIGNUP_DUPLICATED_ID);
         }
-        user.setId(userInfo.getId());
+        user.setCheckId(true);
 
-        return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK, user.getUserId());
+        return new UserDto.UserResponse(ExceptionCode.USER_CHECK_ID_OK, Math.toIntExact(user.getUserId()));
     }
 
     @Override
@@ -172,7 +195,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         //TokenDto tokenDto = createToken(user.getEmail(), KAKAO, user.getPassword());
-        return new UserDto.UserResponse(exception, user.getUserId());
+        return new UserDto.UserResponse(exception, Math.toIntExact(user.getUserId()));
     }
 
     @Override
@@ -210,8 +233,8 @@ public class AuthServiceImpl implements AuthService {
 
 
     public ResponseKakaoUser reissue(TokenRequest tokenRequest) {
-        Optional<User> findUser = userRepository.findByTokenAndStatus(tokenRequest.getRefreshToken(),1);
-        String getRefreshToken = tokenRequest.getRefreshToken();
+        Optional<User> findUser = userRepository.findByTokenAndStatus(tokenRequest.getAccessToken(),1);
+        String getRefreshToken = tokenRequest.getAccessToken();
         if (findUser.isEmpty() || !(findUser.get().getToken().equals(getRefreshToken))) {
             return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
         }
