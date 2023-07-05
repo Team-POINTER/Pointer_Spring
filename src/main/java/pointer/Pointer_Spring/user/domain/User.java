@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
@@ -31,7 +32,7 @@ public class User extends BaseEntity {
     public enum SignupType {
         KAKAO, APPLE
     }
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private SignupType type;
 
     // role
@@ -39,8 +40,8 @@ public class User extends BaseEntity {
         USER, ADMIN
     }
 
-    @Column(nullable = false,columnDefinition = "boolean default false")
-    private boolean checkId;
+    @ColumnDefault("0")
+    private int checkId;
 
     @Enumerated(EnumType.ORDINAL)
     private Role role;
@@ -97,11 +98,12 @@ public class User extends BaseEntity {
         this.token = token;
     }
 
-    public void setId(String id) {
+    public void setId(String id, int checkId) {
         this.id = id;
+        this.checkId = checkId;
     }
 
-    public void setCheckId(boolean checkId) {
+    public void setCheckId(int checkId) {
         this.checkId = checkId;
     }
 

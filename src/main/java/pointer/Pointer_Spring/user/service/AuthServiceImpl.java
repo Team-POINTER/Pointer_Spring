@@ -39,6 +39,9 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    private final Integer CHECK = 1;
+    private final Integer COMPLETE = 2;
+
     public String getKakaoAccessToken(String code) {
         String access_Token;
         //String refresh_Token = "";
@@ -53,12 +56,11 @@ public class AuthServiceImpl implements AuthService {
             conn.setDoOutput(true); // POST 요청
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-            StringBuilder sb = new StringBuilder();
-            sb.append("grant_type=authorization_code");
-            sb.append("&client_id=" + restApiKey); // REST_API_KEY
-            sb.append("&redirect_uri=" + redirectUri); // REDIRECT_URI
-            sb.append("&code=" + code);
-            bw.write(sb.toString());
+            String sb = "grant_type=authorization_code" +
+                    "&client_id=" + restApiKey + // REST_API_KEY
+                    "&redirect_uri=" + redirectUri + // REDIRECT_URI
+                    "&code=" + code;
+            bw.write(sb);
             bw.flush();
 
             int responseCode = conn.getResponseCode();
@@ -140,8 +142,8 @@ public class AuthServiceImpl implements AuthService {
         if (findUser.isPresent()) { // 상대 id
                 return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
         }
-        else if (user.isCheckId()) {
-            user.setId(userInfo.getId());
+        else if (user.getCheckId() == 1) {
+            user.setId(userInfo.getId(), COMPLETE);
             return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK, Math.toIntExact(user.getUserId()));
         }
         return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID, Math.toIntExact(user.getUserId()));
@@ -161,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
         if (findUser.isPresent()) {
             return new UserDto.DuplicateUserResponse(ExceptionCode.SIGNUP_DUPLICATED_ID);
         }
-        user.setCheckId(true);
+        user.setCheckId(CHECK);
 
         return new UserDto.UserResponse(ExceptionCode.USER_CHECK_ID_OK, Math.toIntExact(user.getUserId()));
     }
@@ -176,23 +178,20 @@ public class AuthServiceImpl implements AuthService {
 
         Optional<User> findUser = userRepository.findByEmailAndTypeAndStatus(kakaoDto.getEmail(), User.SignupType.KAKAO,1);
         User user;
-        ExceptionCode exception = null;
+        ExceptionCode exception;
 
         if (findUser.isEmpty() ) {
             user = signup(kakaoDto);
-            exception = ExceptionCode.SIGNUP_CREATED_OK;
         } else {
             user = findUser.get();
         }
 
-        if (user.getId().equals(User.SignupType.KAKAO+user.getEmail())) { // 회원가입 : SignupType + email
+        if (user.getId().equals(User.SignupType.KAKAO+user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : SignupType + email
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         }
-        if (exception != null) {
+        else {
             exception = ExceptionCode.SIGNUP_COMPLETE;
         }
-
-
 
         //TokenDto tokenDto = createToken(user.getEmail(), KAKAO, user.getPassword());
         return new UserDto.UserResponse(exception, Math.toIntExact(user.getUserId()));

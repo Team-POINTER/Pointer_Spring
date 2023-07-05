@@ -35,6 +35,7 @@ public class Friend extends BaseEntity {
     }
 
     @Column(nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     private Relation relationship;
 
     public void setRelationship(Relation relationship) {
