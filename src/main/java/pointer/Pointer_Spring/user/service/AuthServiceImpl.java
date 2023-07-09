@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 //@PropertySource("classpath:application.properties")
 public class AuthServiceImpl implements AuthService {
@@ -150,7 +151,6 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
-    @Transactional
     @Override
     public Object checkId(UserDto.UserInfo userInfo) {
         User user = userRepository.findByUserIdAndStatus((long) userInfo.getUserId(), STATUS).orElseThrow(
