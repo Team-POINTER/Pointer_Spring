@@ -25,6 +25,10 @@ public enum ExceptionCode {
     USER_GET_OK(SUCCESS, "C000", "회원정보 있음"),
     USER_NOT_FOUND(NOT_FOUND_VALUE, "C001", "회원정보 없음"),
     USER_FRIEND_NOT_FOUND(NOT_FOUND_VALUE, "C002", "상대 회원정보 없음"),
+    USER_UPDATE_ID_SUCCESS(SUCCESS, "C003", "사용가능한 아이디로, 업데이트 성공"),
+    USER_UPDATE_NM_SUCCESS(SUCCESS, "C004", "이름 업데이트 성공"),
+    USERE_DUPLICATED_ID(DUPLICATED_VALUE, "C005", "중복된 아이디"),
+
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),
@@ -106,7 +110,7 @@ public enum ExceptionCode {
     /**
      * 잘못된 ExceptionCode
      */
-    INVALID_REQUEST(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
+    INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
     EMPTY(null, "", "");
 
 
