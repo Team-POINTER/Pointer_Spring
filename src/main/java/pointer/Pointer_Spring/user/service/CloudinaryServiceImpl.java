@@ -79,7 +79,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         String publicId = profileImage.getImageUrl();
         String profileImageUrl = cloudinary.url().generate(publicId);
 
-        Image backgroundImage = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.PROFILE).orElseThrow(
+        Image backgroundImage = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.BACKGROUND).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }

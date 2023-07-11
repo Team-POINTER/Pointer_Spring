@@ -27,7 +27,7 @@ public class ImageController {
         return cloudinaryService.uploadBackgroundImage(userId, image);
     }
 
-    @GetMapping("{userId}/get/images")
+    @GetMapping("{userId}/get")
     public ImageDto.ImageUrlResponse getImage(@PathVariable Long userId) {
         return cloudinaryService.getImages(userId);
     }
