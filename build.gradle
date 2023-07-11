@@ -49,6 +49,9 @@ dependencies {
 	//org.apache.http. -> HttpClientUtils.java
 	implementation 'org.apache.httpcomponents:httpclient:4.5.14'
 
+	//cloudinary
+	implementation group: 'com.cloudinary', name: 'cloudinary-http44', version: '1.33.0'
+
 }
 
 tasks.named('test') {

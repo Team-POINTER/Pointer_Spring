@@ -25,13 +25,21 @@ public enum ExceptionCode {
     USER_GET_OK(SUCCESS, "C000", "회원정보 있음"),
     USER_NOT_FOUND(NOT_FOUND_VALUE, "C001", "회원정보 없음"),
     USER_FRIEND_NOT_FOUND(NOT_FOUND_VALUE, "C002", "상대 회원정보 없음"),
+
     USER_SAVE_ID_OK(SUCCESS, "C003", "ID 저장 성공"),
     USER_CHECK_ID_OK(SUCCESS, "C004", "ID 중복 확인 성공"),
     USER_NO_CHECK_ID(SUCCESS, "C005", "ID 중복 확인 없음"),
+    USER_UPDATE_ID_SUCCESS(SUCCESS, "C006", "사용가능한 아이디로, 업데이트 성공"),
+    USER_UPDATE_NM_SUCCESS(SUCCESS, "C007", "이름 업데이트 성공"),
+    USERE_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
+
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),
-    USER_KAKAO_INVALID(NOT_FOUND_VALUE, "D002", "KAKAO 회원정보 조회 실패"),
+    USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),
+    BACKGROUND_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D003", "배경 사진 수정 실패"),
+    IMAGE_INVALID(INVALID_ACCESS, "D004", "유효하지 않은 파일"),
+    IMAGE_NOT_FOUND(NOT_FOUND_VALUE, "D005", "존재하지 않는 이미지"),
 
     /**
      * 채팅
@@ -107,7 +115,9 @@ public enum ExceptionCode {
     /**
      * 잘못된 ExceptionCode
      */
+    INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
     EMPTY(null, "", "");
+
 
     private final HttpStatus status;
     private final String code;

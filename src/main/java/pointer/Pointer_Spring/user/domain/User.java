@@ -58,6 +58,8 @@ public class User extends BaseEntity {
     @Column(length = 1000)
     private String token;
 
+    private Long point;
+
     // builder
     @Builder
     public User(String id, String email, String name, SignupType type) {
@@ -90,6 +92,12 @@ public class User extends BaseEntity {
         this.marketing = marketing;
     }
 
+    public void changeName(String newName) {
+        this.name = newName;
+    }
+    public void changeId(String newId) {
+        this.id = newId;
+    }
     public void changePassword(String password) {
         this.password = password;
     }
