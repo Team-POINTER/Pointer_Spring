@@ -16,6 +16,8 @@ import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.question.dto.QuestionDto;
+import pointer.Pointer_Spring.question.service.QuestionService;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -36,22 +38,27 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 
 @Service
 @Transactional
-@RequiredArgsConstructor//룸 입장 = 조회<질문 투표수 등등까지> / 룸 전체 조회(정렬), 초대 / RoomResponse 결과 고치기(updateRoomNm) / 이후 링크로 초대<웹 초대> /
+@RequiredArgsConstructor/// 룸 전체 조회(정렬), 초대 / RoomResponse 결과 고치기(updateRoomNm) / 이후 링크로 초대<웹 초대> /
 public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final FriendRepository friendRepository;
+    private final QuestionService questionService;
     //private final PasswordEncoder passwordEncoder;
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ListResponse getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
-        //List<RoomMember> roomList = new ArrayList<>();
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         if (kwd == null) {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1)
                     .stream()
-                    .map(RoomDto.ListRoom::new).toList();
+                    .map(roomMember -> {
+                        Room room = roomMember.getRoom();
+                        Optional<Question> latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
+                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                    }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
                     .filter(roomMember -> {
@@ -60,7 +67,13 @@ public class RoomServiceImpl implements RoomService {
                                 .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
                         return roomMember.getPrivateRoomNm().contains(kwd) || latestQuestion.map(question -> question.getQuestion().contains(kwd)).orElse(false);
                     })
-                    .map(RoomDto.ListRoom::new)
+//                    .map(RoomDto.ListRoom::new).toList()
+                    .map(roomMember -> {
+                        Room room = roomMember.getRoom();
+                        Optional<Question> latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
+                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                    })
                     .collect(Collectors.toList());
         }
         return new ListResponse(roomListDto);
@@ -72,9 +85,16 @@ public class RoomServiceImpl implements RoomService {
                 throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
             }
         );
+        Question latestQuestion = foundRoom.getQuestions().stream()
+                .max(Comparator.comparing(BaseEntity::getUpdatedAt)).orElseThrow(
+                        () -> {
+                            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
+                        }
+                );
+
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(foundRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        return new DetailResponse(foundRoom, roomMemberResopnoseList);
+        return new DetailResponse(foundRoom, latestQuestion.getQuestion(), roomMemberResopnoseList);
     }
 
 
@@ -109,11 +129,16 @@ public class RoomServiceImpl implements RoomService {
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";//?
 
-
+        Question latestQuestion = savedRoom.getQuestions().stream()
+                .max(Comparator.comparing(BaseEntity::getUpdatedAt)).orElseThrow(
+                        () -> {
+                            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
+                        }
+                );
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom,latestQuestion.getQuestion(), roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
 
@@ -255,7 +280,7 @@ public class RoomServiceImpl implements RoomService {
 
     private List<Friend> fetchPagesOffset(Long userId, int currentPage, int pageSize, String kwd){
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize, Sort.by("friendName"));
-        System.out.println(pageRequest);
+        //System.out.println(pageRequest);
         return friendRepository.findAllByUserUserIdAndRelationshipAndStatusAndFriendNameContaining(userId, Friend.Relation.SUCCESS, 1,kwd, pageRequest);
     }
 

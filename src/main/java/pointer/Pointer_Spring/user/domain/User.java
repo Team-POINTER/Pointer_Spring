@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
 
 @Getter
@@ -31,13 +32,17 @@ public class User extends BaseEntity {
     public enum SignupType {
         KAKAO, APPLE
     }
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private SignupType type;
 
     // role
     public enum Role {
         USER, ADMIN
     }
+
+    @ColumnDefault("0")
+    private int checkId;
+
     @Enumerated(EnumType.ORDINAL)
     private Role role;
     @Column(name = "service_agree")
@@ -66,12 +71,12 @@ public class User extends BaseEntity {
 
 
     @Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String name, String password) {
+    public User(String email, String id, String name, String password, SignupType type) {
         this.email = email;
         this.id = id;
         this.name = name;
         this.password = password;
-        this.type = SignupType.KAKAO;
+        this.type = type;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -99,6 +104,15 @@ public class User extends BaseEntity {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setId(String id, int checkId) {
+        this.id = id;
+        this.checkId = checkId;
+    }
+
+    public void setCheckId(int checkId) {
+        this.checkId = checkId;
     }
 
     public void updateRoomLimit(Integer roomLimit) {

@@ -19,8 +19,11 @@ public class ResponseKakaoUser extends ResponseType {
     @Autowired
     private TokenDto token;
 
-    public ResponseKakaoUser(ExceptionCode exceptionCode, @Nullable TokenDto token) {
+    private Long userId;
+
+    public ResponseKakaoUser(ExceptionCode exceptionCode, @Nullable TokenDto token, Long userId) {
         super(exceptionCode);
         this.token = token;
+        this.userId = userId;
     }
 }
