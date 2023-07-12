@@ -19,7 +19,7 @@ public class UserDto {
 
     @Setter
     @Getter
-    public static class UserInfo {
+    public static class BasicUser {
         int userId;
         String id;
     }

@@ -69,6 +69,15 @@ public class User extends BaseEntity {
         this.type = type;
     }
 
+    // test builder
+    @Builder
+    public User(String id, String email, String name, String password) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+    }
+
 
     @Builder(builderMethodName = "KakaoBuilder")
     public User(String email, String id, String name, String password, SignupType type) {

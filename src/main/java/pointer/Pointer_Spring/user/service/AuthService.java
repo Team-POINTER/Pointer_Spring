@@ -16,6 +16,6 @@ public interface AuthService {
 
     KakaoRequestDto getKakaoUser(String token);
 
-    Object saveId(UserDto.UserInfo userInfo);
-    Object checkId(UserDto.UserInfo userInfo);
+    Object saveId(UserDto.BasicUser userInfo);
+    Object checkId(UserDto.BasicUser userInfo);
 }
