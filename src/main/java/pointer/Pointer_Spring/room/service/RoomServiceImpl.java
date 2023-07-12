@@ -34,6 +34,8 @@ import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
+import pointer.Pointer_Spring.vote.domain.VoteHistory;
+import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 
 @Service
@@ -44,8 +46,8 @@ public class RoomServiceImpl implements RoomService {
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final FriendRepository friendRepository;
-    private final QuestionService questionService;
-    //private final PasswordEncoder passwordEncoder;
+    private final VoteRepository voteRepository;
+
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ListResponse getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
@@ -55,9 +57,12 @@ public class RoomServiceImpl implements RoomService {
                     .stream()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
-                        Optional<Question> latestQuestion = room.getQuestions().stream()
-                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
-                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                        Question latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt))
+                                .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
+
+                        String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
                     }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
@@ -70,13 +75,37 @@ public class RoomServiceImpl implements RoomService {
 //                    .map(RoomDto.ListRoom::new).toList()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
-                        Optional<Question> latestQuestion = room.getQuestions().stream()
-                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
-                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                        Question latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt))
+                                .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
+
+                        String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
                     })
                     .collect(Collectors.toList());
         }
         return new ListResponse(roomListDto);
+    }
+    private String getTopUserNm(Room room, Long latestQuestionId){
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        int maxVote = 0;
+        RoomMember topMem = roomMembers.get(0);
+        for (RoomMember roomMem : roomMembers) {
+            User member = roomMem.getUser();
+            //QuestionIdAndCandidateId로 찾아서 updatedAt으로 최신순 sort해서 첫번째 UPDAtdAt끼리 비교 후 반환
+            int votedCnt = voteRepository.countByQuestionIdAndCandidateId(latestQuestionId, member.getUserId());
+            if(votedCnt>maxVote){
+                topMem = roomMem;
+                maxVote = votedCnt;
+            }else if(maxVote != 0 & votedCnt == maxVote){
+                VoteHistory newVote = voteRepository.findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(latestQuestionId, member.getUserId());
+                VoteHistory topVote = voteRepository.findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(latestQuestionId, topMem.getUser().getUserId());
+                topMem = newVote.getUpdatedAt().isAfter(topVote.getUpdatedAt()) ? roomMem : topMem;
+            }
+        }
+        //투표자가 없는 경우도 고려
+        String msgForTopUserNm = maxVote == 0 ? "1등인 사람의 이름" : topMem.getUser().getName();
+        return msgForTopUserNm;
     }
 
     public DetailResponse getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기[합친 후에]
@@ -181,7 +210,7 @@ public class RoomServiceImpl implements RoomService {
         if(room.getMemberNum()<=0){
             room.setStatus(0);
         }
-
+        //voteRepository.findAllByRoomId(roomId).setStatus(0);
         roomMember.setStatus(0);
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }

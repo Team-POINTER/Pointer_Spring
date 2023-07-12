@@ -24,4 +24,7 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
     int countByQuestionIdAndCandidateId(Long questionId, Long userId);
 
     List<VoteHistory> findAllByQuestionIdAndCandidateId(Long questionId, Long userId);
+
+    VoteHistory findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(Long questionId, Long userId);
+    VoteHistory findAllByRoomId(Long roomId);
 }
