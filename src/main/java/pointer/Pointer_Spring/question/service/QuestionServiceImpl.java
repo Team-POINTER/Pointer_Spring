@@ -120,6 +120,7 @@ public class QuestionServiceImpl implements QuestionService {
 
 
         return QuestionDto.GetCurrentResponse.builder()
+                .roomName(room.getName())
                 .questionId(currentQuestion.getId())
                 .content(currentQuestion.getQuestion())
                 .isVoted(isVoted)
