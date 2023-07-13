@@ -55,6 +55,7 @@ public class RoomDto {
     public static class CreateRequest {
         Long userId;
         String roomNm;//roomName
+        String question;
     }
 
     @Data

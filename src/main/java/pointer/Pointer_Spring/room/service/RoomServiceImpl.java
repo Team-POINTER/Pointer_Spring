@@ -17,6 +17,7 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
+import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.question.service.QuestionService;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
@@ -47,6 +48,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomMemberRepository roomMemberRepository;
     private final FriendRepository friendRepository;
     private final VoteRepository voteRepository;
+    private final QuestionRepository questionRepository;
 
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
@@ -158,16 +160,17 @@ public class RoomServiceImpl implements RoomService {
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";//?
 
-        Question latestQuestion = savedRoom.getQuestions().stream()
-                .max(Comparator.comparing(BaseEntity::getUpdatedAt)).orElseThrow(
-                        () -> {
-                            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
-                        }
-                );
+        Question question = Question.builder()
+                .room(savedRoom)
+                .creatorId(foundUser.getUserId())
+                .question(createRoomDto.getQuestion())
+                .build();
+
+        questionRepository.save(question);
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom,latestQuestion.getQuestion(), roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, question.getQuestion(), roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
 
