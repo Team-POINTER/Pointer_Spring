@@ -125,6 +125,7 @@ public class VoteServiceImpl implements VoteService {
         System.out.println(votedUserCnt);
 
         return VoteDto.GetResponse.builder()
+                .roomName(question.getRoom().getName())
                 .members(memberResponses)
                 .targetUser(targetUser)
                 .notNotedMemberCnt(notVotedCnt)
