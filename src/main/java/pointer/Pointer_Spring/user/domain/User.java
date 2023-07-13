@@ -27,6 +27,15 @@ public class User extends BaseEntity {
     private String name;
     private String password;
 
+    @Column(name = "chat_alarm_flag")
+    private boolean chatAlarmFlag;
+
+    @Column(name = "active_alarm_flag")
+    private boolean activeAlarmFlag;
+
+    @Column(name = "event_alarm_flag")
+    private boolean eventAlarmFlag;
+
 
     // social login
     public enum SignupType {
@@ -67,6 +76,9 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.type = type;
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
     }
 
     // test builder
@@ -86,6 +98,9 @@ public class User extends BaseEntity {
         this.name = name;
         this.password = password;
         this.type = type;
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
