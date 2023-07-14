@@ -131,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Object saveId(UserDto.UserInfo userInfo) {
+    public Object saveId(UserDto.BasicUser userInfo) {
         User user = userRepository.findByUserIdAndStatus((long) userInfo.getUserId(), STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
@@ -152,7 +152,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Object checkId(UserDto.UserInfo userInfo) {
+    public Object checkId(UserDto.BasicUser userInfo) {
         User user = userRepository.findByUserIdAndStatus((long) userInfo.getUserId(), STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);

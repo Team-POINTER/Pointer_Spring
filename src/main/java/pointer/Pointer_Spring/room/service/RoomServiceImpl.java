@@ -12,12 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
-import pointer.Pointer_Spring.question.dto.QuestionDto;
-import pointer.Pointer_Spring.question.service.QuestionService;
+import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -34,6 +34,8 @@ import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
+import pointer.Pointer_Spring.vote.domain.VoteHistory;
+import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 
 @Service
@@ -44,20 +46,25 @@ public class RoomServiceImpl implements RoomService {
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final FriendRepository friendRepository;
-    private final QuestionService questionService;
-    //private final PasswordEncoder passwordEncoder;
+    private final VoteRepository voteRepository;
+    private final QuestionRepository questionRepository;
+
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
-    public ListResponse getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         if (kwd == null) {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1)
                     .stream()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
-                        Optional<Question> latestQuestion = room.getQuestions().stream()
-                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
-                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                        Question latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt))
+                                .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
+
+                        String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
                     }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
@@ -70,16 +77,40 @@ public class RoomServiceImpl implements RoomService {
 //                    .map(RoomDto.ListRoom::new).toList()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
-                        Optional<Question> latestQuestion = room.getQuestions().stream()
-                                .max(Comparator.comparing(BaseEntity::getUpdatedAt));//updatedAt 기준
-                        return new RoomDto.ListRoom(roomMember, latestQuestion.map(Question::getQuestion).orElse(null));
+                        Question latestQuestion = room.getQuestions().stream()
+                                .max(Comparator.comparing(BaseEntity::getUpdatedAt))
+                                .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
+
+                        String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
                     })
                     .collect(Collectors.toList());
         }
-        return new ListResponse(roomListDto);
+        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new ListResponse(roomListDto));
+    }
+    private String getTopUserNm(Room room, Long latestQuestionId){
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        int maxVote = 0;
+        RoomMember topMem = roomMembers.get(0);
+        for (RoomMember roomMem : roomMembers) {
+            User member = roomMem.getUser();
+            //QuestionIdAndCandidateId로 찾아서 updatedAt으로 최신순 sort해서 첫번째 UPDAtdAt끼리 비교 후 반환
+            int votedCnt = voteRepository.countByQuestionIdAndCandidateId(latestQuestionId, member.getUserId());
+            if(votedCnt>maxVote){
+                topMem = roomMem;
+                maxVote = votedCnt;
+            }else if(maxVote != 0 & votedCnt == maxVote){
+                VoteHistory newVote = voteRepository.findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(latestQuestionId, member.getUserId());
+                VoteHistory topVote = voteRepository.findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(latestQuestionId, topMem.getUser().getUserId());
+                topMem = newVote.getUpdatedAt().isAfter(topVote.getUpdatedAt()) ? roomMem : topMem;
+            }
+        }
+        //투표자가 없는 경우도 고려
+        String msgForTopUserNm = maxVote == 0 ? null : topMem.getUser().getName();
+        return msgForTopUserNm;
     }
 
-    public DetailResponse getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기[합친 후에]
+    public ResponseRoom getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기[합친 후에]
         Room foundRoom = roomRepository.findById(roomId).orElseThrow(
             () -> {
                 throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
@@ -94,7 +125,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(foundRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        return new DetailResponse(foundRoom, latestQuestion.getQuestion(), roomMemberResopnoseList);
+        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, latestQuestion.getQuestion(), roomMemberResopnoseList));
     }
 
 
@@ -129,16 +160,17 @@ public class RoomServiceImpl implements RoomService {
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";//?
 
-        Question latestQuestion = savedRoom.getQuestions().stream()
-                .max(Comparator.comparing(BaseEntity::getUpdatedAt)).orElseThrow(
-                        () -> {
-                            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
-                        }
-                );
+        Question question = Question.builder()
+                .room(savedRoom)
+                .creatorId(foundUser.getUserId())
+                .question(createRoomDto.getQuestion())
+                .build();
+
+        questionRepository.save(question);
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom,latestQuestion.getQuestion(), roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, question.getQuestion(), roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
 
@@ -181,7 +213,7 @@ public class RoomServiceImpl implements RoomService {
         if(room.getMemberNum()<=0){
             room.setStatus(0);
         }
-
+        //voteRepository.findAllByRoomId(roomId).setStatus(0);
         roomMember.setStatus(0);
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }
@@ -237,24 +269,22 @@ public class RoomServiceImpl implements RoomService {
 
     //이미 초대된 멤버 get(getRoomMember)
     @Override
-    public List<RoomMemberResopnose> getInviteMembers(Long roomId){
+    public ResponseRoom getInviteMembers(Long roomId){
         List<RoomMember> roomMember = roomMemberRepository.findAllByRoom_RoomIdAndStatusEquals(roomId, 1);
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMember.stream()
                 .map(RoomMemberResopnose::new).toList();
-        return roomMemberResopnoseList;
+        return new ResponseRoom(ExceptionCode.ROOMMEMBER_GET_SUCCESS, roomMemberResopnoseList);
     }
 
     //초대 가능 여부 리스트 보내기 - 여기서 해당 유저가 초대 가능한 지 따짐
     @Override
-    public List<IsInviteMember> isInviteMembersList(Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+    public ResponseRoom isInviteMembersList(Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, 1)){//초대하려는 유저가 룸 멤버가 아닐 때
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }
         //pageSize는 상수로
         List<Friend> friendList = fetchPagesOffset(userId, currentPage, pageSize, kwd);//status가 1인 것만 가져옴
-        for(Friend f : friendList){
-            System.out.println(f.getUserFriendId());
-        }
+
         //roomMember에 존재하는가 + 30개 방 개수가 넘지 않았는가
         //List<User> userList =  friendList.stream().map(friend -> userRepository.findById(friend.getUserFriendId()).get()).toList();
         List<IsInviteMember> roomMemberResponoseList = new ArrayList<>();
@@ -274,7 +304,7 @@ public class RoomServiceImpl implements RoomService {
 
 //        Comparator<IsInviteMember> comparator = Comparator.comparing(IsInviteMember::getNickNm);
 //        Collections.sort(roomMemberResponoseList, comparator);//이름 순 정렬
-        return roomMemberResponoseList;
+        return new ResponseRoom( ExceptionCode.INVITATION_LIST_GET_SUCCESS , roomMemberResponoseList);
     }
 
 

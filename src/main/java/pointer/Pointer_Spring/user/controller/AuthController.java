@@ -11,6 +11,7 @@ import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 
 @Controller
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
 
@@ -34,12 +35,12 @@ public class AuthController {
     }
 
     @PostMapping("/auth/id") //
-    public ResponseEntity<Object> saveId(@RequestBody UserDto.UserInfo info) {
+    public ResponseEntity<Object> saveId(@RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(info), HttpStatus.OK);
     }
 
     @PostMapping("/auth/checkId") // 중복 확인
-    public ResponseEntity<Object> checkId(@RequestBody UserDto.UserInfo info) {
+    public ResponseEntity<Object> checkId(@RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.checkId(info), HttpStatus.OK);
     }
 }

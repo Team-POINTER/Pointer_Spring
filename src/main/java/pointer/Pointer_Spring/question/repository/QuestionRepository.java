@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findTopByOrderByIdDesc();
 
-    Optional<Question> findByCreatedAtAfter(LocalDateTime now);
+    Optional<Question> findByCreatedAtAfterAndRoomRoomId(LocalDateTime now, Long roomId);
 
     List<Question> findAllByRoomOrderByCreatedAtDesc(Room room);
     List<Question> findAllByQuestionContaining(String kwd);

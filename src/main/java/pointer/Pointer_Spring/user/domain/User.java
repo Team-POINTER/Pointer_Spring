@@ -2,7 +2,6 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,16 +20,21 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String id;
-
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @JsonIgnore
-    @Column(nullable = false)
     private String password;
+
+    @Column(name = "chat_alarm_flag")
+    private boolean chatAlarmFlag;
+
+    @Column(name = "active_alarm_flag")
+    private boolean activeAlarmFlag;
+
+    @Column(name = "event_alarm_flag")
+    private boolean eventAlarmFlag;
 
 
     // social login
@@ -63,23 +67,43 @@ public class User extends BaseEntity {
     @Column(length = 1000)
     private String token;
 
+    private Long point;
+
     // builder
-/*    @Builder
+    @Builder
     public User(String id, String email, String name, SignupType type) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.type = type;
-    }*/
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
+        this.roomLimit = 0;
+    }
+
+    // test builder
+    @Builder
+    public User(String id, String email, String name, String password) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        this.roomLimit = 0;
+    }
 
 
-    //@Builder(builderMethodName = "KakaoBuilder")
+    @Builder(builderMethodName = "KakaoBuilder")
     public User(String email, String id, String name, String password, SignupType type) {
         this.email = email;
         this.id = id;
         this.name = name;
         this.password = password;
         this.type = type;
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -87,6 +111,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.roomLimit = 0;
     }
 
     public void setService(boolean serviceAgree, boolean serviceAge, boolean marketing) {
@@ -95,6 +120,12 @@ public class User extends BaseEntity {
         this.marketing = marketing;
     }
 
+    public void changeName(String newName) {
+        this.name = newName;
+    }
+    public void changeId(String newId) {
+        this.id = newId;
+    }
     public void changePassword(String password) {
         this.password = password;
     }

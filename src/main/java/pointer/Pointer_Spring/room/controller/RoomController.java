@@ -25,17 +25,18 @@ import java.util.List;
 @ResponseBody
 @RequiredArgsConstructor
 @RequestMapping("/room")
+@CrossOrigin(origins = "http://localhost:3000")
 public class RoomController {
 
     private final RoomService roomService;
 
     @PostMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
-    public RoomDto.ListResponse getRoomList(@RequestBody RoomDto.FindRoomRequest dto, @RequestParam(required = false) String kwd, HttpServletRequest request) {
+    public ResponseRoom getRoomList(@RequestBody RoomDto.FindRoomRequest dto, @RequestParam(required = false) String kwd, HttpServletRequest request) {
         return roomService.getRoomList(dto, kwd, request);
     }
 
     @GetMapping("/{room-id}")
-    public RoomDto.DetailResponse getRoom(@PathVariable("room-id") Long roomId,
+    public ResponseRoom getRoom(@PathVariable("room-id") Long roomId,
         HttpServletRequest request) {
         return roomService.getRoom(roomId, request);
     }
@@ -68,7 +69,7 @@ public class RoomController {
     }
 
     @GetMapping("/get/{room-id}/members")
-    public List<RoomDto.RoomMemberResopnose>  getInviteMembers(@PathVariable("room-id") Long roomId){
+    public ResponseRoom getInviteMembers(@PathVariable("room-id") Long roomId){
         return roomService.getInviteMembers(roomId);
     }
 

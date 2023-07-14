@@ -31,11 +31,16 @@ public class RoomDto {
         String roomNm;
         String question;
         int memberCnt;
+        String topUserName;
+        //String topUserId;
 
-        public ListRoom(RoomMember roomMember, String question) {
+        public ListRoom(RoomMember roomMember, String question, String userNm) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
+            this.memberCnt = roomMember.getRoom().getMemberNum();
             this.question = question;
+            this.topUserName = userNm;
+            //this.topUserId = user.getId();
         }
 
         public void setRoomInfo() {
@@ -50,6 +55,7 @@ public class RoomDto {
     public static class CreateRequest {
         Long userId;
         String roomNm;//roomName
+        String question;
     }
 
     @Data

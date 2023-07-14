@@ -26,5 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Long countByIdContainingOrNameContainingAndStatus(String id, String name, int status);
 
     Optional<User> findByUserId(Long userId);
+    boolean existsById(String id);
     boolean existsByUserIdAndStatus(Long userId, int status);
 }
