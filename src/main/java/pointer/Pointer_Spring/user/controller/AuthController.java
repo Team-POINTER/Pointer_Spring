@@ -11,6 +11,7 @@ import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 
 @Controller
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
 
