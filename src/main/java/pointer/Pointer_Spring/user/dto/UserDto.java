@@ -13,18 +13,17 @@ public class UserDto {
 
     @Setter
     @Getter
-    public static class UserInfo {
-        int userId;
+    public static class BasicUser {
         String id;
     }
 
     @Getter
-    public static class UserResponse extends ResponseType {
-        int userId;
+    public static class TokenResponse extends ResponseType {
+        TokenDto tokenDto;
 
-        public UserResponse(ExceptionCode exceptionCode, int userId) {
+        public TokenResponse(ExceptionCode exceptionCode, TokenDto tokenDto) {
             super(exceptionCode);
-            this.userId = userId;
+            this.tokenDto = tokenDto;
         }
     }
 
@@ -32,6 +31,14 @@ public class UserDto {
     public static class DuplicateUserResponse extends ResponseType {
 
         public DuplicateUserResponse(ExceptionCode exceptionCode) {
+            super(exceptionCode);
+        }
+    }
+
+    @Getter
+    public static class UserResponse extends ResponseType {
+
+        public UserResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
         }
     }

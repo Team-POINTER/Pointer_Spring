@@ -2,6 +2,7 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,11 +21,15 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String id;
+
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @JsonIgnore
+    @Column(nullable = false)
     private String password;
 
 
@@ -59,16 +64,16 @@ public class User extends BaseEntity {
     private String token;
 
     // builder
-    @Builder
+/*    @Builder
     public User(String id, String email, String name, SignupType type) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.type = type;
-    }
+    }*/
 
 
-    @Builder(builderMethodName = "KakaoBuilder")
+    //@Builder(builderMethodName = "KakaoBuilder")
     public User(String email, String id, String name, String password, SignupType type) {
         this.email = email;
         this.id = id;
