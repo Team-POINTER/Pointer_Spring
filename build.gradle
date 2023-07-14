@@ -3,6 +3,7 @@ plugins {
 
 	id 'org.springframework.boot' version '2.7.7' //swagger사용을 위해 다운그레이드
 	id 'io.spring.dependency-management' version '1.1.0'
+
 }
 
 group = 'pointer'
@@ -10,13 +11,17 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
+}
+
+ext {
+	springCloudVersion = '2021.0.3'
 }
 
 dependencies {
@@ -52,8 +57,17 @@ dependencies {
 	//cloudinary
 	implementation group: 'com.cloudinary', name: 'cloudinary-http44', version: '1.33.0'
 
+	// open feign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
