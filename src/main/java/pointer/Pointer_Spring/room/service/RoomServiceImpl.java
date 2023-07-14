@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
@@ -50,6 +51,7 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         if (kwd == null) {
@@ -104,7 +106,7 @@ public class RoomServiceImpl implements RoomService {
             }
         }
         //투표자가 없는 경우도 고려
-        String msgForTopUserNm = maxVote == 0 ? "1등인 사람의 이름" : topMem.getUser().getName();
+        String msgForTopUserNm = maxVote == 0 ? null : topMem.getUser().getName();
         return msgForTopUserNm;
     }
 

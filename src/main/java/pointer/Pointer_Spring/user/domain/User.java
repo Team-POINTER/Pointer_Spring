@@ -79,6 +79,7 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     // test builder
@@ -88,6 +89,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.password = password;
+        this.roomLimit = 0;
     }
 
 
@@ -101,6 +103,7 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -108,6 +111,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.roomLimit = 0;
     }
 
     public void setService(boolean serviceAgree, boolean serviceAge, boolean marketing) {

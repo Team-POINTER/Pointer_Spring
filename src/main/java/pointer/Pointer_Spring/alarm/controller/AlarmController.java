@@ -1,14 +1,12 @@
 package pointer.Pointer_Spring.alarm.controller;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.alarm.service.AlarmService;
 import pointer.Pointer_Spring.common.response.BaseResponse;
 
 @RestController
 @RequestMapping("/alarm")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AlarmController {
 
     private final AlarmService alarmService;
