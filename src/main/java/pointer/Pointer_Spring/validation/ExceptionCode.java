@@ -118,6 +118,12 @@ public enum ExceptionCode {
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
 
     /**
+     * 알림
+     */
+
+    ACTIVE_ALARM_NOT_FOUND(NOT_FOUND_VALUE, "L000", "활동 알림이 존재하지 않습니다"),
+
+    /**
      * 잘못된 ExceptionCode
      */
     INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),

@@ -27,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserId(Long userId);
     boolean existsById(String id);
     boolean existsByUserIdAndStatus(Long userId, int status);
+
+    List<User> findAllByEventAlarmFlag(boolean b);
 }
