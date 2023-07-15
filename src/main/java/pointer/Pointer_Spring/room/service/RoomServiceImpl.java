@@ -51,7 +51,6 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
-    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         if (kwd == null) {
@@ -125,7 +124,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(foundRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, latestQuestion.getQuestion(), roomMemberResopnoseList));
+        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, latestQuestion, roomMemberResopnoseList));
     }
 
 
@@ -170,7 +169,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, question.getQuestion(), roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, question, roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
 

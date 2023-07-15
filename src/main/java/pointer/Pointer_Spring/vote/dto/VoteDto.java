@@ -56,14 +56,16 @@ public class VoteDto {
     @NoArgsConstructor
     public static class GetResponse {
         private String roomName;
+        private String question;
         private GetMemberResponse targetUser;
         private List<GetMemberResponse> members;
         private int notNotedMemberCnt;
         private int notReadChatCnt;
 
         @Builder
-        public GetResponse(String roomName, GetMemberResponse targetUser, List<GetMemberResponse> members, int notNotedMemberCnt, int notReadChatCnt) {
+        public GetResponse(String roomName, String question, GetMemberResponse targetUser, List<GetMemberResponse> members, int notNotedMemberCnt, int notReadChatCnt) {
             this.roomName = roomName;
+            this.question = question;
             this.targetUser = targetUser;
             this.members = members;
             this.notNotedMemberCnt = notNotedMemberCnt;

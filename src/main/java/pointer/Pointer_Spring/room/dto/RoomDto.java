@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.user.domain.User;
@@ -80,17 +81,19 @@ public class RoomDto {
         String roomNm;
         private Integer memberNum;
         private Integer votingNum;
+        Long questionId;
         String question;
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room, String question, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers) {
             this.roomId = room.getRoomId();
             this.roomNm = room.getName(); // defaultname
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
             this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
-            this.question = question;
+            this.questionId = question.getId();
+            this.question = question.getQuestion();
             this.roomMembers = roomMembers;
         }
     }
