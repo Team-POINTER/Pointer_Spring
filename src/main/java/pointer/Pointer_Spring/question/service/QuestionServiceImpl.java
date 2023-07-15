@@ -69,7 +69,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .build();
 
         questionRepository.save(question);
-
+        question.getRoom().setUpdatedAt(question.getUpdatedAt());
         return QuestionDto.CreateResponse.builder()
                 .questionId(question.getId())
                 .content(question.getQuestion())
@@ -177,6 +177,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.QUESTION_DELETE_NOT_AUTHENTICATED);
 
         question.modify(request.getContent());
+        question.getRoom().setUpdatedAt(question.getUpdatedAt());
     }
 
     @Override

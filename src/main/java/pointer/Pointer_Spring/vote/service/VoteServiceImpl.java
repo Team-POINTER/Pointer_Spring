@@ -126,6 +126,7 @@ public class VoteServiceImpl implements VoteService {
 
         return VoteDto.GetResponse.builder()
                 .roomName(question.getRoom().getName())
+                .question(question.getQuestion())
                 .members(memberResponses)
                 .targetUser(targetUser)
                 .notNotedMemberCnt(notVotedCnt)
