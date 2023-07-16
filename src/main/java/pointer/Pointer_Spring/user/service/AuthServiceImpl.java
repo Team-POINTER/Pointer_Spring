@@ -193,7 +193,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
-                        user.getPassword() // "1111"
+                        kakaoDto.getId() // password
                 )
         ); // CustomUserDetailsService.loadUserByUsername
 
@@ -232,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
         User user = new User(User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
                 kakaoRequestDto.getEmail(), kakaoRequestDto.getName(), password, User.SignupType.KAKAO);
         userRepository.save(user);
-        System.out.println("kakao - user.getPassword() = " + user.getPassword());
+
         return user;
     }
 
