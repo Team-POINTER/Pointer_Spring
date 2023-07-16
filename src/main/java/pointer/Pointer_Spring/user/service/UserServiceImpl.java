@@ -23,13 +23,13 @@ public class UserServiceImpl implements UserService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public Long getPoints(Long userId){
+    public ResponseUser getPoints(Long userId){
         User user = userRepository.findByUserId(userId).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
         );
-        return user.getPoint();
+        return new ResponseUser(ExceptionCode.USER_GET_OK, user.getPoint());
     }
 
     @Override
@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
                 }
         );
         user.changeName(newName);
-        return new ResponseUser(ExceptionCode.USER_UPDATE_NM_SUCCESS);
+        return new ResponseUser(ExceptionCode.USER_UPDATE_OK);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.changeId(newId);
-        return new ResponseUser(ExceptionCode.USER_UPDATE_ID_SUCCESS);
+        return new ResponseUser(ExceptionCode.USER_UPDATE_OK);
     }
     private boolean isValidId(String id) {
         // 영문, 숫자, 특수문자 . 과 _ 만 사용 가능
@@ -79,12 +79,12 @@ public class UserServiceImpl implements UserService {
         return id.matches(pattern);
     }
 
-    public UserDto.UserInfo getUserInfo(Long userId) {
+    public ResponseUser getUserInfo(Long userId) {
         Optional<User> userOptional = userRepository.findByUserId(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             System.out.println(user.getUserId());
-            return new UserDto.UserInfo(user, cloudinaryService.getImages(userId));
+            return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user, cloudinaryService.getImages(userId)));
         } else {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         }

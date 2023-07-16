@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}/get/points")
-    public Long getPoint(@PathVariable Long userId){
+    public ResponseUser getPoint(@PathVariable Long userId){
         return userService.getPoints(userId);
     }
 
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/info")
-    public UserDto.UserInfo getUserInfo(@PathVariable Long userId){
+    public ResponseUser getUserInfo(@PathVariable Long userId){
         return userService.getUserInfo(userId);
     }
 

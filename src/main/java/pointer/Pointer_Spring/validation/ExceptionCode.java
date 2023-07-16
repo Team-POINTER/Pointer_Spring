@@ -31,17 +31,18 @@ public enum ExceptionCode {
     USER_SAVE_ID_OK(SUCCESS, "C003", "ID 저장 성공"),
     USER_CHECK_ID_OK(SUCCESS, "C004", "ID 중복 확인 성공"),
     USER_NO_CHECK_ID(SUCCESS, "C005", "ID 중복 확인 없음"),
-    USER_UPDATE_ID_SUCCESS(SUCCESS, "C006", "사용가능한 아이디로, 업데이트 성공"),
-    USER_UPDATE_NM_SUCCESS(SUCCESS, "C007", "이름 업데이트 성공"),
     USERE_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
 
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
-    USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),
+    IMAGE_GET_OK(SUCCESS, "D001", "사진 조회 성공"),
     USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),
     BACKGROUND_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D003", "배경 사진 수정 실패"),
     IMAGE_INVALID(INVALID_ACCESS, "D004", "유효하지 않은 파일"),
     IMAGE_NOT_FOUND(NOT_FOUND_VALUE, "D005", "존재하지 않는 이미지"),
+    USER_IMAGE_UPDATE_SUCCESS(SUCCESS, "D006", "회원 사진 수정 성공"),
+    BACKGROUND_IMAGE_UPDATE_SUCCESS(SUCCESS, "D007", "배경 사진 수정 성공"),
+
 
     /**
      * 채팅
@@ -116,6 +117,11 @@ public enum ExceptionCode {
     QUESTION_NOT_FOUND(INVALID_ACCESS, "K002", "질문이 없습니다."),
     QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
+
+    /**
+     * 질문
+     */
+    REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
 
     /**
      * 잘못된 ExceptionCode

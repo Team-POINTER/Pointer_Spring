@@ -5,9 +5,9 @@ import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.response.ResponseUser;
 
 public interface UserService {
-    Long getPoints(Long userId);
+    ResponseUser getPoints(Long userId);
     ResponseUser updateNm(Long userId, String name);
     ResponseUser updateId(Long userId, String id);
-    UserDto.UserInfo getUserInfo(Long userId);
+    ResponseUser getUserInfo(Long userId);
     User createUser(UserDto.CreateUserRequest createUserRequest);
 }
