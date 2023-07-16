@@ -36,8 +36,9 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+
+/*    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;*/
 
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter() {
@@ -109,10 +110,10 @@ public class SecurityConfig {
                         //.authorizationRequestRepository(cookieAuthorizationRequestRepository())
                         .and()
                     .redirectionEndpoint()
-                        .baseUri("/oauth2/callback/*")
-                        .and()
-                    .userInfoEndpoint()
-                        .userService(customOAuth2UserService);
+                        .baseUri("/oauth2/callback/*");
+                        //.and()
+                    //.userInfoEndpoint()
+                        //.userService(customOAuth2UserService);
                     //.successHandler(oAuth2AuthenticationSuccessHandler)
                     //.failureHandler(oAuth2AuthenticationFailureHandler);
 
