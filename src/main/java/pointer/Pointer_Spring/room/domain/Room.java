@@ -33,7 +33,7 @@ public class Room extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "writer_id")
 //    @JoinColumn(name = "user_id")
-    @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
+    @Column(name = "creator_id")
     private Long creatorId;
 
 

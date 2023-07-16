@@ -33,14 +33,16 @@ public class RoomDto {
         String question;
         int memberCnt;
         String topUserName;
+        boolean voted;
         //String topUserId;
 
-        public ListRoom(RoomMember roomMember, String question, String userNm) {
+        public ListRoom(RoomMember roomMember, String question, String userNm, boolean isVoted) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
             this.memberCnt = roomMember.getRoom().getMemberNum();
             this.question = question;
             this.topUserName = userNm;
+            this.voted = isVoted;
             //this.topUserId = user.getId();
         }
 
@@ -56,7 +58,6 @@ public class RoomDto {
     public static class CreateRequest {
         Long userId;
         String roomNm;//roomName
-        String question;
     }
 
     @Data

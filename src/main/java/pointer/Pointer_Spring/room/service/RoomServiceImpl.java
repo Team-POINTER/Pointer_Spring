@@ -48,7 +48,7 @@ public class RoomServiceImpl implements RoomService {
     private final FriendRepository friendRepository;
     private final VoteRepository voteRepository;
     private final QuestionRepository questionRepository;
-
+    private final String FIRST_QUESTION = "첫인상이 좋았던 사람을 지목해주세요";
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
@@ -63,7 +63,9 @@ public class RoomServiceImpl implements RoomService {
                                 .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
-                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
+
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(dto.getUserId(), latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
@@ -81,7 +83,9 @@ public class RoomServiceImpl implements RoomService {
                                 .orElseThrow(()-> new CustomException(ExceptionCode.QUESTION_NOT_FOUND));//updatedAt 기준
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
-                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm);
+
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(dto.getUserId(), latestQuestion.getId());
+                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     })
                     .collect(Collectors.toList());
         }
@@ -162,7 +166,7 @@ public class RoomServiceImpl implements RoomService {
         Question question = Question.builder()
                 .room(savedRoom)
                 .creatorId(foundUser.getUserId())
-                .question(createRoomDto.getQuestion())
+                .question(FIRST_QUESTION)
                 .build();
 
         questionRepository.save(question);

@@ -107,13 +107,15 @@ public class VoteDto {
     @NoArgsConstructor
     public static class GetHintResponse {
         private List<String> hint;
+        private List<String> voterNm;
         private int allVoteCnt;
         private int targetVotedCnt;
         private String createdAt;
 
         @Builder
-        public GetHintResponse(List<String> hint, int allVoteCnt, int targetVotedCnt, String createdAt) {
+        public GetHintResponse(List<String> hint, List<String> voterNm,  int allVoteCnt, int targetVotedCnt, String createdAt) {
             this.hint = hint;
+            this.voterNm = voterNm;
             this.allVoteCnt = allVoteCnt;
             this.targetVotedCnt = targetVotedCnt;
             this.createdAt = createdAt;
