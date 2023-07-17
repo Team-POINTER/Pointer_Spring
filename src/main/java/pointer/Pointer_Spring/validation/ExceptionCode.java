@@ -117,6 +117,12 @@ public enum ExceptionCode {
     QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
 
+
+    /**
+     * 신고
+     */
+    REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
+
     /**
      * 잘못된 ExceptionCode
      */
