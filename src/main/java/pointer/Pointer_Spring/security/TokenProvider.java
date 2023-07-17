@@ -69,4 +69,20 @@ public class TokenProvider {
             return ExceptionCode.JWT_CLAIMS_STRING_IS_EMPTY;
         }
     }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(appProperties.getAuth().getTokenSecret())
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            Date expirationDate = claims.getExpiration();
+            return expirationDate.before(new Date());
+        } catch (ExpiredJwtException ex) {
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }

@@ -45,7 +45,6 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
 
-    private final String PASSWORD = "1111";
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
 
@@ -201,11 +200,9 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
-                        PASSWORD // password
+                        "1111" // password
                 )
-        ); // CustomUserDetailsService.loadUserByUsername
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        );
 
         TokenDto tokenDto = createToken(authentication, user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
@@ -228,11 +225,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public User signup(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
-        String password = passwordEncoder.encode(PASSWORD);
-
         User user = new User(kakaoRequestDto.getEmail(), User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
-                kakaoRequestDto.getName(), password, User.SignupType.KAKAO);
+                kakaoRequestDto.getName(), passwordEncoder.encode("1111"), User.SignupType.KAKAO);
         userRepository.save(user);
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        "1111" // password
+                )
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return user;
     }
@@ -251,7 +254,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
-                        PASSWORD //user.getPassword() // password
+                        "1111" //user.getPassword() // password
                 )
         );
 
