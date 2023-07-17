@@ -225,12 +225,11 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    @Transactional
     public User signup(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
         String password = passwordEncoder.encode(kakaoRequestDto.getId());
 
-        User user = new User(User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
-                kakaoRequestDto.getEmail(), kakaoRequestDto.getName(), password, User.SignupType.KAKAO);
+        User user = new User(kakaoRequestDto.getEmail(), User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
+                kakaoRequestDto.getName(), password, User.SignupType.KAKAO);
         userRepository.save(user);
 
         return user;

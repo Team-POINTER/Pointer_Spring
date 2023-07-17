@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pointer.Pointer_Spring.security.CustomUserDetailsService;
-import pointer.Pointer_Spring.security.RestAuthenticationEntryPoint;
 import pointer.Pointer_Spring.security.TokenAuthenticationFilter;
-import pointer.Pointer_Spring.security.oauth2.CustomOAuth2UserService;
+import pointer.Pointer_Spring.security.handler.JwtAccessDeniedHandler;
+import pointer.Pointer_Spring.security.handler.JwtAuthenticationEntryPoint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +32,12 @@ import java.util.List;
         jsr250Enabled = true,
         prePostEnabled = true
 )
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
 
 /*    @Autowired
@@ -84,9 +87,13 @@ public class SecurityConfig {
                     .disable()
                 .httpBasic()
                     .disable()
+
+                // exception handling 할 때 우리가 만든 클래스를 추가
                 .exceptionHandling()
-                    .authenticationEntryPoint(new RestAuthenticationEntryPoint())
-                    .and()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
+
+                .and()
                 .authorizeRequests()
                     .antMatchers("/",
                         "/error",
