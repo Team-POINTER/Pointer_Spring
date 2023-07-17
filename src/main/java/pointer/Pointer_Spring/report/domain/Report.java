@@ -12,6 +12,7 @@ import javax.persistence.*;
 
 @Getter
 @Entity(name = "Report")
+@RequiredArgsConstructor
 public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
