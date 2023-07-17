@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
 
+    private final String PASSWORD = "1111";
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
 
@@ -145,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
 
         Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
         if (findUser.isPresent()) { // 상대 id
-                return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
+            return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
         }
         else if (user.getCheckId() == 1) {
             user.setId(userInfo.getId(), COMPLETE);
@@ -190,21 +191,21 @@ public class AuthServiceImpl implements AuthService {
             user = findUser.get();
         }
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        kakaoDto.getId() // password
-                )
-        ); // CustomUserDetailsService.loadUserByUsername
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         if (user.getId().equals(User.SignupType.KAKAO+user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : SignupType + email
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         }
         else {
             exception = ExceptionCode.SIGNUP_COMPLETE;
         }
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        PASSWORD // password
+                )
+        ); // CustomUserDetailsService.loadUserByUsername
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = createToken(authentication);
         user.setToken(tokenDto.getRefreshToken());
@@ -226,7 +227,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public User signup(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
-        String password = passwordEncoder.encode(kakaoRequestDto.getId());
+        String password = passwordEncoder.encode(PASSWORD);
 
         User user = new User(kakaoRequestDto.getEmail(), User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
                 kakaoRequestDto.getName(), password, User.SignupType.KAKAO);
@@ -249,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),
-                        user.getId() // password 대신 id 사용
+                        PASSWORD //user.getPassword() // password
                 )
         );
 

@@ -41,11 +41,11 @@ public class AuthController {
         User user;
         if (findUser.isEmpty()) {
             user = new User(signUpRequest.getEmail(), signUpRequest.getId(), signUpRequest.getName(),
-                    passwordEncoder.encode(signUpRequest.getId()), User.SignupType.KAKAO);
+                    passwordEncoder.encode("1111"), User.SignupType.KAKAO); // password
             userRepository.save(user);
 
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                    user.getEmail(), user.getId());
+                    user.getEmail(), "1111");
 
             Authentication authentication = authenticationManager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -59,7 +59,7 @@ public class AuthController {
         user = findUser.get();
 
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getId());
+                user.getEmail(), "1111");
 
         Authentication authentication = authenticationManager.authenticate(token);
 
@@ -93,12 +93,12 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.reissue(userPrincipal), HttpStatus.OK);
     }
 
-    @PostMapping("user/id") // id 저장
+    @PostMapping("/user/id") // id 저장
     public ResponseEntity<Object> saveId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(userPrincipal, info), HttpStatus.OK);
     }
 
-    @PostMapping("user/checkId") // 중복 확인
+    @PostMapping("/user/checkId") // 중복 확인
     public ResponseEntity<Object> checkId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.checkId(userPrincipal, info), HttpStatus.OK);
     }

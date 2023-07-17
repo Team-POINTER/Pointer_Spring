@@ -21,29 +21,20 @@ public class TokenProvider {
     @Autowired
     private AppProperties appProperties;
 
-    public String createToken(Authentication authentication, boolean day) {
+    public String createToken(Authentication authentication, boolean refresh) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        Date now = new Date();
-        Date expiryDate;
-        if (day) {
-            expiryDate = new Date(now.getTime() + appProperties.getAuth().getTokenExpirationMsec()); // 5일
+        int time;
+        if (refresh) {
+            time = (int) (appProperties.getAuth().getTokenExpirationDay()*60*24); // 5일
         } else {
-            expiryDate = new Date(now.getTime() + 3*appProperties.getAuth().getTokenExpirationMsec()); // 15일
+            time = (int) (appProperties.getAuth().getTokenExpirationDay()*3*60*24); // 15일
         }
-
-/*        return Jwts.builder()
-                .setSubject(Long.toString(userPrincipal.getId()))
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, appProperties.getAuth().getTokenSecret())
-                .compact();*/
 
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
-                .setIssuedAt(new Date())
                 .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
-                .setExpiration(expiryDate)
+                .setExpiration(Date.from(ZonedDateTime.now().plusDays(time).toInstant()))
                 .signWith(SignatureAlgorithm.HS256, appProperties.getAuth().getTokenSecret())
                 .compact();
     }
