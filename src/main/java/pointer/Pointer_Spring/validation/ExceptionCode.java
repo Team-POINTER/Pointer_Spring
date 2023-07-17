@@ -59,9 +59,13 @@ public enum ExceptionCode {
     /**
      *  토큰
      */
-    EXPIRED_TOKEN(INVALID_ACCESS, "G000","expired access-token"),
-    MALFORMED_TOKEN(INVALID_ACCESS, "G001","incorrect access-token"),
-    UNAUTHORIZED_TOKEN(INVALID_ACCESS, "G002", "invalid access-token"),
+    INVALID_JWT_SIGNATURE(UNAUTHORIZED,"G000", "타당하지 않은 JWT 서명 오류"),
+    INVALID_JWT_TOKEN(UNAUTHORIZED,"G001", "잘못된 JWT 토큰 오류"),
+    EXPIRED_JWT_TOKEN(UNAUTHORIZED,"G002", "만료된 JWT 토큰 오류"),
+    UNSUPPORTED_JWT_TOKEN(UNAUTHORIZED,"G003", "지원되지 않는 JWT 토큰 오류"),
+    JWT_CLAIMS_STRING_IS_EMPTY(UNAUTHORIZED,"G004", "JWT 클레임 문자열이 비어 있음 오류"),
+    TOKEN_SUCCESS(SUCCESS, "G005", "토큰 확인 성공"),
+
 
     REISSUE_TOKEN(SUCCESS, "H000", "reissued token"),
     INVALID_REFRESH_TOKEN(INVALID_ACCESS, "H001", "non-existent refresh-token"),

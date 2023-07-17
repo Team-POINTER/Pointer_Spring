@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
 import org.hibernate.validator.constraints.UniqueElements;
@@ -20,15 +21,30 @@ public class UserDto {
     @Setter
     @Getter
     public static class BasicUser {
-        int userId;
         String id;
     }
 
     @Getter
-    public static class UserResponse extends ResponseType {
-        int userId;
+    public static class TokenResponse extends ResponseType {
+        TokenDto tokenDto;
 
-        public UserResponse(ExceptionCode exceptionCode, int userId) {
+        public TokenResponse(ExceptionCode exceptionCode, TokenDto tokenDto) {
+            super(exceptionCode);
+            this.tokenDto = tokenDto;
+        }
+    }
+
+    @Getter
+    public static class UserResponse extends ResponseType {
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Long userId;
+
+        public UserResponse(ExceptionCode exceptionCode) {
+            super(exceptionCode);
+        }
+
+        public UserResponse(ExceptionCode exceptionCode, Long userId) {
             super(exceptionCode);
             this.userId = userId;
         }

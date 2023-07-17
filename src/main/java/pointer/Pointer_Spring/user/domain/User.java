@@ -91,7 +91,7 @@ public class User extends BaseEntity {
     }
 
 
-    @Builder(builderMethodName = "KakaoBuilder")
+    //@Builder(builderMethodName = "KakaoBuilder")
     public User(String email, String id, String name, String password, SignupType type) {
         this.email = email;
         this.id = id;
