@@ -51,7 +51,7 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             //System.out.println("SecurityContextHolder.getContext().toString() = " + SecurityContextHolder.getContext().toString());
 
-            TokenDto tokenDto = authServiceImpl.createToken(authentication);
+            TokenDto tokenDto = authServiceImpl.createToken(authentication, user.getUserId());
             user.setToken(tokenDto.getRefreshToken());
             userRepository.save(user);
             return new ResponseEntity<>(tokenDto, HttpStatus.OK);
@@ -63,7 +63,7 @@ public class AuthController {
 
         Authentication authentication = authenticationManager.authenticate(token);
 
-        TokenDto tokenDto = authServiceImpl.createToken(authentication);
+        TokenDto tokenDto = authServiceImpl.createToken(authentication, user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
         userRepository.save(user);
 

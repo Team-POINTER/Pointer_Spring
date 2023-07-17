@@ -207,7 +207,7 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        TokenDto tokenDto = createToken(authentication);
+        TokenDto tokenDto = createToken(authentication, user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
         userRepository.save(user);
 
@@ -215,12 +215,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    public TokenDto createToken(Authentication authentication) { // token 발급
+    public TokenDto createToken(Authentication authentication, Long userId) { // token 발급
 
         String accessToken = tokenProvider.createToken(authentication, Boolean.FALSE); // access
-        String refreshToken = tokenProvider.createToken(authentication, Boolean.FALSE); // refresh
+        String refreshToken = tokenProvider.createToken(authentication, Boolean.TRUE); // refresh
 
         return TokenDto.builder()
+                .userId(userId)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -256,7 +257,7 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        TokenDto tokenDto = createToken(authentication);
+        TokenDto tokenDto = createToken(authentication, user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
         userRepository.save(user);
 

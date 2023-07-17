@@ -81,7 +81,7 @@ public class FriendDto {
 
     @Data
     public static class FriendUserDto {
-        private Long userId;
+        //private Long userId;
         // pageable
         private int lastPage;
 
@@ -89,7 +89,7 @@ public class FriendDto {
 
     @Data
     public static class FindFriendDto {
-        private Long userId;
+        //private Long userId;
         private String keyword;
         // pageable
         private int lastPage;
@@ -103,7 +103,7 @@ public class FriendDto {
 
     @Data
     public static class RequestFriendDto {
-        private Long userId;
+        //private Long userId;
         private Long memberId;
     }
 }
