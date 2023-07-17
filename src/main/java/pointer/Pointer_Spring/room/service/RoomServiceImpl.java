@@ -18,6 +18,7 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -51,10 +52,11 @@ public class RoomServiceImpl implements RoomService {
     private final String FIRST_QUESTION = "첫인상이 좋았던 사람을 지목해주세요";
 
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
-    public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
+    public ResponseRoom getRoomList(UserPrincipal userPrincipal, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
+        Long userId = userPrincipal.getId();
         if (kwd == null) {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1)
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, 1)
                     .stream()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
@@ -64,11 +66,11 @@ public class RoomServiceImpl implements RoomService {
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
-                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(dto.getUserId(), latestQuestion.getId());
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
                         return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     }).toList();
         } else {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(dto.getUserId(), 1).stream()
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, 1).stream()
                     .filter(roomMember -> {
                         Room room = roomMember.getRoom();
                         Optional<Question> latestQuestion = room.getQuestions().stream()
@@ -84,7 +86,7 @@ public class RoomServiceImpl implements RoomService {
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
-                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(dto.getUserId(), latestQuestion.getId());
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
                         return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     })
                     .collect(Collectors.toList());
@@ -133,10 +135,10 @@ public class RoomServiceImpl implements RoomService {
 
 
     //validation 정해지면 ( 룸 이름 중복 가능)
-    public ResponseRoom createRoom(CreateRequest createRoomDto, HttpServletRequest request) {
+    public ResponseRoom createRoom(UserPrincipal userPrincipal, CreateRequest createRoomDto, HttpServletRequest request) {
         isValidRoomNmLength(createRoomDto.getRoomNm());
 
-        User foundUser = userRepository.findById(createRoomDto.getUserId()).orElseThrow(//이후 토큰으로 변경 필요
+        User foundUser = userRepository.findById(userPrincipal.getId()).orElseThrow(//이후 토큰으로 변경 필요
             () -> {
                 throw new CustomException(ExceptionCode.USER_NOT_FOUND);
             }
@@ -160,9 +162,6 @@ public class RoomServiceImpl implements RoomService {
 
         //createdRoom.setInvitation(createLink(createdRoom));
 
-        String accessToken = "accessToken";
-        String refreshToken = "refreshToken";//?
-
         Question question = Question.builder()
                 .room(savedRoom)
                 .creatorId(foundUser.getUserId())
@@ -173,7 +172,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse(accessToken, refreshToken, new DetailResponse(savedRoom, question, roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
 
@@ -206,8 +205,8 @@ public class RoomServiceImpl implements RoomService {
 
 
     @Override
-    public ResponseRoom exitRoom(Long roomId, ExitRequest exitRequestDto){//남은 사람 있는지 확인
-        User foundUser = userRepository.findById(exitRequestDto.getUserId()).orElseThrow(()->new CustomException(ExceptionCode.USER_NOT_FOUND));
+    public ResponseRoom exitRoom(Long roomId, UserPrincipal userPrincipal){//남은 사람 있는지 확인
+        User foundUser = userRepository.findById(userPrincipal.getId()).orElseThrow(()->new CustomException(ExceptionCode.USER_NOT_FOUND));
         RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(roomId, foundUser.getUserId(), 1).orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
 
         foundUser.updateRoomLimit(foundUser.getRoomLimit() - 1);
@@ -281,7 +280,8 @@ public class RoomServiceImpl implements RoomService {
 
     //초대 가능 여부 리스트 보내기 - 여기서 해당 유저가 초대 가능한 지 따짐
     @Override
-    public ResponseRoom isInviteMembersList(Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+    public ResponseRoom isInviteMembersList(UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
+        Long userId = userPrincipal.getId();
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, 1)){//초대하려는 유저가 룸 멤버가 아닐 때
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }

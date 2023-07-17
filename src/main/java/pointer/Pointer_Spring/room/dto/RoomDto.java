@@ -10,10 +10,6 @@ import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.user.domain.User;
 
 public class RoomDto {
-    @Data
-    public static class FindRoomRequest{
-        Long userId;
-    }
 
     @Data
     public static class ListResponse {
@@ -56,21 +52,15 @@ public class RoomDto {
 
     @Data
     public static class CreateRequest {
-        Long userId;
         String roomNm;//roomName
     }
 
     @Data
     public static class CreateResponse {
 
-        String accessToken;
-        String refreshToken;
         DetailResponse detailResponse;
 
-        public CreateResponse(String accessToken, String refreshToken,
-            DetailResponse detailResponse) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public CreateResponse(DetailResponse detailResponse) {
             this.detailResponse = detailResponse;
         }
     }
@@ -111,14 +101,14 @@ public class RoomDto {
             this.privateRoomNm = roomMember.getPrivateRoomNm();
         }
     }
-    @Data
-    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
-        Long userId;//user 고유 string id
-    }
+//    @Data
+//    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
+//        Long userId;//user 고유 string id
+//    }
 
     @Data
     public static class InviteRequest {
-        Long userId;//초대하는 유저
+        //Long userId;//초대하는 유저
         Long roomId;
         List<Long> userFriendIdList;
     }
@@ -157,13 +147,13 @@ public class RoomDto {
             INVITE, OVERLIMIT, ALREADY
         }
         Reason reason;
-        Long userId;
+        //Long userId;
         String nickNm;
         LocalDateTime updateAt;
 
         public IsInviteMember( User user, Friend f) {
             this.isInvite = true;
-            this.userId = user.getUserId();
+            //this.userId = user.getUserId();
             this.nickNm = f.getFriendName();
             this.reason = Reason.INVITE;
             this.updateAt = f.getUpdatedAt();
