@@ -2,6 +2,7 @@ package pointer.Pointer_Spring.user.service;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,7 +25,9 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Transactional
@@ -39,6 +42,9 @@ public class AuthServiceImpl implements AuthService {
     @Value("${kakao.redirectURI}")
     private String redirectUri;
 
+    @Value("${kakao.web.redirectURI}")
+    private String webRedirectUri;
+
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -48,7 +54,9 @@ public class AuthServiceImpl implements AuthService {
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
 
-    public String getKakaoAccessToken(String code) {
+    private static final SecureRandom random = new SecureRandom();
+
+    public String getKakaoAccessToken(String code, boolean web) {
         String access_Token;
         //String refresh_Token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token";
@@ -62,9 +70,14 @@ public class AuthServiceImpl implements AuthService {
             conn.setDoOutput(true); // POST 요청
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+
+            String uri;
+            if (web) uri = webRedirectUri;
+            else uri = redirectUri;
+
             String sb = "grant_type=authorization_code" +
                     "&client_id=" + restApiKey + // REST_API_KEY
-                    "&redirect_uri=" + redirectUri + // REDIRECT_URI
+                    "&redirect_uri=" + uri + // REDIRECT_URI
                     "&code=" + code;
             bw.write(sb);
             bw.flush();
@@ -187,7 +200,7 @@ public class AuthServiceImpl implements AuthService {
         ExceptionCode exception;
 
         if (findUser.isEmpty()) {
-            user = signup(kakaoDto, password);
+            user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
         } else {
             user = findUser.get();
         }
@@ -228,12 +241,64 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    public User signup(KakaoRequestDto kakaoRequestDto, String password) { // 비밀번호 설정
+    public User signup(KakaoRequestDto kakaoRequestDto, String id, String password) { // 비밀번호 설정
 
-        User user = new User(kakaoRequestDto.getEmail(), User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
-                kakaoRequestDto.getName(), passwordEncoder.encode(password), User.SignupType.KAKAO);
+        User user = new User(kakaoRequestDto.getEmail(), id, kakaoRequestDto.getName(),
+                passwordEncoder.encode(password), User.SignupType.KAKAO);
         userRepository.save(user);
         return user;
+    }
+
+    public String generateRandomId() {
+        int randomNumber = ThreadLocalRandom.current().nextInt(5, 15 + 1);
+        return RandomStringUtils.randomAlphanumeric(randomNumber);
+    }
+
+    @Override // 카카오 소셜 로그잉
+    public Object webKakaoCheck(String code) {
+        String password = "1111";
+        KakaoRequestDto kakaoDto = getKakaoUser(code);
+
+        if (kakaoDto == null) {
+            return new ResponseKakaoUser(ExceptionCode.USER_NOT_FOUND);
+        }
+
+        Optional<User> findUser = userRepository.findByEmailAndTypeAndStatus(kakaoDto.getEmail(), User.SignupType.KAKAO,1);
+        User user;
+
+        if (findUser.isEmpty()) {
+            String id = null;
+            for (int i = 0; i < 10; i++) {
+                id = generateRandomId();
+                if (userRepository.findByIdAndStatus(id, 1).isEmpty()) {
+                    break;
+                }
+                else if (i == 9) {
+                    return new ResponseKakaoUser(ExceptionCode.USER_EXCEED_ID); // ID 생성 횟수 초과
+                }
+            }
+            user = signup(kakaoDto, id, password);
+            user.setId(id, COMPLETE);
+        } else {
+            user = findUser.get();
+        }
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        "1111" // password
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        TokenDto tokenDto = createToken(authentication, user.getUserId());
+        tokenDto.setId(user.getId());
+
+        user.setToken(tokenDto.getRefreshToken());
+        userRepository.save(user);
+
+        return new UserDto.TokenResponse(ExceptionCode.SIGNUP_COMPLETE, tokenDto);
     }
 
     @Override
