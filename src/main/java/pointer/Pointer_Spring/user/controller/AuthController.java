@@ -64,6 +64,8 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(token);
 
         TokenDto tokenDto = authServiceImpl.createToken(authentication, user.getUserId());
+        tokenDto.setId(user.getId());
+        tokenDto.setUserId(user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
         userRepository.save(user);
 
@@ -72,20 +74,30 @@ public class AuthController {
 
     @GetMapping("/user")
     public ResponseEntity<Object> test2() {
-        return new ResponseEntity<>("/user", HttpStatus.OK);
+        return new ResponseEntity<>("success!", HttpStatus.OK);
     }
 
     @GetMapping("/auth/kakao")
     public Object kakaoLogin(@RequestParam String code) {
-        // code와 username이 들어올 예정
-        String accessToken = authServiceImpl.getKakaoAccessToken(code);
+        String accessToken = authServiceImpl.getKakaoAccessToken(code, false);
         return new ResponseEntity<>(authServiceImpl.kakaoCheck(accessToken), HttpStatus.OK);
+    }
+
+    @GetMapping("/auth/kakao/web")
+    public Object webKakaoLogin(@RequestParam String code) {
+        String accessToken = authServiceImpl.getKakaoAccessToken(code, true);
+        return new ResponseEntity<>(authServiceImpl.webKakaoCheck(accessToken), HttpStatus.OK);
     }
 
     // real
     @PostMapping("/auth/login") // kakao social login
     public ResponseEntity<Object> login(@RequestBody TokenRequest tokenRequest) {
         return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/login/web")
+    public Object webKakaoLogin(@RequestBody TokenRequest tokenRequest) {
+        return new ResponseEntity<>(authServiceImpl.webKakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
     }
 
     @PostMapping("/user/reissue") // token 재발급

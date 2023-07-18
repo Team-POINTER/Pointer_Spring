@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         }
         // 중복 체크
         if (userRepository.existsById(newId)) {
-            throw new CustomException(ExceptionCode.USERE_DUPLICATED_ID);
+            throw new CustomException(ExceptionCode.USER_DUPLICATED_ID);
         }
 
         user.changeId(newId);

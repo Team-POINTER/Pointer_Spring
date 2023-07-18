@@ -31,8 +31,8 @@ public enum ExceptionCode {
     USER_SAVE_ID_OK(SUCCESS, "C003", "ID 저장 성공"),
     USER_CHECK_ID_OK(SUCCESS, "C004", "ID 중복 확인 성공"),
     USER_NO_CHECK_ID(SUCCESS, "C005", "ID 중복 확인 없음"),
-    USERE_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
-
+    USER_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
+    USER_EXCEED_ID(DUPLICATED_VALUE, "C009", "ID 생성 실패"),
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     IMAGE_GET_OK(SUCCESS, "D001", "사진 조회 성공"),

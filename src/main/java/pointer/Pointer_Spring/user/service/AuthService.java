@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface AuthService {
     Object kakaoCheck(String accessToken);
     KakaoRequestDto getKakaoUser(String token);
+    Object webKakaoCheck(String code);
 
     Object saveId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
     Object checkId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
