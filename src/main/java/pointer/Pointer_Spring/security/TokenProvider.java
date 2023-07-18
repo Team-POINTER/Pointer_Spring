@@ -26,9 +26,9 @@ public class TokenProvider {
 
         int time;
         if (refresh) {
-            time = (int) (appProperties.getAuth().getTokenExpirationDay()*60*24); // 5일
-        } else {
             time = (int) (appProperties.getAuth().getTokenExpirationDay()*3*60*24); // 15일
+        } else {
+            time = (int) (appProperties.getAuth().getTokenExpirationDay()*60*24); // 5일
         }
 
         return Jwts.builder()

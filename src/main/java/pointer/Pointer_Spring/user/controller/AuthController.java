@@ -88,7 +88,7 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
     }
 
-    @PostMapping("/auth/reissue") // token 재발급
+    @PostMapping("/user/reissue") // token 재발급
     public ResponseEntity<Object> reissue(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.reissue(userPrincipal), HttpStatus.OK);
     }

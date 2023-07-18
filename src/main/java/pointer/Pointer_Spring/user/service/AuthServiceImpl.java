@@ -174,6 +174,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override // 카카오 소셜 로그잉
     public Object kakaoCheck(String code) {
+
+        String password = "1111"; // 오류
         KakaoRequestDto kakaoDto = getKakaoUser(code);
 
         if (kakaoDto == null) {
@@ -185,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         ExceptionCode exception;
 
         if (findUser.isEmpty()) {
-            user = signup(kakaoDto);
+            user = signup(kakaoDto, password);
         } else {
             user = findUser.get();
         }
@@ -203,6 +205,8 @@ public class AuthServiceImpl implements AuthService {
                         "1111" // password
                 )
         );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = createToken(authentication, user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
@@ -224,19 +228,11 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    public User signup(KakaoRequestDto kakaoRequestDto) { // 비밀번호 설정
+    public User signup(KakaoRequestDto kakaoRequestDto, String password) { // 비밀번호 설정
+
         User user = new User(kakaoRequestDto.getEmail(), User.SignupType.KAKAO.name()+kakaoRequestDto.getEmail(),
-                kakaoRequestDto.getName(), passwordEncoder.encode("1111"), User.SignupType.KAKAO);
+                kakaoRequestDto.getName(), passwordEncoder.encode(password), User.SignupType.KAKAO);
         userRepository.save(user);
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        "1111" // password
-                )
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
         return user;
     }
 
