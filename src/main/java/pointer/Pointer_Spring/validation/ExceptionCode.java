@@ -114,14 +114,18 @@ public enum ExceptionCode {
     QUESTION_CREATED_FAILED(INVALID_ACCESS, "K000", "질문 생성 실패"),
     CURRENT_QUESTION_NOT_FOUND(INVALID_ACCESS, "K001", "현재 질문이 없습니다."),
     QUESTION_NOT_FOUND(INVALID_ACCESS, "K002", "질문이 없습니다."),
-    QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
+
+    HINT_NOT_FOUND(INVALID_ACCESS, "K004", "힌트를 찾을 수 없습니다."),
 
 
     /**
      * 신고
      */
     REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
+    REPORT_NOT_FOUND(NOT_FOUND_VALUE, "L001", "신고 존재하지 않음"),
+    REPORTED_USER(INVALID_ACCESS, "L002", "일시적 신고 처리된 유저"),
+    ALREADY_REPORT(DUPLICATED_VALUE, "L002", "이미 처리된 신고"),
 
     /**
      * 잘못된 ExceptionCode

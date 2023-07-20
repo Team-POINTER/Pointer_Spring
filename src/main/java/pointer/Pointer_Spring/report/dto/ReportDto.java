@@ -41,7 +41,7 @@ public class ReportDto {
     @Getter
     public static class ReportRequest{
         private Long roomId;
-        private String data;
+        private Long dataId;
         private Report.ReportType type;
         private Long targetUserId;
         private Long reportingUserId;
@@ -49,9 +49,9 @@ public class ReportDto {
         private ReportReason reasonCode;
 
         @Builder
-        public ReportRequest(Long roomId, String data, Report.ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
+        public ReportRequest(Long roomId, Long dataId, Report.ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
             this.roomId = roomId;
-            this.data = data;
+            this.dataId = dataId;
             this.type =type;
             this.targetUserId = targetUserId;
             this.reportingUserId = reportingUserId;

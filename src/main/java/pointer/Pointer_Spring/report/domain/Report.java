@@ -20,9 +20,11 @@ public class Report extends BaseEntity {
     private Long reportId;
 
     @ManyToOne
+    @JoinColumn(name = "Room_room_id")
     private Room room;
 
-    private String data;
+    @Column(name = "data_id")
+    private Long dataId;
     public enum ReportType{
         QUESTION, HINT
     }
@@ -32,7 +34,7 @@ public class Report extends BaseEntity {
     private ReportType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_user")
+    @JoinColumn(name = "target_user_id")
     private User targetUser;
 
     private String reason;
@@ -45,9 +47,9 @@ public class Report extends BaseEntity {
 
 
     @Builder
-    public Report(Room room, String data, ReportType type, String reason, User targetUser, ReportReason reportCode, Long reportingUserId ){
+    public Report(Room room, Long dataId, ReportType type, String reason, User targetUser, ReportReason reportCode, Long reportingUserId ){
         this.room = room;
-        this.data = data;
+        this.dataId = dataId;
         this.type = type;
         this.reason = reason;
         this.targetUser = targetUser;

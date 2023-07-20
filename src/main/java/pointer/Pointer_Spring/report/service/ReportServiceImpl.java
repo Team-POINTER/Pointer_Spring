@@ -3,10 +3,16 @@ package pointer.Pointer_Spring.report.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.report.domain.BlockedUser;
 import pointer.Pointer_Spring.report.domain.Report;
+import pointer.Pointer_Spring.report.domain.RestrictedUser;
 import pointer.Pointer_Spring.report.domain.UserReport;
 import pointer.Pointer_Spring.report.dto.ReportDto;
+import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.report.repository.ReportRepository;
+import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.report.repository.UserReportRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
@@ -14,16 +20,23 @@ import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
+import pointer.Pointer_Spring.vote.domain.VoteHistory;
+import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
 public class ReportServiceImpl implements ReportService {
+    private final String REPORT_QUESTION = "해당 질문은 삭제되었습니다.";
     private final UserReportRepository userReportRepository;
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final RoomRepository roomRepository;
+    private final VoteRepository voteRepository;
+    private final QuestionRepository questionRepository;
+    private final BlockedUserRepository blockedUserRepository;
+    private final RestrictedUserRepository restrictedUserRepository;
     @Override
     @Transactional
     public ReportDto.UserReportResponse saveUserReport(ReportDto.UserReportRequest reportRequest) {
@@ -38,8 +51,10 @@ public class ReportServiceImpl implements ReportService {
                 .build();
 
         //중복확인
-        if (!userReportRepository.existsByTargetUserUserIdAndReportingUserId(targetUser.getUserId(), reportingUserId)){
+        if (!userReportRepository.existsByTargetUserUserIdAndReportingUserId(targetUser.getUserId(), reportingUserId)) {
             userReportRepository.save(userReport);
+        }else{
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
         }
 
         return ReportDto.UserReportResponse.builder()
@@ -55,8 +70,23 @@ public class ReportServiceImpl implements ReportService {
         User targetUser = userRepository.findById(reportRequest.getTargetUserId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
         Long reportingUserId = reportRequest.getReportingUserId();
+        Long dataId = reportRequest.getDataId();
+
+        String data = reportRequest.getType() == Report.ReportType.HINT?
+                voteRepository.findById(dataId).orElseThrow(()->new CustomException(ExceptionCode.HINT_NOT_FOUND)).getHint()
+                : questionRepository.findById(dataId).orElseThrow(()->new CustomException(ExceptionCode.QUESTION_NOT_FOUND)).getQuestion();
 
         Room reportRoom = roomRepository.findById(reportRequest.getRoomId()).orElseThrow(()->new CustomException(ExceptionCode.ROOM_NOT_FOUND));
+
+        //중복확인
+        if(reportRequest.getType()== Report.ReportType.HINT &&
+                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndType(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.HINT)){
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
+        } else if ((reportRequest.getType()== Report.ReportType.QUESTION &&
+                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndType(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.QUESTION))){
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
+        }
+
         Report report = Report.builder()
                 .targetUser(targetUser)
                 .reportCode(reportRequest.getReasonCode())
@@ -64,41 +94,94 @@ public class ReportServiceImpl implements ReportService {
                 .reason(reportRequest.getReason())
                 .room(reportRoom)
                 .type(reportRequest.getType())
-                .data(reportRequest.getData())
+                .dataId(dataId)
                 .build();
-
-        //중복확인
-        if (!reportRepository.existsByTargetUserUserIdAndReportingUserId(targetUser.getUserId(), reportingUserId)){
-            reportRepository.save(report);
-        }
+        reportRepository.save(report);
 
         ReportDto.ReportResponse reportResponse = ReportDto.ReportResponse.builder()
                 .targetUserId(targetUser.getUserId())
                 .reportingUserId(reportingUserId)
                 .reason(reportRequest.getReason())
                 .type(reportRequest.getType())
-                .data(reportRequest.getData())
+                .data(data)
                 .reasonCode(reportRequest.getReasonCode())
                 .roomId(reportRoom.getRoomId())
                 .build();
         return reportResponse;
     }
 
+    /**
+     * 관리자 모드로 관리
+     */
+
     //콘텐츠 삭제
-    public void deleteContents(){
+    @Override
+    public void deleteContents(Long reportId){
+        Report report = reportRepository.findById(reportId).orElseThrow(
+                ()->new CustomException(ExceptionCode.REPORT_NOT_FOUND)
+        );
+        Long dataId = report.getDataId();
+        if(report.getType() == Report.ReportType.QUESTION){
+            Question question = questionRepository.findById(dataId).orElseThrow(()->new CustomException(ExceptionCode.QUESTION_NOT_FOUND));
+            question.modify(REPORT_QUESTION);
+
+        } else if (report.getType() == Report.ReportType.HINT) {
+            VoteHistory voteHistory =  voteRepository.findById(dataId).orElseThrow(()-> new CustomException(ExceptionCode.HINT_NOT_FOUND));
+            voteHistory.updateHint(null);
+        }
 
     }
     //영구적인 제한
-    public void permanentRestriction(Long userReportId){
-        
+    @Override
+    public void permanentRestrictionByUserReport(Long userReportId){
+        UserReport userReport = userReportRepository.findById(userReportId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
+        );
+        User user = userRepository.findById(userReport.getTargetUser().getUserId()).get();
+        if(checkDuplicatedPermanentRestriction(user.getEmail())){
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
+        }
+        blockedUserRepository.save(new BlockedUser(user.getEmail(), user.getId()));
+        user.setStatus(0);
+    }
+    @Override
+    public void permanentRestrictionByOtherReport(Long reportId){
+        Report report = reportRepository.findById(reportId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
+        );
+        User user = userRepository.findById(report.getTargetUser().getUserId()).get();
+        if(checkDuplicatedPermanentRestriction(user.getEmail())){
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
+        }
+        blockedUserRepository.save(new BlockedUser(user.getEmail(), user.getId()));
+        user.setStatus(0);
+    }
+    private boolean checkDuplicatedPermanentRestriction(String email){
+        return blockedUserRepository.existsByEmail(email);
     }
 
     //일시적인 기능 제한
-    public void temporalRestriction(){
+    @Override
+    public void temporalRestriction(Long reportId){
+        Report report = reportRepository.findById(reportId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
+        );
+        Long targetUserId = report.getTargetUser().getUserId();
+        Report.ReportType reportType = report.getType();
+        Long roomId = report.getRoom().getRoomId();
+        Long questionId = questionRepository.findTopByRoomIdOrderByCreatedAtDesc(roomId).getId();
+        if(checkDuplicatedTemporalRestriction(targetUserId, roomId, reportType)){
+            throw new CustomException(ExceptionCode.ALREADY_REPORT);
+        }
 
+        restrictedUserRepository.save(new RestrictedUser(report, targetUserId, reportType, roomId, questionId));
+        report.getTargetUser().updateIsQuestionRestricted(true);
+    }
+    private boolean checkDuplicatedTemporalRestriction(Long targetUserId, Long roomId, Report.ReportType reportType){
+        return restrictedUserRepository.existsByTargetUserIdAndRoomIdAndReportType(targetUserId, roomId, reportType);
     }
 
-    // 관리자 모드
+    // 관리자 조회 모드
     @Override
     public List<UserReport> getUserReports(Long userId){//신고한 사람이 신고한 목록
         return userReportRepository.findAllByReportingUserId(userId);
@@ -106,6 +189,10 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public UserReport getUserReport(Long userId, Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
         return userReportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
+    }
+    @Override
+    public List<UserReport> getUserReportByTarget(Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
+        return userReportRepository.findAllByTargetUserUserId(targetUserId);
     }
 
     @Override
@@ -115,5 +202,9 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Report getReport(Long userId, Long targetUserId){
         return reportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
+    }
+    @Override
+    public List<Report> getReportsByTarget(Long targetUserId){//신고한 사람이 신고한 목록
+        return reportRepository.findAllByTargetUserUserId(targetUserId);
     }
 }

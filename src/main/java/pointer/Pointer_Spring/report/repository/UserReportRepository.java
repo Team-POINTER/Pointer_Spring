@@ -9,7 +9,9 @@ import java.util.List;
 public interface UserReportRepository extends JpaRepository<UserReport, Long> {
 
     UserReport save(UserReport userReport);
-    List<UserReport> findAllByReportingUserId(Long userId);
+    List<UserReport> findAllByReportingUserId(Long userId);//userid == reportingUserId
     boolean existsByTargetUserUserIdAndReportingUserId(Long reportingUserId, Long targetUserId);
     UserReport findByTargetUserUserIdAndReportingUserId(Long userId, Long targetUserId);
+
+    List<UserReport> findAllByTargetUserUserId(Long targetId);
 }

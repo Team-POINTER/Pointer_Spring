@@ -19,7 +19,7 @@ public class UserReport extends BaseEntity {
     @Column(name = "user_report_id", unique = true)
     private Long userReportId;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_user")
+    @JoinColumn(name = "target_user_id")
     private User targetUser;
     private String reason;
     @Column(name = "report_code")

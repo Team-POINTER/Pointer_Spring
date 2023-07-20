@@ -28,13 +28,29 @@ public class ReportController {
     }
 
     //관리자 모드에서 실행할 api
-
+    @PatchMapping("/report/delete/")
+    public void deleteContents(Long reportId){
+        reportService.deleteContents(reportId);
+    }
+    @PostMapping("/report/delete/")
+    public void permanentRestrictionByUserReport(Long userReportId){
+        reportService.permanentRestrictionByUserReport(userReportId);
+    }
+    @PostMapping("/report/delete/")
+    public void permanentRestrictionByOtherReport(Long reportId){
+        reportService.permanentRestrictionByOtherReport(reportId);
+    }
+    @PostMapping("/report/delete/")
+    public void temporalRestriction(Long reportId){
+        reportService.temporalRestriction(reportId);
+    }
 
     //추후 관리자 모드로 관리시 필요할 수도 있는 api
     @GetMapping("/user-reports/{userId}")//신고한 사람
     public void getUserReports(@PathVariable Long userId){
         reportService.getUserReports(userId);
     }
+    //신고 받은 사람도 필요할 듯
     @GetMapping("/user-report/{userId}/{targetId}")
     public void getUserReport(@PathVariable Long userId, @PathVariable Long targetId){
         reportService.getUserReport(userId, targetId);
