@@ -4,8 +4,10 @@ import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.report.domain.Report;
+import pointer.Pointer_Spring.report.domain.RestrictedUser;
+import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
-import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.user.domain.User;
@@ -28,19 +30,21 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final VoteRepository voteRepository;
+    private final RestrictedUserRepository restrictedUserRepository;
 
     public QuestionServiceImpl(
             QuestionRepository questionRepository,
             RoomRepository roomRepository,
             UserRepository userRepository,
             RoomMemberRepository roomMemberRepository,
-            VoteRepository voteRepository
-    ) {
+            VoteRepository voteRepository,
+            RestrictedUserRepository restrictedUserRepository) {
         this.questionRepository = questionRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.roomMemberRepository = roomMemberRepository;
         this.voteRepository = voteRepository;
+        this.restrictedUserRepository = restrictedUserRepository;
     }
 
     @Override
@@ -58,9 +62,24 @@ public class QuestionServiceImpl implements QuestionService {
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
+        //신고 당한 유저인지
+        if(user.isQuestionRestricted()){
+            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(user.getUserId(), room.getRoomId(), Report.ReportType.QUESTION);
+            Long questionId = questionRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId()).getId();
+            if(restrictedUser.getCurrentQuestionId() != questionId) {
+                restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
+                restrictedUser.updateCurrentQuestionId(questionId);
+            }
+            if(restrictedUser.getTemporalNum() == 0){
+                user.updateIsQuestionRestricted(false);
+            }
+            throw new CustomException(ExceptionCode.REPORTED_USER);
+        }
 
         // 질문 생성 가능한지 확인
         validQuestionTime();
+
+        //모든 맴버가 투표를 했으면 질문 활성화
 
         Question question = Question.builder()
                 .room(room)

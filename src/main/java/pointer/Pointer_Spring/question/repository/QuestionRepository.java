@@ -16,4 +16,5 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     List<Question> findAllByRoomOrderByCreatedAtDesc(Room room);
     List<Question> findAllByQuestionContaining(String kwd);
+    Question findTopByRoomIdOrderByCreatedAtDesc(Long roomId);
 }
