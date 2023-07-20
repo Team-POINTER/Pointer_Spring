@@ -14,4 +14,6 @@ public interface AuthService {
     Object saveId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
     Object checkId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
     Object reissue(UserPrincipal userPrincipal);
+
+    Object resign(UserPrincipal userPrincipal);
 }

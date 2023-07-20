@@ -39,8 +39,13 @@ public class Room extends BaseEntity {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();
+
     public void updateMemberNum(Integer memberNum){
         this.memberNum = memberNum;
+    }
+
+    public void updateMemberNum(){
+        this.memberNum -= 1;
     }
 
 
@@ -51,6 +56,5 @@ public class Room extends BaseEntity {
         this.memberNum = 1;
         this.votingNum = 0;
     }
-
 
 }

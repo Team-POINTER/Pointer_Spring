@@ -13,13 +13,15 @@ public enum ExceptionCode {
     SIGNUP_DUPLICATED_ID(DUPLICATED_VALUE, "A002", "ID 중복"),
     SIGNUP_DUPLICATED_USERNAME(DUPLICATED_VALUE, "A003", "USERNAME 중복"),
     USER_KAKAO_INVALID(NOT_FOUND_VALUE, "A004","카카오 소셜 로그인 실패"),
-
+    SIGNUP_LIMITED_ID(NOT_FOUND_VALUE, "A005","제한된 회원"),
+    SIGNUP_PERMANENT_LIMITED_ID(NOT_FOUND_VALUE, "A006","영구 제한된 회원"),
+    RESIGN_OK(SUCCESS,"A007", "회원 탈퇴 성공"),
 
     LOGIN_OK(SUCCESS, "B000", "로그인 성공"),
     LOGIN_NOT_FOUND_ID(NOT_FOUND_VALUE, "B001", "로그인 실패"),
     LOGIN_NOT_FOUND_PW(NOT_FOUND_VALUE, "B002", "로그인 실패"),
     LOGOUT_OK(SUCCESS, "B003", "로그아웃 성공"),
-    LOGOUT_STATE(UNAUTHORIZED, "B004", "로그아웃 상태"),
+    LOGOUT_INVALID(NOT_FOUND_VALUE, "B004", "로그아웃 실패"),
 
     /**
      * 회원정보

@@ -64,8 +64,11 @@ public class User extends BaseEntity {
     @Column(name = "room_limit")
     private Integer roomLimit;
 
-    @Column(length = 1000)
+    @Column(length = 400)
     private String token;
+
+    @Column(length = 400)
+    private String socialToken;
 
     private Long point;
 
@@ -92,11 +95,12 @@ public class User extends BaseEntity {
 
 
     //@Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String name, String password, SignupType type) {
+    public User(String email, String id, String name, String password, SignupType type, String socialToken) {
         this.email = email;
         this.id = id;
         this.name = name;
         this.password = password;
+        this.socialToken = socialToken;
         this.type = type;
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
