@@ -41,7 +41,7 @@ public class AuthController {
         User user;
         if (findUser.isEmpty()) {
             user = new User(signUpRequest.getEmail(), signUpRequest.getId(), signUpRequest.getName(),
-                    passwordEncoder.encode("1111"), User.SignupType.KAKAO); // password
+                    passwordEncoder.encode("1111"), User.SignupType.KAKAO, "test"); // password
             userRepository.save(user);
 
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -105,6 +105,11 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.reissue(userPrincipal), HttpStatus.OK);
     }
 
+    @PostMapping("/user/agree") // 동의
+    public ResponseEntity<Object> saveAgree(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.UserAgree agree) {
+        return new ResponseEntity<>(authServiceImpl.saveAgree(userPrincipal, agree), HttpStatus.OK);
+    }
+
     @PostMapping("/user/id") // id 저장
     public ResponseEntity<Object> saveId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(userPrincipal, info), HttpStatus.OK);
@@ -113,5 +118,10 @@ public class AuthController {
     @PostMapping("/user/checkId") // 중복 확인
     public ResponseEntity<Object> checkId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.checkId(userPrincipal, info), HttpStatus.OK);
+    }
+
+    @PostMapping("/user/resign") // 회원 탈퇴
+    public ResponseEntity<Object> resign(@CurrentUser UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(authServiceImpl.resign(userPrincipal), HttpStatus.OK);
     }
 }

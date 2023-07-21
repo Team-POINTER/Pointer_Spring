@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
+import pointer.Pointer_Spring.user.dto.UserDto;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -64,8 +65,14 @@ public class User extends BaseEntity {
     @Column(name = "room_limit")
     private Integer roomLimit;
 
-    @Column(length = 1000)
+    @Column(length = 400)
     private String token;
+
+    @Column(length = 400)
+    private String socialToken;
+
+    @ColumnDefault("false")
+    private boolean tokenExpired;
 
     private Long point;
 
@@ -76,6 +83,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.type = type;
+        this.tokenExpired = false;
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
@@ -92,11 +100,13 @@ public class User extends BaseEntity {
 
 
     //@Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String name, String password, SignupType type) {
+    public User(String email, String id, String name, String password, SignupType type, String socialToken) {
         this.email = email;
         this.id = id;
         this.name = name;
         this.password = password;
+        this.socialToken = socialToken;
+        this.tokenExpired = false;
         this.type = type;
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
@@ -110,10 +120,10 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void setService(boolean serviceAgree, boolean serviceAge, boolean marketing) {
-        this.serviceAge = serviceAge;
-        this.serviceAgree = serviceAgree;
-        this.marketing = marketing;
+    public void setService(UserDto.UserAgree agree) {
+        this.serviceAge = agree.isServiceAge();
+        this.serviceAgree = agree.isServiceAgree();
+        this.marketing = agree.isMarketing();
     }
 
     public void changeName(String newName) {
@@ -127,7 +137,12 @@ public class User extends BaseEntity {
     }
 
     public void setToken(String token) {
+        this.tokenExpired = false;
         this.token = token;
+    }
+
+    public void setTokenExpired() { // 로그아웃 : 토큰 만료
+        this.tokenExpired = true;
     }
 
     public void setId(String id, int checkId) {

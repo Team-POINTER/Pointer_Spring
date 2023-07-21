@@ -11,8 +11,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.friend.repository.FriendRepository;
+import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.room.domain.Room;
+import pointer.Pointer_Spring.room.domain.RoomMember;
+import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
+import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.Image;
+import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.*;
@@ -26,6 +36,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -50,6 +61,13 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
+
+    private final ImageRepository imageRepository;
+    private final FriendRepository friendRepository; // 자기 기준, 상대쪽 모두 제거
+    private final RoomMemberRepository roomMemberRepository;
+    private final RoomRepository roomRepository; // 혼자만 있는 방
+    private final QuestionRepository questionRepository; // 삭제 되는 방의 질문
+
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -142,6 +160,7 @@ public class AuthServiceImpl implements AuthService {
                     .id(id)
                     .email(email)
                     .name(name)
+                    .token(token)
                     .build();
         } catch (Exception e) {
             throw new CustomException(ExceptionCode.USER_KAKAO_INVALID);
@@ -150,11 +169,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Object saveId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo) {
-        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        /*.orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
-        );
+        );*/
 
         Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
         if (findUser.isPresent()) { // 상대 id
@@ -200,6 +220,10 @@ public class AuthServiceImpl implements AuthService {
         ExceptionCode exception;
 
         if (findUser.isEmpty()) {
+            // 제한된 회원 확인 : user -> 제한 회원 table?
+            /*if (~Repository.findByEmailAndStatus(kakaoDto.getEmail(), STATUS).isPresent()) {
+                return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
+            }*/
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
         } else {
             user = findUser.get();
@@ -244,7 +268,7 @@ public class AuthServiceImpl implements AuthService {
     public User signup(KakaoRequestDto kakaoRequestDto, String id, String password) { // 비밀번호 설정
 
         User user = new User(kakaoRequestDto.getEmail(), id, kakaoRequestDto.getName(),
-                passwordEncoder.encode(password), User.SignupType.KAKAO);
+                passwordEncoder.encode(password), User.SignupType.KAKAO, kakaoRequestDto.getToken());
         userRepository.save(user);
         return user;
     }
@@ -302,14 +326,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Object saveAgree(UserPrincipal userPrincipal, UserDto.UserAgree agree) {
+        if (!agree.isServiceAgree() || !agree.isServiceAge()) {
+            return new UserDto.UserResponse(ExceptionCode.USER_AGREE_INVALID);
+        }
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        user.setService(agree);
+        userRepository.save(user);
+        return new UserDto.UserResponse(ExceptionCode.USER_AGREE_OK);
+    }
+
+    @Override
     public Object reissue(UserPrincipal userPrincipal) {
         Optional<User> findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS);
 
         // reissue 비교
 
-        if (findUser.isEmpty()) {
+        /*if (findUser.isEmpty()) {
             return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
-        }
+        }*/
 
         User user = findUser.get();
         Authentication authentication = authenticationManager.authenticate(
@@ -326,5 +361,41 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return new UserDto.TokenResponse(ExceptionCode.REISSUE_TOKEN, tokenDto);
+    }
+
+    @Override
+    public Object resign(UserPrincipal userPrincipal) {
+        /*Optional<User> findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS);
+        if (findUser.isEmpty()) {
+            return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
+        }*/
+
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS).get();
+
+        List<Friend> friends = friendRepository.findByUserUserIdOrUserFriendIdAndStatus(user.getUserId(), user.getUserId(), STATUS);
+        for (Friend friend : friends) friend.delete();
+
+        List<Image> images = imageRepository.findByUserUserIdAndStatus(user.getUserId(), STATUS);
+        for (Image image : images) image.delete();
+
+        List<RoomMember> roomMembers = roomMemberRepository.findByUserUserIdAndStatus(user.getUserId(), STATUS);
+        for (RoomMember member : roomMembers) {
+            member.getRoom().updateMemberNum();
+            member.delete();
+        }
+
+        List<Room> rooms = roomRepository.findBymemberNumAndStatus(0, STATUS);
+        for (Room room : rooms) {
+            for (Question question : room.getQuestions()) {
+                question.delete();
+            }
+            room.delete();
+        }
+
+        // alarm 부분은 status가 없어서 임시 제거 불가?
+
+        userRepository.delete(user);
+
+        return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
     }
 }
