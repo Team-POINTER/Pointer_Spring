@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class FriendController {
 
     private final FriendService friendService;

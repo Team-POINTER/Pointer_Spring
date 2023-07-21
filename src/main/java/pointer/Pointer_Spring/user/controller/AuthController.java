@@ -25,7 +25,7 @@ import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 import java.util.Optional;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
