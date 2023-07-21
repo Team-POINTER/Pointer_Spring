@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +25,13 @@ import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 import java.util.Optional;
 
 @Controller
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
 
     //  test
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
 
@@ -40,8 +41,12 @@ public class AuthController {
         Optional<User> findUser = userRepository.findByEmailAndStatus(signUpRequest.getEmail(), 1);
         User user;
         if (findUser.isEmpty()) {
+
+            // {id}ENCODED_PASSWORD 형태
+            PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+
             user = new User(signUpRequest.getEmail(), signUpRequest.getId(), signUpRequest.getName(),
-                    passwordEncoder.encode("1111"), User.SignupType.KAKAO, "test"); // password
+                    encoder.encode("1111"), User.SignupType.KAKAO, "test"); // password
             userRepository.save(user);
 
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(

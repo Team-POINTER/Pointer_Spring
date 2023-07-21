@@ -27,7 +27,7 @@ import java.util.List;
 @ResponseBody
 @RequiredArgsConstructor
 @RequestMapping("/room")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class RoomController {
 
     private final RoomService roomService;

@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.friend.domain.Friend;
@@ -58,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
 
@@ -267,8 +268,11 @@ public class AuthServiceImpl implements AuthService {
 
     public User signup(KakaoRequestDto kakaoRequestDto, String id, String password) { // 비밀번호 설정
 
+        // {id}ENCODED_PASSWORD 형태
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+
         User user = new User(kakaoRequestDto.getEmail(), id, kakaoRequestDto.getName(),
-                passwordEncoder.encode(password), User.SignupType.KAKAO, kakaoRequestDto.getToken());
+                encoder.encode(password), User.SignupType.KAKAO, kakaoRequestDto.getToken());
         userRepository.save(user);
         return user;
     }
@@ -281,6 +285,7 @@ public class AuthServiceImpl implements AuthService {
     @Override // 카카오 소셜 로그잉
     public Object webKakaoCheck(String code) {
         String password = "1111";
+
         KakaoRequestDto kakaoDto = getKakaoUser(code);
 
         if (kakaoDto == null) {

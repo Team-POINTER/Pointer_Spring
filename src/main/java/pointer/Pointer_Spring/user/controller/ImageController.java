@@ -12,7 +12,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/image")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class ImageController {
     private final CloudinaryService cloudinaryService;
 
