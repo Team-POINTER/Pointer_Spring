@@ -18,6 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmailAndTypeAndStatus(String email, User.SignupType type, int status);
     Optional<User> findByIdAndStatus(String id, int status);
     Optional<User> findByUserIdAndStatus(Long userId, int status);
+    Optional<User> findByUserIdAndTokenExpiredAndStatus(Long userId, boolean tokenToken, int status);
     Optional<User> findByTokenAndStatus(String token, int status);
     boolean existsByEmailAndTypeAndStatus(String email, User.SignupType type, int status);
     // pageable
@@ -28,4 +29,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserId(Long userId);
     boolean existsById(String id);
     boolean existsByUserIdAndStatus(Long userId, int status);
+
 }

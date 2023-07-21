@@ -326,6 +326,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Object saveAgree(UserPrincipal userPrincipal, UserDto.UserAgree agree) {
+        if (!agree.isServiceAgree() || !agree.isServiceAge()) {
+            return new UserDto.UserResponse(ExceptionCode.USER_AGREE_INVALID);
+        }
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        user.setService(agree);
+        userRepository.save(user);
+        return new UserDto.UserResponse(ExceptionCode.USER_AGREE_OK);
+    }
+
+    @Override
     public Object reissue(UserPrincipal userPrincipal) {
         Optional<User> findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS);
 

@@ -3,22 +3,16 @@ package pointer.Pointer_Spring.user.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
-import org.hibernate.validator.constraints.UniqueElements;
-import pointer.Pointer_Spring.friend.dto.FriendDto;
-import lombok.Setter;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 public class UserDto {
 
-    @Setter
     @Getter
     public static class BasicUser {
         String id;
@@ -56,6 +50,14 @@ public class UserDto {
         public DuplicateUserResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
         }
+    }
+
+    @Getter
+    public static class UserAgree  {
+
+        private boolean serviceAgree;
+        private boolean serviceAge;
+        private boolean marketing;
     }
 
     @Data

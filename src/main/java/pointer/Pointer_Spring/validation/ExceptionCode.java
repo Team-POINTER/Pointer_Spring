@@ -36,6 +36,9 @@ public enum ExceptionCode {
     USER_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
     USER_EXCEED_ID(DUPLICATED_VALUE, "C009", "ID 생성 실패"),
 
+    USER_AGREE_INVALID(INVALID_ACCESS, "C010", "약관에 동의하지 않은 사용자"),
+    USER_AGREE_OK(SUCCESS, "C011", "약관 동의 성공"),
+
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     IMAGE_GET_OK(SUCCESS, "D001", "사진 조회 성공"),
     USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),

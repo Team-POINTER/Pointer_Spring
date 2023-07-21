@@ -105,6 +105,11 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.reissue(userPrincipal), HttpStatus.OK);
     }
 
+    @PostMapping("/user/agree") // 동의
+    public ResponseEntity<Object> saveAgree(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.UserAgree agree) {
+        return new ResponseEntity<>(authServiceImpl.saveAgree(userPrincipal, agree), HttpStatus.OK);
+    }
+
     @PostMapping("/user/id") // id 저장
     public ResponseEntity<Object> saveId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(userPrincipal, info), HttpStatus.OK);

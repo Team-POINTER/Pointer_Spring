@@ -3,6 +3,7 @@ package pointer.Pointer_Spring.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.WeakKeyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -41,7 +43,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(jwt)) {
                 if (tokenProvider.isTokenExpired(jwt)) {
                     createResponse(ExceptionCode.EXPIRED_JWT_TOKEN, response);
-                    return;
                 } else {
                     Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(jwt); // jwt check
 
@@ -59,7 +60,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
 
-        } catch (SignatureException ex) {
+        } catch (WeakKeyException ex) {
             logger.error("Invalid JWT signature");
             createResponse(ExceptionCode.INVALID_JWT_SIGNATURE, response);
         } catch (MalformedJwtException ex) {
@@ -87,7 +88,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private ServletResponse createResponse(ExceptionCode exceptionCode, ServletResponse response) throws IOException {
+    private void createResponse(ExceptionCode exceptionCode, ServletResponse response) throws IOException {
         ObjectNode json = new ObjectMapper().createObjectNode();
         json.put("state", HttpServletResponse.SC_UNAUTHORIZED); // exceptionCode.getStatus().getValue()
         json.put("code", exceptionCode.getCode());
@@ -99,9 +100,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         String newResponse = new ObjectMapper().writeValueAsString(json);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setContentLength(newResponse.getBytes("UTF-8").length);
+        response.setContentLength(newResponse.getBytes(StandardCharsets.UTF_8).length);
         response.getWriter().write(newResponse);
-
-        return response;
     }
 }
