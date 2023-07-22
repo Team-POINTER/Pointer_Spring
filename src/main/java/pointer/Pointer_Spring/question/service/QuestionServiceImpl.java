@@ -8,6 +8,7 @@ import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.RestrictedUser;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
+import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.user.domain.User;
@@ -63,23 +64,14 @@ public class QuestionServiceImpl implements QuestionService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
         //신고 당한 유저인지
-        if(user.isQuestionRestricted()){
-            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(user.getUserId(), room.getRoomId(), Report.ReportType.QUESTION);
-            Long questionId = questionRepository.findTopByRoomIdOrderByCreatedAtDesc(room.getRoomId()).getId();
-            if(restrictedUser.getCurrentQuestionId() != questionId) {
-                restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
-                restrictedUser.updateCurrentQuestionId(questionId);
-            }
-            if(restrictedUser.getTemporalNum() == 0){
-                user.updateIsQuestionRestricted(false);
-            }
-            throw new CustomException(ExceptionCode.REPORTED_USER);
+        if(user.isQuestionRestricted()){ //질문 생성마다 새로운 투표를 해야함 -> 따라서 신고 처리 확인 로직 존재
+            throw new CustomException(ExceptionCode.REPORTED_USER);//
         }
 
         // 질문 생성 가능한지 확인
         validQuestionTime();
 
-        //모든 맴버가 투표를 했으면 질문 활성화
+        //모든 맴버가 투표를 했으면 질문 활성화해야함
 
         Question question = Question.builder()
                 .room(room)
@@ -89,10 +81,32 @@ public class QuestionServiceImpl implements QuestionService {
 
         questionRepository.save(question);
 
+        handlingReportRoomMembers(roomMemberRepository.findAllByRoomAndUserIsQuestionRestrictedEquals(room, true), roomMemberRepository.findAllByRoomAndUserIsHintRestrictedEquals(room, true));
+
         return QuestionDto.CreateResponse.builder()
                 .questionId(question.getId())
                 .content(question.getQuestion())
                 .build();
+    }
+    private void handlingReportRoomMembers(List<RoomMember> questionRestrictedRoomMembers, List<RoomMember> hintRestrictedRoomMembers){
+        for(RoomMember roomMember : questionRestrictedRoomMembers){
+            RestrictedUser restrictedUser = restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.QUESTION);
+
+            restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
+            if (restrictedUser.getTemporalNum() == 0) {
+                roomMember.getUser().updateIsQuestionRestricted(false);
+                restrictedUser.setStatus(0);
+            }
+        }
+        for(RoomMember roomMember : hintRestrictedRoomMembers){//힌트는 현재 질문에서 투표를 했든 안했든 다음 부터 적용되는데 만약 지금 질문에 투표를 안했다면 지금 질문을 제외하고도 3번 더 투표흫 못 함
+            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.HINT);
+            if(restrictedUser.getTemporalNum() == 0){
+                roomMember.getUser().updateIsHintRestricted(false);
+                restrictedUser.setStatus(0);
+            }
+
+            restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
+        }
     }
 
     private void validQuestionTime() {

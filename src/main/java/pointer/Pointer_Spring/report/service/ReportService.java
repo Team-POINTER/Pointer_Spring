@@ -5,17 +5,18 @@ import pointer.Pointer_Spring.report.domain.UserReport;
 import pointer.Pointer_Spring.report.dto.ReportDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReportService {
     ReportDto.UserReportResponse saveUserReport(ReportDto.UserReportRequest reportRequest);
-    List<UserReport> getUserReports(Long userId);
-    UserReport getUserReport(Long userId, Long targetUserId);
-    List<UserReport> getUserReportByTarget(Long targetUserId);
+    List<ReportDto.UserReportResponse> getUserReports(Long userId);
+    ReportDto.UserReportResponse getUserReport(Long userId, Long targetUserId);
+    List<ReportDto.UserReportResponse> getUserReportsByTarget(Long targetUserId);
 
     ReportDto.ReportResponse saveReport(ReportDto.ReportRequest reportRequest);
-    List<Report> getReports(Long userId);
-    Report getReport(Long userId, Long targetUserId);
-    public List<Report> getReportsByTarget(Long targetUserId);
+    List<ReportDto.ReportResponse> getReports(Long userId);
+    //Report getReport(Long userId, Long targetUserId);
+    public List<ReportDto.ReportResponse> getReportsByTarget(Long targetUserId);
 
 
     void deleteContents(Long reportId);

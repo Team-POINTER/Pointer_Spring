@@ -24,6 +24,8 @@ import pointer.Pointer_Spring.vote.domain.VoteHistory;
 import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -116,6 +118,7 @@ public class ReportServiceImpl implements ReportService {
 
     //콘텐츠 삭제
     @Override
+    @Transactional
     public void deleteContents(Long reportId){
         Report report = reportRepository.findById(reportId).orElseThrow(
                 ()->new CustomException(ExceptionCode.REPORT_NOT_FOUND)
@@ -133,6 +136,7 @@ public class ReportServiceImpl implements ReportService {
     }
     //영구적인 제한
     @Override
+    @Transactional
     public void permanentRestrictionByUserReport(Long userReportId){
         UserReport userReport = userReportRepository.findById(userReportId).orElseThrow(
                 () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
@@ -145,6 +149,7 @@ public class ReportServiceImpl implements ReportService {
         user.setStatus(0);
     }
     @Override
+    @Transactional
     public void permanentRestrictionByOtherReport(Long reportId){
         Report report = reportRepository.findById(reportId).orElseThrow(
                 () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
@@ -162,6 +167,7 @@ public class ReportServiceImpl implements ReportService {
 
     //일시적인 기능 제한
     @Override
+    @Transactional
     public void temporalRestriction(Long reportId){
         Report report = reportRepository.findById(reportId).orElseThrow(
                 () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
@@ -169,42 +175,67 @@ public class ReportServiceImpl implements ReportService {
         Long targetUserId = report.getTargetUser().getUserId();
         Report.ReportType reportType = report.getType();
         Long roomId = report.getRoom().getRoomId();
-        Long questionId = questionRepository.findTopByRoomIdOrderByCreatedAtDesc(roomId).getId();
         if(checkDuplicatedTemporalRestriction(targetUserId, roomId, reportType)){
             throw new CustomException(ExceptionCode.ALREADY_REPORT);
         }
 
-        restrictedUserRepository.save(new RestrictedUser(report, targetUserId, reportType, roomId, questionId));
-        report.getTargetUser().updateIsQuestionRestricted(true);
+        restrictedUserRepository.save(new RestrictedUser(report, targetUserId, reportType, roomId));
+        if(reportType== Report.ReportType.QUESTION) {
+            report.getTargetUser().updateIsQuestionRestricted(true);
+        }else if(reportType== Report.ReportType.HINT){
+            report.getTargetUser().updateIsHintRestricted(true);
+        }
     }
+
     private boolean checkDuplicatedTemporalRestriction(Long targetUserId, Long roomId, Report.ReportType reportType){
         return restrictedUserRepository.existsByTargetUserIdAndRoomIdAndReportType(targetUserId, roomId, reportType);
     }
 
     // 관리자 조회 모드
     @Override
-    public List<UserReport> getUserReports(Long userId){//신고한 사람이 신고한 목록
-        return userReportRepository.findAllByReportingUserId(userId);
+    public List<ReportDto.UserReportResponse> getUserReports(Long userId){//신고한 사람이 신고한 목록
+        return userReportRepository.findAllByReportingUserId(userId).stream()
+                .map(ReportDto.UserReportResponse::new).collect(Collectors.toList());
     }
     @Override
-    public UserReport getUserReport(Long userId, Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
-        return userReportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
+    public ReportDto.UserReportResponse  getUserReport(Long userId, Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
+        UserReport userReport = userReportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
+        return ReportDto.UserReportResponse.builder()
+                .reportingUserId(userReport.getReportingUserId())
+                .reasonCode(userReport.getReportCode())
+                .targetUserId(userReport.getTargetUser().getUserId())
+                .reason(userReport.getReason())
+                .build();
+
     }
     @Override
-    public List<UserReport> getUserReportByTarget(Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
-        return userReportRepository.findAllByTargetUserUserId(targetUserId);
+    public List<ReportDto.UserReportResponse> getUserReportsByTarget(Long targetUserId){//일단 targetId로 받는데 targetUser의 고유 id등으로 논의 필요(프론트는 targetUserId알 수 있는지 확인)
+        return userReportRepository.findAllByTargetUserUserId(targetUserId).stream()
+                .map(ReportDto.UserReportResponse::new).collect(Collectors.toList());
     }
 
     @Override
-    public List<Report> getReports(Long userId){//신고한 사람이 신고한 목록
-        return reportRepository.findAllByReportingUserId(userId);
+    public List<ReportDto.ReportResponse> getReports(Long userId){//신고한 사람이 신고한 목록
+
+        return reportRepository.findAllByReportingUserId(userId).stream()
+                .map(report -> {
+                    String data = report.getType() == Report.ReportType.HINT
+                            ? voteRepository.findById(report.getDataId()).get().getHint()
+                            : questionRepository.findById(report.getDataId()).get().getQuestion();
+                    return new ReportDto.ReportResponse(report, data);
+                }).collect(Collectors.toList());
     }
+//    @Override
+//    public Report getReport(Long userId, Long targetUserId){
+//        return reportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
+//    }
     @Override
-    public Report getReport(Long userId, Long targetUserId){
-        return reportRepository.findByTargetUserUserIdAndReportingUserId(targetUserId, userId);
-    }
-    @Override
-    public List<Report> getReportsByTarget(Long targetUserId){//신고한 사람이 신고한 목록
-        return reportRepository.findAllByTargetUserUserId(targetUserId);
+    public List<ReportDto.ReportResponse> getReportsByTarget(Long targetUserId){//신고한 사람이 신고한 목록
+        return reportRepository.findAllByTargetUserUserId(targetUserId).stream().map(report -> {
+            String data = report.getType() == Report.ReportType.HINT
+                    ? voteRepository.findById(report.getDataId()).get().getHint()
+                    : questionRepository.findById(report.getDataId()).get().getQuestion();
+            return new ReportDto.ReportResponse(report, data);
+        }).collect(Collectors.toList());
     }
 }

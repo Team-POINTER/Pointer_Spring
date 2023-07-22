@@ -56,19 +56,18 @@ public class VoteServiceImpl implements VoteService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
-        //신고 당한 유저인지
+//        //신고 당한 유저인지
         if(user.isHintRestricted()){
-            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(user.getUserId(), question.getRoom().getRoomId(), Report.ReportType.HINT);
-            Long questionId = question.getId();
-
-            if(restrictedUser.getCurrentQuestionId() != questionId) {
-                restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
-                restrictedUser.updateCurrentQuestionId(questionId);
-            }//지금 신고된 상황에서 질문의 다음 질문부터 패널티 적용됨
-
-            if(restrictedUser.getTemporalNum() == 0){
-                user.updateIsHintRestricted(false);
-            }
+//            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(user.getUserId(), question.getRoom().getRoomId(), Report.ReportType.HINT);
+//            Long questionId = question.getId();
+//
+//            if(restrictedUser.getCurrentQuestionId() != questionId) {
+//                restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
+//            }//지금 신고된 상황에서 질문의 다음 질문부터 패널티 적용됨
+//
+//            if(restrictedUser.getTemporalNum() == 0){
+//                user.updateIsHintRestricted(false);
+//            }
             throw new CustomException(ExceptionCode.REPORTED_USER);//한 턴 동안만 막아야해
         }//생성이 안되니까 신고 당한 유저가 있을 시 룸 멤버 수보다 투표 가능 인원 수 가 더 적게 나옴
 

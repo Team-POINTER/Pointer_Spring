@@ -22,6 +22,7 @@ public class UserReport extends BaseEntity {
     @JoinColumn(name = "target_user_id")
     private User targetUser;
     private String reason;
+    @Enumerated(EnumType.STRING)
     @Column(name = "report_code")
     private ReportReason reportCode;
 

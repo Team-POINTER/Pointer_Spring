@@ -125,8 +125,9 @@ public enum ExceptionCode {
     REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
     REPORT_NOT_FOUND(NOT_FOUND_VALUE, "L001", "신고 존재하지 않음"),
     REPORTED_USER(INVALID_ACCESS, "L002", "일시적 신고 처리된 유저"),
-    ALREADY_REPORT(DUPLICATED_VALUE, "L002", "이미 처리된 신고"),
-
+    ALREADY_REPORT(DUPLICATED_VALUE, "L003", "이미 처리된 신고"),
+    REPORT_GET_SUCCESS(SUCCESS, "L004", "신고 조회 성공"),
+    REPORT_HANDLE_SUCCESS(SUCCESS, "L005", "신고 처리 성공"),
     /**
      * 잘못된 ExceptionCode
      */
