@@ -177,9 +177,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseMemberRoom updateRoomNm(ModifyRoomNmRequest modifyRoomNmRequestDto){//validation정해지면 ( 룸 이름 중복 가능)
+    public ResponseMemberRoom updateRoomNm(UserPrincipal userPrincipal, ModifyRoomNmRequest modifyRoomNmRequestDto){//validation정해지면 ( 룸 이름 중복 가능)
         RoomMember roomMember = roomMemberRepository
-                .findByRoom_RoomIdAndUser_UserIdAndStatus(modifyRoomNmRequestDto.getRoomId(), modifyRoomNmRequestDto.getUserId(), 1)
+                .findByRoom_RoomIdAndUser_UserIdAndStatus(modifyRoomNmRequestDto.getRoomId(), userPrincipal.getId(), 1)
                 .orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
 
         String roomNm = roomRepository.findById(modifyRoomNmRequestDto.getRoomId()).get().getName();
@@ -261,9 +261,7 @@ public class RoomServiceImpl implements RoomService {
         List<InviteMember> invitedMemberList = invitedRoomMemberInfoList.stream()
                 .map(RoomDto.InviteMember::new).toList();
 
-        String accessToken = "accessToken";
-        String refreshToken = "refreshToken";
-        InviteResponse inviteResponse = new InviteResponse(accessToken, refreshToken, invitedMemberList);
+        InviteResponse inviteResponse = new InviteResponse(invitedMemberList);
 
         //초대한 사람 목록에 원래 존재하던 사람 제외 필요
         return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION,inviteResponse);

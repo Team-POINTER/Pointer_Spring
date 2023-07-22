@@ -32,7 +32,7 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    @PostMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
+    @GetMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
     public ResponseRoom getRoomList(@CurrentUser UserPrincipal userPrincipal, @RequestParam(required = false) String kwd, HttpServletRequest request) {
         return roomService.getRoomList(userPrincipal, kwd, request);
     }
@@ -55,8 +55,8 @@ public class RoomController {
 //            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = SwaggerTestDto.class))),
 //            @ApiResponse(responseCode = "404", description = "500과 동일")
 //    })
-    public Object updateRoomName(@RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
-        return roomService.updateRoomNm(dto);
+    public Object updateRoomName(@CurrentUser UserPrincipal userPrincipal, @RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
+        return roomService.updateRoomNm(userPrincipal, dto);
     }
 
     @PostMapping("/invite/members")
@@ -75,7 +75,7 @@ public class RoomController {
         return roomService.getInviteMembers(roomId);
     }
 
-    @PostMapping("/{room-id}/exit")
+    @GetMapping("/{room-id}/exit")
     public Object exitRoom(@PathVariable(name = "room-id") Long roomId, @CurrentUser UserPrincipal userPrincipal, HttpServletRequest request) {
         return roomService.exitRoom(roomId, userPrincipal);
     }

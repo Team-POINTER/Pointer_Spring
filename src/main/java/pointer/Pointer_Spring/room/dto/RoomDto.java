@@ -101,10 +101,6 @@ public class RoomDto {
             this.privateRoomNm = roomMember.getPrivateRoomNm();
         }
     }
-//    @Data
-//    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
-//        Long userId;//user 고유 string id
-//    }
 
     @Data
     public static class InviteRequest {
@@ -115,15 +111,8 @@ public class RoomDto {
 
     @Data
     public static class InviteResponse {
-
-        String accessToken;
-        String refreshToken;
         List<InviteMember> inviteMemberList;
-
-        public InviteResponse(String accessToken, String refreshToken,
-            List<InviteMember> inviteMemberList) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public InviteResponse(List<InviteMember> inviteMemberList) {
             this.inviteMemberList = inviteMemberList;
         }
     }
