@@ -158,4 +158,8 @@ public class User extends BaseEntity {
         this.roomLimit = roomLimit;
     }
 
+    @PrePersist
+    public void prePersist() {
+        this.roomLimit = 0;
+    }
 }
