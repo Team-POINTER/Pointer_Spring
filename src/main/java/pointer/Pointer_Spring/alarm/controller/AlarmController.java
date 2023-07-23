@@ -8,7 +8,7 @@ import pointer.Pointer_Spring.common.response.BaseResponse;
 
 @RestController
 @RequestMapping("/alarm")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class AlarmController {
 
     private final AlarmService alarmService;

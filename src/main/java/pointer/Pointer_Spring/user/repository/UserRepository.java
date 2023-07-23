@@ -14,9 +14,11 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User save(User user);
+    Optional<User> findByEmailAndStatus(String email, int status); // email 중복 없게
     Optional<User> findByEmailAndTypeAndStatus(String email, User.SignupType type, int status);
     Optional<User> findByIdAndStatus(String id, int status);
     Optional<User> findByUserIdAndStatus(Long userId, int status);
+    Optional<User> findByUserIdAndTokenExpiredAndStatus(Long userId, boolean tokenToken, int status);
     Optional<User> findByTokenAndStatus(String token, int status);
     boolean existsByEmailAndTypeAndStatus(String email, User.SignupType type, int status);
     // pageable
@@ -29,4 +31,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserIdAndStatus(Long userId, int status);
 
     List<User> findAllByEventAlarmFlag(boolean b);
+
 }

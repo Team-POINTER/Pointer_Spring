@@ -1,34 +1,44 @@
 package pointer.Pointer_Spring.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
-import org.hibernate.validator.constraints.UniqueElements;
-import pointer.Pointer_Spring.friend.dto.FriendDto;
-import lombok.Setter;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 public class UserDto {
 
-    @Setter
     @Getter
     public static class BasicUser {
-        int userId;
         String id;
     }
 
     @Getter
-    public static class UserResponse extends ResponseType {
-        int userId;
+    public static class TokenResponse extends ResponseType {
+        TokenDto tokenDto;
 
-        public UserResponse(ExceptionCode exceptionCode, int userId) {
+        public TokenResponse(ExceptionCode exceptionCode, TokenDto tokenDto) {
+            super(exceptionCode);
+            this.tokenDto = tokenDto;
+        }
+    }
+
+    @Getter
+    public static class UserResponse extends ResponseType {
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Long userId;
+
+        public UserResponse(ExceptionCode exceptionCode) {
+            super(exceptionCode);
+        }
+
+        public UserResponse(ExceptionCode exceptionCode, Long userId) {
             super(exceptionCode);
             this.userId = userId;
         }
@@ -40,6 +50,14 @@ public class UserDto {
         public DuplicateUserResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
         }
+    }
+
+    @Getter
+    public static class UserAgree  {
+
+        private boolean serviceAgree;
+        private boolean serviceAge;
+        private boolean marketing;
     }
 
     @Data

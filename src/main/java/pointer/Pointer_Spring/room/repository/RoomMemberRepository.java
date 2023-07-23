@@ -30,5 +30,5 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     List<RoomMember> findAllByUserUserIdAndPrivateRoomNmContainingAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(Long userId, String kwd, int status);
     List<RoomMember> findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(Long userId, int status);
 
-
+    List<RoomMember> findByUserUserIdAndStatus(Long userId, int status);
 }

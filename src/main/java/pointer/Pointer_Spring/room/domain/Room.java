@@ -33,14 +33,19 @@ public class Room extends BaseEntity {
 //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name = "writer_id")
 //    @JoinColumn(name = "user_id")
-    @Column(name = "creator_id", unique = true)//연관관계 맵핑 안 함
+    @Column(name = "creator_id")
     private Long creatorId;
 
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();
+
     public void updateMemberNum(Integer memberNum){
         this.memberNum = memberNum;
+    }
+
+    public void updateMemberNum(){
+        this.memberNum -= 1;
     }
 
 
@@ -55,6 +60,5 @@ public class Room extends BaseEntity {
         this.memberNum = 1;
         this.votingNum = 0;
     }
-
 
 }

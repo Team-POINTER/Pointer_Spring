@@ -171,14 +171,17 @@ public class VoteServiceImpl implements VoteService {
         List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());
         int allVoteCnt = voteRepository.countByQuestionId(question.getId());
         List<String> hints = new ArrayList<>();
+        List<String> voterNm = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
             hints.add(vote.getHint());
+            voterNm.add(userRepository.findByUserId(vote.getMemberId()).get().getName());
         }
 
         return VoteDto.GetHintResponse.builder()
                 .targetVotedCnt(voteHistories.size())
                 .allVoteCnt(allVoteCnt)
                 .hint(hints)
+                .voterNm(voterNm)
                 .createdAt(question.getCreatedAt().format(formatter))
                 .build();
     }

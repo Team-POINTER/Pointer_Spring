@@ -18,6 +18,7 @@ import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.ImageDto.*;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
+import pointer.Pointer_Spring.user.response.ResponseImage;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
@@ -52,22 +53,22 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         ));
     }
     @Override
-    public String uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {//이미지 업로드(수정)
+    public ResponseImage uploadProfileImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {//이미지 업로드(수정)
          if(!userRepository.existsById(userId)){
              throw new CustomException(ExceptionCode.USER_NOT_FOUND);
          }
         String publicId = uploadImageInCloudinary(userId, "profile-photos", multipartFile);
         String extension = checkExtension(multipartFile);
-        return uploadImage(userId, publicId, extension, ImageType.PROFILE);
+        return new ResponseImage( ExceptionCode.USER_IMAGE_UPDATE_SUCCESS , uploadImage(userId, publicId, extension, ImageType.PROFILE));
     }
     @Override
-    public String uploadBackgroundImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {
+    public ResponseImage uploadBackgroundImage(Long userId, @NonNull MultipartFile multipartFile) throws IOException {
         if(!userRepository.existsById(userId)){
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         }
         String publicId = uploadImageInCloudinary(userId, "background-photos", multipartFile);
         String extension = checkExtension(multipartFile);
-        return uploadImage(userId, publicId, extension, ImageType.BACKGROUND);
+        return new ResponseImage(ExceptionCode.BACKGROUND_IMAGE_UPDATE_SUCCESS , uploadImage(userId, publicId, extension, ImageType.BACKGROUND));
     }
     @Override
     public ImageUrlResponse getImages(Long userId){
@@ -90,7 +91,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         return new ImageUrlResponse(profileImageUrl, backgroundImageUrl);
     }
     @Override
-    public String changeDefaultProfileImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
+    public ResponseImage changeDefaultProfileImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
         deleteImageInCloudinary(userId, ImageType.PROFILE);
 
         Image image = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.PROFILE).orElseThrow(
@@ -99,10 +100,10 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
                 }
         );
         image.updateImageUrl(DEFAULT_PROFILE_IMG_PATH);// + extension
-        return cloudinary.url().generate(DEFAULT_PROFILE_IMG_PATH);
+        return new ResponseImage(ExceptionCode.USER_IMAGE_UPDATE_SUCCESS , cloudinary.url().generate(DEFAULT_PROFILE_IMG_PATH));
     }
     @Override
-    public String changeDefaultBackgroundImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
+    public ResponseImage changeDefaultBackgroundImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
         deleteImageInCloudinary(userId, ImageType.BACKGROUND);
 
         Image image = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.BACKGROUND).orElseThrow(
@@ -112,7 +113,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         );
         image.updateImageUrl(DEFAULT_BACKGROUND_IMG_PATH);// + extension
 
-        return cloudinary.url().generate(DEFAULT_BACKGROUND_IMG_PATH);
+        return new ResponseImage(ExceptionCode.BACKGROUND_IMAGE_UPDATE_SUCCESS, cloudinary.url().generate(DEFAULT_BACKGROUND_IMG_PATH));
     }
 
 

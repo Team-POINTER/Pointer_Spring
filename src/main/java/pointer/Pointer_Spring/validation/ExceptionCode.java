@@ -13,13 +13,15 @@ public enum ExceptionCode {
     SIGNUP_DUPLICATED_ID(DUPLICATED_VALUE, "A002", "ID 중복"),
     SIGNUP_DUPLICATED_USERNAME(DUPLICATED_VALUE, "A003", "USERNAME 중복"),
     USER_KAKAO_INVALID(NOT_FOUND_VALUE, "A004","카카오 소셜 로그인 실패"),
-
+    SIGNUP_LIMITED_ID(NOT_FOUND_VALUE, "A005","제한된 회원"),
+    SIGNUP_PERMANENT_LIMITED_ID(NOT_FOUND_VALUE, "A006","영구 제한된 회원"),
+    RESIGN_OK(SUCCESS,"A007", "회원 탈퇴 성공"),
 
     LOGIN_OK(SUCCESS, "B000", "로그인 성공"),
     LOGIN_NOT_FOUND_ID(NOT_FOUND_VALUE, "B001", "로그인 실패"),
     LOGIN_NOT_FOUND_PW(NOT_FOUND_VALUE, "B002", "로그인 실패"),
     LOGOUT_OK(SUCCESS, "B003", "로그아웃 성공"),
-    LOGOUT_STATE(UNAUTHORIZED, "B004", "로그아웃 상태"),
+    LOGOUT_INVALID(NOT_FOUND_VALUE, "B004", "로그아웃 실패"),
 
     /**
      * 회원정보
@@ -31,17 +33,21 @@ public enum ExceptionCode {
     USER_SAVE_ID_OK(SUCCESS, "C003", "ID 저장 성공"),
     USER_CHECK_ID_OK(SUCCESS, "C004", "ID 중복 확인 성공"),
     USER_NO_CHECK_ID(SUCCESS, "C005", "ID 중복 확인 없음"),
-    USER_UPDATE_ID_SUCCESS(SUCCESS, "C006", "사용가능한 아이디로, 업데이트 성공"),
-    USER_UPDATE_NM_SUCCESS(SUCCESS, "C007", "이름 업데이트 성공"),
-    USERE_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
+    USER_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),
+    USER_EXCEED_ID(DUPLICATED_VALUE, "C009", "ID 생성 실패"),
 
+    USER_AGREE_INVALID(INVALID_ACCESS, "C010", "약관에 동의하지 않은 사용자"),
+    USER_AGREE_OK(SUCCESS, "C011", "약관 동의 성공"),
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
-    USER_UPDATE_INVALID(NOT_FOUND_VALUE, "D001", "회원정보 수정 실패"),
+    IMAGE_GET_OK(SUCCESS, "D001", "사진 조회 성공"),
     USER_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D002", "회원 사진 수정 실패"),
     BACKGROUND_IMAGE_UPDATE_INVALID(NOT_FOUND_VALUE, "D003", "배경 사진 수정 실패"),
     IMAGE_INVALID(INVALID_ACCESS, "D004", "유효하지 않은 파일"),
     IMAGE_NOT_FOUND(NOT_FOUND_VALUE, "D005", "존재하지 않는 이미지"),
+    USER_IMAGE_UPDATE_SUCCESS(SUCCESS, "D006", "회원 사진 수정 성공"),
+    BACKGROUND_IMAGE_UPDATE_SUCCESS(SUCCESS, "D007", "배경 사진 수정 성공"),
+
 
     /**
      * 채팅
@@ -58,9 +64,13 @@ public enum ExceptionCode {
     /**
      *  토큰
      */
-    EXPIRED_TOKEN(INVALID_ACCESS, "G000","expired access-token"),
-    MALFORMED_TOKEN(INVALID_ACCESS, "G001","incorrect access-token"),
-    UNAUTHORIZED_TOKEN(INVALID_ACCESS, "G002", "invalid access-token"),
+    INVALID_JWT_SIGNATURE(UNAUTHORIZED,"G000", "타당하지 않은 JWT 서명 오류"),
+    INVALID_JWT_TOKEN(UNAUTHORIZED,"G001", "잘못된 JWT 토큰 오류"),
+    EXPIRED_JWT_TOKEN(UNAUTHORIZED,"G002", "만료된 JWT 토큰 오류"),
+    UNSUPPORTED_JWT_TOKEN(UNAUTHORIZED,"G003", "지원되지 않는 JWT 토큰 오류"),
+    JWT_CLAIMS_STRING_IS_EMPTY(UNAUTHORIZED,"G004", "JWT 클레임 문자열이 비어 있음 오류"),
+    TOKEN_SUCCESS(SUCCESS, "G005", "토큰 확인 성공"),
+
 
     REISSUE_TOKEN(SUCCESS, "H000", "reissued token"),
     INVALID_REFRESH_TOKEN(INVALID_ACCESS, "H001", "non-existent refresh-token"),
@@ -116,6 +126,11 @@ public enum ExceptionCode {
     QUESTION_NOT_FOUND(INVALID_ACCESS, "K002", "질문이 없습니다."),
     QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
+
+    /**
+     * 질문
+     */
+    REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
 
     /**
      * 알림

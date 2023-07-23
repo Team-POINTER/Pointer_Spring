@@ -17,6 +17,8 @@ import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.room.service.RoomService;
+import pointer.Pointer_Spring.security.CurrentUser;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.swagger.SwaggerTestDto;
 
 import java.util.List;
@@ -25,14 +27,14 @@ import java.util.List;
 @ResponseBody
 @RequiredArgsConstructor
 @RequestMapping("/room")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class RoomController {
 
     private final RoomService roomService;
 
-    @PostMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
-    public ResponseRoom getRoomList(@RequestBody RoomDto.FindRoomRequest dto, @RequestParam(required = false) String kwd, HttpServletRequest request) {
-        return roomService.getRoomList(dto, kwd, request);
+    @GetMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
+    public ResponseRoom getRoomList(@CurrentUser UserPrincipal userPrincipal, @RequestParam(required = false) String kwd, HttpServletRequest request) {
+        return roomService.getRoomList(userPrincipal, kwd, request);
     }
 
     @GetMapping("/{room-id}")
@@ -42,9 +44,9 @@ public class RoomController {
     }
 
     @PostMapping("create")
-    public ResponseRoom createRoom(@RequestBody RoomDto.CreateRequest dto,
+    public ResponseRoom createRoom(@CurrentUser UserPrincipal userPrincipal, @RequestBody RoomDto.CreateRequest dto,
                                    HttpServletRequest request) {//원래 return RoomDto.CreateResponse
-        return roomService.createRoom(dto, request);
+        return roomService.createRoom(userPrincipal, dto, request);
     }
 
     @PatchMapping("/verify/room-name")
@@ -53,8 +55,8 @@ public class RoomController {
 //            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = SwaggerTestDto.class))),
 //            @ApiResponse(responseCode = "404", description = "500과 동일")
 //    })
-    public Object updateRoomName(@RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
-        return roomService.updateRoomNm(dto);
+    public Object updateRoomName(@CurrentUser UserPrincipal userPrincipal, @RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
+        return roomService.updateRoomNm(userPrincipal, dto);
     }
 
     @PostMapping("/invite/members")
@@ -64,8 +66,8 @@ public class RoomController {
     }
 
     @GetMapping("/paging/friend/invitation")
-    public Object invitationFriendList(@RequestParam Long userId, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
-        return roomService.isInviteMembersList(userId, roomId, currentPage, pageSize,kwd, request); //여기 kwd는 Nickname에 있는가 없는가
+    public Object invitationFriendList(@CurrentUser UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
+        return roomService.isInviteMembersList(userPrincipal, roomId, currentPage, pageSize,kwd, request); //여기 kwd는 Nickname에 있는가 없는가
     }
 
     @GetMapping("/get/{room-id}/members")
@@ -73,9 +75,9 @@ public class RoomController {
         return roomService.getInviteMembers(roomId);
     }
 
-    @PostMapping("/{room-id}/exit")
-    public Object exitRoom(@PathVariable(name = "room-id") Long roomId, @RequestBody RoomDto.ExitRequest dto, HttpServletRequest request) {
-        return roomService.exitRoom(roomId, dto);
+    @GetMapping("/{room-id}/exit")
+    public Object exitRoom(@PathVariable(name = "room-id") Long roomId, @CurrentUser UserPrincipal userPrincipal, HttpServletRequest request) {
+        return roomService.exitRoom(roomId, userPrincipal);
     }
 
     // 초대 링크 조회

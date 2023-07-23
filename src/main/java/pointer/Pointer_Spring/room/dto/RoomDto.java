@@ -2,6 +2,8 @@ package pointer.Pointer_Spring.room.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.question.domain.Question;
@@ -10,10 +12,6 @@ import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.user.domain.User;
 
 public class RoomDto {
-    @Data
-    public static class FindRoomRequest{
-        Long userId;
-    }
 
     @Data
     public static class ListResponse {
@@ -33,14 +31,16 @@ public class RoomDto {
         String question;
         int memberCnt;
         String topUserName;
+        boolean voted;
         //String topUserId;
 
-        public ListRoom(RoomMember roomMember, String question, String userNm) {
+        public ListRoom(RoomMember roomMember, String question, String userNm, boolean isVoted) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
             this.memberCnt = roomMember.getRoom().getMemberNum();
             this.question = question;
             this.topUserName = userNm;
+            this.voted = isVoted;
             //this.topUserId = user.getId();
         }
 
@@ -54,22 +54,15 @@ public class RoomDto {
 
     @Data
     public static class CreateRequest {
-        Long userId;
         String roomNm;//roomName
-        String question;
     }
 
     @Data
     public static class CreateResponse {
 
-        String accessToken;
-        String refreshToken;
         DetailResponse detailResponse;
 
-        public CreateResponse(String accessToken, String refreshToken,
-            DetailResponse detailResponse) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public CreateResponse(DetailResponse detailResponse) {
             this.detailResponse = detailResponse;
         }
     }
@@ -83,6 +76,7 @@ public class RoomDto {
         private Integer votingNum;
         Long questionId;
         String question;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
@@ -110,29 +104,18 @@ public class RoomDto {
             this.privateRoomNm = roomMember.getPrivateRoomNm();
         }
     }
-    @Data
-    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
-        Long userId;//user 고유 string id
-    }
 
     @Data
     public static class InviteRequest {
-        Long userId;//초대하는 유저
+        //Long userId;//초대하는 유저
         Long roomId;
         List<Long> userFriendIdList;
     }
 
     @Data
     public static class InviteResponse {
-
-        String accessToken;
-        String refreshToken;
         List<InviteMember> inviteMemberList;
-
-        public InviteResponse(String accessToken, String refreshToken,
-            List<InviteMember> inviteMemberList) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public InviteResponse(List<InviteMember> inviteMemberList) {
             this.inviteMemberList = inviteMemberList;
         }
     }
@@ -156,13 +139,13 @@ public class RoomDto {
             INVITE, OVERLIMIT, ALREADY
         }
         Reason reason;
-        Long userId;
+        //Long userId;
         String nickNm;
         LocalDateTime updateAt;
 
         public IsInviteMember( User user, Friend f) {
             this.isInvite = true;
-            this.userId = user.getUserId();
+            //this.userId = user.getUserId();
             this.nickNm = f.getFriendName();
             this.reason = Reason.INVITE;
             this.updateAt = f.getUpdatedAt();
