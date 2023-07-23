@@ -154,6 +154,10 @@ public class User extends BaseEntity {
         this.checkId = checkId;
     }
 
+    public void setMarketing(boolean marketing) {
+        this.marketing = marketing;
+    }
+
     public void updateRoomLimit(Integer roomLimit) {
         this.roomLimit = roomLimit;
     }

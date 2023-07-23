@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static pointer.Pointer_Spring.validation.ExceptionCode.FRIEND_REQUEST_CANCEL_OK;
 
 @Service
 @Transactional
@@ -288,7 +287,7 @@ public class FriendServiceImpl implements FriendService {
                 friendRepository.delete(findFriendMember);
             }
             // 상대 알림에서 친구 요청 삭제
-            return new ResponseFriend(FRIEND_REQUEST_CANCEL_OK);
+            return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_NOT);
     }

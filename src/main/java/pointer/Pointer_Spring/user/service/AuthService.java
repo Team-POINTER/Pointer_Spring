@@ -9,6 +9,7 @@ public interface AuthService {
     KakaoRequestDto getKakaoUser(String token);
     Object webKakaoCheck(String code);
 
+    Object updateMarketing(UserPrincipal userPrincipal, UserDto.UserMarketing marketing);
     Object saveAgree(UserPrincipal userPrincipal, UserDto.UserAgree agree);
     Object saveId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
     Object checkId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);

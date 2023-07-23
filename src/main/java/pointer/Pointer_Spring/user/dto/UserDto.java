@@ -60,6 +60,11 @@ public class UserDto {
         private boolean marketing;
     }
 
+    @Getter
+    public static class UserMarketing  {
+        private boolean marketing;
+    }
+
     @Data
     public static class UserListResponse {
 

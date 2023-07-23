@@ -216,7 +216,7 @@ public class AuthServiceImpl implements AuthService {
             return new ResponseKakaoUser(ExceptionCode.USER_NOT_FOUND);
         }
 
-        Optional<User> findUser = userRepository.findByEmailAndTypeAndStatus(kakaoDto.getEmail(), User.SignupType.KAKAO,1);
+        Optional<User> findUser = userRepository.findByEmailAndStatus(kakaoDto.getEmail(),1);
         User user;
         ExceptionCode exception;
 
@@ -226,7 +226,10 @@ public class AuthServiceImpl implements AuthService {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }*/
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
-        } else {
+        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
+            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
+        }
+        else {
             user = findUser.get();
         }
 
@@ -342,6 +345,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Object updateMarketing(UserPrincipal userPrincipal, UserDto.UserMarketing marketing) {
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        user.setMarketing(marketing.isMarketing());
+        userRepository.save(user);
+        return new UserDto.UserResponse(ExceptionCode.USER_MARKETING_OK);
+    }
+
+    @Override
     public Object reissue(UserPrincipal userPrincipal) {
         Optional<User> findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS);
 
@@ -399,7 +410,7 @@ public class AuthServiceImpl implements AuthService {
 
         // alarm 부분은 status가 없어서 임시 제거 불가?
 
-        userRepository.delete(user);
+        user.delete();
 
         return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
     }
