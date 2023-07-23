@@ -30,4 +30,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsById(String id);
     boolean existsByUserIdAndStatus(Long userId, int status);
 
+    List<User> findAllByEventAlarmFlag(boolean b);
+
 }

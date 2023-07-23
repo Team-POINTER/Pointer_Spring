@@ -1,6 +1,10 @@
 package pointer.Pointer_Spring.question.service;
 
 import org.springframework.stereotype.Service;
+import pointer.Pointer_Spring.alarm.domain.Alarm;
+import pointer.Pointer_Spring.alarm.dto.AlarmDto;
+import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
@@ -18,7 +22,9 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -28,19 +34,23 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final VoteRepository voteRepository;
+    private final AlarmRepository alarmRepository;
+    private final KakaoPushNotiService kakaoPushNotiService;
 
     public QuestionServiceImpl(
             QuestionRepository questionRepository,
             RoomRepository roomRepository,
             UserRepository userRepository,
             RoomMemberRepository roomMemberRepository,
-            VoteRepository voteRepository
-    ) {
+            VoteRepository voteRepository,
+            AlarmRepository alarmRepository, KakaoPushNotiService kakaoPushNotiService) {
         this.questionRepository = questionRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.roomMemberRepository = roomMemberRepository;
         this.voteRepository = voteRepository;
+        this.alarmRepository = alarmRepository;
+        this.kakaoPushNotiService = kakaoPushNotiService;
     }
 
     @Override
@@ -70,6 +80,32 @@ public class QuestionServiceImpl implements QuestionService {
 
         questionRepository.save(question);
         question.getRoom().setUpdatedAt(question.getUpdatedAt());
+        room.addQuestion(question);
+
+        // 알림
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        for(RoomMember roomMember : roomMembers) {
+            User member = roomMember.getUser();
+            if(!member.isActiveAlarmFlag()) continue;
+
+            Alarm alarm = Alarm.builder()
+                    .sendUserId(user.getUserId())
+                    .receiveUserId(member.getUserId())
+                    .type(Alarm.AlarmType.QUESTION)
+                    .content(Alarm.AlarmType.QUESTION.getMessage())
+                    .build();
+
+            alarmRepository.save(alarm);
+
+            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                    .forApns(AlarmDto.PushType.builder()
+                            .message(alarm.getContent())
+                            .apnsEnv("sandbox")
+                            .build())
+                    .build();
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
+        }
+
         return QuestionDto.CreateResponse.builder()
                 .questionId(question.getId())
                 .content(question.getQuestion())

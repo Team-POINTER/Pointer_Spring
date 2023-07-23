@@ -51,6 +51,7 @@ public class RoomServiceImpl implements RoomService {
     private final QuestionRepository questionRepository;
     private final String FIRST_QUESTION = "첫인상이 좋았던 사람을 지목해주세요";
 
+    @Transactional
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ResponseRoom getRoomList(UserPrincipal userPrincipal, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();

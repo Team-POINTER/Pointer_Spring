@@ -2,15 +2,13 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.user.dto.UserDto;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "User")
 public class User extends BaseEntity {
@@ -36,6 +34,9 @@ public class User extends BaseEntity {
 
     @Column(name = "event_alarm_flag")
     private boolean eventAlarmFlag;
+
+    @Column(name = "all_alarm_flag")
+    private boolean allAlarmFlag;
 
 
     // social login
@@ -87,6 +88,8 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        //this.roomLimit = 0;
     }
 
     // test builder
@@ -96,6 +99,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.password = password;
+        //this.roomLimit = 0;
     }
 
 
@@ -111,6 +115,8 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
