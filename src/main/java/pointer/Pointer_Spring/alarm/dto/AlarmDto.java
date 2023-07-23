@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 
 public class AlarmDto {
 
@@ -85,6 +87,68 @@ public class AlarmDto {
         @Builder
         public EventAlarmRequest(String content) {
             this.content = content;
+        }
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class KakaoTokenRequest {
+        //Map<String, Object> requestMap;
+        //private Long uuid;
+        private String deviceId;
+        private String pushType;
+        private String pushToken;
+        //private String apnsEnv;
+
+        @Builder
+//        public KakaoTokenRequest(Map<String, Object> requestMap) {
+//            this.requestMap = requestMap;
+//        }
+        public KakaoTokenRequest(String deviceId, String pushType, String pushToken) {
+            //this.uuid = uuid;
+            this.deviceId = deviceId;
+            this.pushType = pushType;
+            this.pushToken = pushToken;
+        }
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class KakaoPushRequest {
+        private PushType forApns;
+
+        @Builder
+        public KakaoPushRequest(PushType forApns) {
+            this.forApns = forApns;
+        }
+
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class PushMessage {
+        private PushType forApns;
+
+        @Builder
+        public PushMessage(PushType forApns) {
+            this.forApns = forApns;
+        }
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class PushType {
+        private String message;
+        private String apnsEnv;
+
+        @Builder
+        public PushType(String message, String apnsEnv) {
+            this.message = message;
+            this.apnsEnv = apnsEnv;
         }
     }
 }

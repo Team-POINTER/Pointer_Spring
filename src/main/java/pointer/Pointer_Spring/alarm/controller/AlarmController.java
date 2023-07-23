@@ -3,6 +3,7 @@ package pointer.Pointer_Spring.alarm.controller;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.alarm.service.AlarmService;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.common.response.BaseResponse;
 
 @RestController
@@ -11,10 +12,12 @@ import pointer.Pointer_Spring.common.response.BaseResponse;
 public class AlarmController {
 
     private final AlarmService alarmService;
+    private final KakaoPushNotiService kakaoPushNotiService;
 
 
-    public AlarmController(AlarmService alarmService) {
+    public AlarmController(AlarmService alarmService, KakaoPushNotiService kakaoPushNotiService) {
         this.alarmService = alarmService;
+        this.kakaoPushNotiService = kakaoPushNotiService;
     }
 
     // 콕 찌르기
@@ -70,4 +73,12 @@ public class AlarmController {
         alarmService.eventAlarm(request);
         return new BaseResponse<>();
     }
+
+    // 카카오 토큰 등록
+    @PostMapping("/kakao/{userId}")
+    public BaseResponse<Void> registKakaoToken(@PathVariable Long userId, @RequestBody AlarmDto.KakaoTokenRequest request) {
+        kakaoPushNotiService.registKakaoToken(userId, request);
+        return new BaseResponse<>();
+    }
+
 }

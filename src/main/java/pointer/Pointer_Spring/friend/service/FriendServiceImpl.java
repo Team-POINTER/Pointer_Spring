@@ -6,7 +6,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.alarm.domain.Alarm;
+import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
@@ -20,10 +22,7 @@ import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static pointer.Pointer_Spring.validation.ExceptionCode.FRIEND_REQUEST_CANCEL_OK;
 
@@ -36,6 +35,7 @@ public class FriendServiceImpl implements FriendService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final AlarmRepository alarmRepository;
+    private final KakaoPushNotiService kakaoPushNotiService;
     private final Integer STATUS = 1;
     private final Integer PAGE_COUNT = 30;
     private final Image.ImageType PROFILE_TYPE = Image.ImageType.PROFILE;
@@ -216,6 +216,15 @@ public class FriendServiceImpl implements FriendService {
 //                        //.responseUserId(friend.getUserId())
 //                        .build();
 //                activeAlarmRepository.save(activeAlarm);
+
+                //kakaoPushRequestMap.put("custom_field", Map.of("room_id", room.getRoomId()));
+                AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                        .forApns(AlarmDto.PushType.builder()
+                                .message(alarm.getContent())
+                                .apnsEnv("sandbox")
+                                .build())
+                        .build();
+                kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(friend.getUserId())), kakaoPushRequest);
 
             }
 

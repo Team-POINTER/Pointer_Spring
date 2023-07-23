@@ -18,4 +18,5 @@ public interface AlarmService {
     AlarmDto.GetAlarmResponses getAlarms(Long userId, Long cursorId);
 
     void eventAlarm(AlarmDto.EventAlarmRequest request);
+
 }

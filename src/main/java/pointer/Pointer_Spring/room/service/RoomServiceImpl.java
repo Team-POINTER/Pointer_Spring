@@ -50,6 +50,7 @@ public class RoomServiceImpl implements RoomService {
     private final QuestionRepository questionRepository;
 
 
+    @Transactional
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
     public ResponseRoom getRoomList(FindRoomRequest dto, String kwd, HttpServletRequest request) {//검색 추가
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
