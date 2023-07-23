@@ -17,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
@@ -40,7 +41,7 @@ public class KakaoPushNotiService {
     private String apnsEnv;
 
 
-    public void registKakaoToken(Long userId, AlarmDto.KakaoTokenRequest request) {
+    public void registKakaoToken(UserPrincipal userPrincipal, AlarmDto.KakaoTokenRequest request) {
         WebClient webClient = WebClient.builder()
                 .baseUrl(kakaoUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -53,7 +54,7 @@ public class KakaoPushNotiService {
                             .pathSegment("v2", "push", "register")
                             .build())
                     .body(BodyInserters
-                            .fromFormData("uuid", String.valueOf(userId))
+                            .fromFormData("uuid", String.valueOf(userPrincipal.getId()))
                             .with("device_id", request.getDeviceId())
                             .with("push_type", request.getPushType())
                             .with("push_token", request.getPushToken())

@@ -12,6 +12,7 @@ import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
@@ -48,8 +49,8 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public void poke(Long userId, Long questionId) {
-        User user = userRepository.findByUserId(userId)
+    public void poke(UserPrincipal userPrincipal, Long questionId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -92,8 +93,8 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Transactional
     @Override
-    public void activeAllAlarm(Long userId, AlarmDto.AlarmActiveRequest request) {
-        User user = userRepository.findByUserId(userId)
+    public void activeAllAlarm(UserPrincipal userPrincipal, AlarmDto.AlarmActiveRequest request) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -108,8 +109,8 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Transactional
     @Override
-    public void activeAlarm(Long userId, AlarmDto.AlarmActiveRequest request) {
-        User user = userRepository.findByUserId(userId)
+    public void activeAlarm(UserPrincipal userPrincipal, AlarmDto.AlarmActiveRequest request) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -120,8 +121,8 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Transactional
     @Override
-    public void activeChatAlarm(Long userId, AlarmDto.AlarmActiveRequest request) {
-        User user = userRepository.findByUserId(userId)
+    public void activeChatAlarm(UserPrincipal userPrincipal, AlarmDto.AlarmActiveRequest request) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -132,8 +133,8 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Transactional
     @Override
-    public void activeEventAlarm(Long userId, AlarmDto.AlarmActiveRequest request) {
-        User user = userRepository.findByUserId(userId)
+    public void activeEventAlarm(UserPrincipal userPrincipal, AlarmDto.AlarmActiveRequest request) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -143,8 +144,8 @@ public class AlarmServiceImpl implements AlarmService {
     }
 
     @Override
-    public AlarmDto.GetAlarmActiveResponse getActiveAlarm(Long userId) {
-        User user = userRepository.findByUserId(userId)
+    public AlarmDto.GetAlarmActiveResponse getActiveAlarm(UserPrincipal userPrincipal) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -159,8 +160,8 @@ public class AlarmServiceImpl implements AlarmService {
 
     @Transactional
     @Override
-    public AlarmDto.GetAlarmResponses getAlarms(Long userId, Long cursorId) {
-        User user = userRepository.findByUserId(userId)
+    public AlarmDto.GetAlarmResponses getAlarms(UserPrincipal userPrincipal, Long cursorId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -170,12 +171,12 @@ public class AlarmServiceImpl implements AlarmService {
         }
 
         // 안읽은 알람 있는지 체크
-        boolean newAlarm = alarmRepository.existsByReceiveUserIdAndReadCheck(userId, false);
-        List<ChatAlarm> newFriendAlarm = chatAlarmRepository.findAllBySendUserIdAndReadCheck(userId, false);
+        boolean newAlarm = alarmRepository.existsByReceiveUserIdAndReadCheck(userPrincipal.getId(), false);
+        List<ChatAlarm> newFriendAlarm = chatAlarmRepository.findAllBySendUserIdAndReadCheck(userPrincipal.getId(), false);
 
         // 30개씩 페이징
         PageRequest pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("id").descending());
-        List<Alarm> alarms = alarmRepository.findAllByReceiveUserIdAndIdLessThanOrderByIdDesc(userId, cursorId, pageable);
+        List<Alarm> alarms = alarmRepository.findAllByReceiveUserIdAndIdLessThanOrderByIdDesc(userPrincipal.getId(), cursorId, pageable);
 
         List<AlarmDto.GetAlarmResponse> alarmResponses = new ArrayList<>();
         for(Alarm alarm : alarms) {
