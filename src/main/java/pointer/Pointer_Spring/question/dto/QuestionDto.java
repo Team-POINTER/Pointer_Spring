@@ -13,7 +13,7 @@ public class QuestionDto extends BaseEntity {
     @NoArgsConstructor
     public static class CreateRequest {
         private Long roomId;
-        private Long userId;
+        //private Long userId;
         private String content;
     }
 

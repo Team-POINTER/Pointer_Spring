@@ -5,6 +5,7 @@ import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
@@ -38,7 +39,7 @@ public class VoteServiceImpl implements VoteService {
 
     @Transactional
     @Override
-    public List<VoteDto.CreateResponse> createVote(VoteDto.CreateRequest dto) {
+    public List<VoteDto.CreateResponse> createVote(UserPrincipal userPrincipal, VoteDto.CreateRequest dto) {
         // 질문 validation
         Question question = questionRepository.findById(dto.getQuestionId())
                 .orElseThrow(() -> {
@@ -46,7 +47,7 @@ public class VoteServiceImpl implements VoteService {
                 });
 
         // 유저 validation check
-        User user = userRepository.findByUserId(dto.getUserId())
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -62,7 +63,7 @@ public class VoteServiceImpl implements VoteService {
 
             VoteHistory vote = VoteHistory.builder()
                     .questionId(dto.getQuestionId())
-                    .memberId(dto.getUserId())
+                    .memberId(userPrincipal.getId())
                     .candidateId(userId)
                     .candidateName(voteUser.getName())
                     .hint(dto.getHint())
@@ -82,9 +83,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetResponse getQuestionVoteCnt(Long userId, Long questionId) {
+    public VoteDto.GetResponse getQuestionVoteCnt(UserPrincipal userPrincipal, Long questionId) {
         // 유저 validation check
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -158,8 +159,8 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetHintResponse getHintResponse(Long userId, Long questionId) {
-        User user = userRepository.findByUserId(userId)
+    public VoteDto.GetHintResponse getHintResponse(UserPrincipal userPrincipal, Long questionId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
