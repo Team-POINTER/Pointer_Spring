@@ -32,10 +32,11 @@ public class AlarmServiceImpl implements AlarmService {
     private final RoomMemberRepository roomMemberRepository;
     private final VoteRepository voteRepository;
     private final ChatAlarmRepository chatAlarmRepository;
+    private final KakaoPushNotiService kakaoPushNotiService;
 
     private static final int PAGE_SIZE = 30;
 
-    public AlarmServiceImpl(AlarmRepository alarmRepository, UserRepository userRepository, QuestionRepository questionRepository, RoomMemberRepository roomMemberRepository, VoteRepository voteRepository, ChatAlarmRepository chatAlarmRepository) {
+    public AlarmServiceImpl(AlarmRepository alarmRepository, UserRepository userRepository, QuestionRepository questionRepository, RoomMemberRepository roomMemberRepository, VoteRepository voteRepository, ChatAlarmRepository chatAlarmRepository, KakaoPushNotiService kakaoPushNotiService) {
         this.alarmRepository = alarmRepository;
         //this.activeAlarmRepository = activeAlarmRepository;
         this.userRepository = userRepository;
@@ -43,6 +44,7 @@ public class AlarmServiceImpl implements AlarmService {
         this.roomMemberRepository = roomMemberRepository;
         this.voteRepository = voteRepository;
         this.chatAlarmRepository = chatAlarmRepository;
+        this.kakaoPushNotiService = kakaoPushNotiService;
     }
 
     @Override
@@ -69,6 +71,14 @@ public class AlarmServiceImpl implements AlarmService {
                         .build();
 
                 alarmRepository.save(alarm);
+
+                AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                        .forApns(AlarmDto.PushType.builder()
+                                .message(alarm.getContent())
+                                .apnsEnv("sandbox")
+                                .build())
+                        .build();
+                kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
 
 //                ActiveAlarm activeAlarm = ActiveAlarm.builder()
 //                        //.requestUserId(user.getUserId())
@@ -207,6 +217,14 @@ public class AlarmServiceImpl implements AlarmService {
                     .build();
 
             alarmRepository.save(alarm);
+
+            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                    .forApns(AlarmDto.PushType.builder()
+                            .message(alarm.getContent())
+                            .apnsEnv("sandbox")
+                            .build())
+                    .build();
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(user.getUserId())), kakaoPushRequest);
         }
     }
 }

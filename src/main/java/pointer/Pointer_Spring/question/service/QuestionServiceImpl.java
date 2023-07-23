@@ -97,20 +97,13 @@ public class QuestionServiceImpl implements QuestionService {
 
             alarmRepository.save(alarm);
 
-            Map<String, Object> kakaoPushRequestMap = new HashMap<>();
-            kakaoPushRequestMap.put("message", alarm.getContent());
-            kakaoPushRequestMap.put("custom_field", Map.of("room_id", room.getRoomId()));
-//            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
-//                    .uuids(List.of(String.valueOf(member.getUserId())))
-//                    .message(alarm.getContent())
-//                    .build();
-//            kakaoPushNotiService.sendKakaoPush(kakaoPushRequest);
-
-//            ActiveAlarm activeAlarm = ActiveAlarm.builder()
-//                    //.responseUserId(member.getUserId())
-//                    .build();
-
-//            activeAlarmRepository.save(activeAlarm);
+            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                    .forApns(AlarmDto.PushType.builder()
+                            .message(alarm.getContent())
+                            .apnsEnv("sandbox")
+                            .build())
+                    .build();
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
         }
 
         return QuestionDto.CreateResponse.builder()

@@ -2,15 +2,13 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.user.dto.UserDto;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "User")
 public class User extends BaseEntity {

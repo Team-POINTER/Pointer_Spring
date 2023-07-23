@@ -253,7 +253,7 @@ public class FriendServiceImpl implements FriendService {
             findFriendMember.setRelationship(Friend.Relation.SUCCESS);
 
             Alarm alarm = Alarm.builder()
-                    .sendUserId(dto.getUserId())
+                    .sendUserId(dto.getMemberId())
                     .receiveUserId(findFriendUser.getUser().getUserId())
                     .type(Alarm.AlarmType.FRIEND_ACCEPT)
                     .content(findFriendUser.getUser().getName()
@@ -266,6 +266,14 @@ public class FriendServiceImpl implements FriendService {
 //                    //.responseUserId(dto.getMemberId())
 //                    .build();
 //            activeAlarmRepository.save(activeAlarm);
+
+            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                    .forApns(AlarmDto.PushType.builder()
+                            .message(alarm.getContent())
+                            .apnsEnv("sandbox")
+                            .build())
+                    .build();
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendUser.getUser().getUserId())), kakaoPushRequest);
 
             return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_OK);
         }
@@ -282,7 +290,7 @@ public class FriendServiceImpl implements FriendService {
             findFriend.setRelationship(Friend.Relation.REFUSE);
             friendRepository.save(findFriend);
 
-            Alarm alarm = alarmRepository.findBySendUserIdAndReceiveUserIdAndType(dto.getUserId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST)
+            Alarm alarm = alarmRepository.findBySendUserIdAndReceiveUserIdAndType(dto.getMemberId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST)
                     .orElseThrow(() -> {
                         throw new CustomException(ExceptionCode.ACTIVE_ALARM_NOT_FOUND);
                     });
