@@ -2,6 +2,8 @@ package pointer.Pointer_Spring.room.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.question.domain.Question;
@@ -74,6 +76,7 @@ public class RoomDto {
         private Integer votingNum;
         Long questionId;
         String question;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 

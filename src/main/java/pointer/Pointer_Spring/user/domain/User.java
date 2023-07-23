@@ -161,5 +161,6 @@ public class User extends BaseEntity {
     @PrePersist
     public void prePersist() {
         this.roomLimit = 0;
+        this.point = 0L;
     }
 }
