@@ -34,4 +34,8 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     List<Friend> findByUserUserIdOrUserFriendIdAndStatus(Long userUserId, Long userFriendId, int status);
     Optional<Friend> findByUserUserIdAndUserFriendId(Long userId, Long userFriendId);
+
+    List<Friend> findAllByUserUserIdAndFriendUserIdContainingOrFriendNameContainingAndRelationshipNotAndStatusOrderByUserIdDesc(Long userUserId, String friendUserId, String friendName, Friend.Relation relation, int status, PageRequest pageRequest);
+    List<Friend> findAllByUserUserIdAndFriendUserIdContainingOrFriendNameContainingAndRelationshipAndStatusOrderByUserIdDesc(Long userUserId, String friendUserId, String friendName, Friend.Relation relation, int status, PageRequest pageRequest);
+
 }

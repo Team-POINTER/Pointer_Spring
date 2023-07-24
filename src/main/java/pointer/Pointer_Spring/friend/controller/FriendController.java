@@ -25,6 +25,7 @@ public class FriendController {
                                                 HttpServletRequest request) {
         return friendService.getUserList(userPrincipal, dto, request);
     }
+/*
 
     @GetMapping("/friend") // 친구 목록 조회
     public FriendDto.FriendInfoListResponse getFriendList(@CurrentUser UserPrincipal userPrincipal,
@@ -46,6 +47,7 @@ public class FriendController {
                                                               HttpServletRequest request) {
         return friendService.getUserBlockFriendList(userPrincipal, dto, request);
     }
+*/
 
     // 친구 관계 설정
 
@@ -87,13 +89,13 @@ public class FriendController {
     }
 
     // 차단 : 상대의 차단전 마지막 상태 유지
-
+/*
     @GetMapping("/friend/block") // 차단 친구 조회
     public FriendDto.FriendInfoListResponse getRefuseFriendList(@CurrentUser UserPrincipal userPrincipal,
                                                                 @RequestBody FriendDto.FriendUserDto dto,
                                                                 HttpServletRequest request) {
         return friendService.getBlockFriendList(userPrincipal, dto, request);
-    }
+    }*/
 
     @PostMapping("/friend/block") // 차단
     public Object getBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
