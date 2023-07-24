@@ -2,9 +2,13 @@ package pointer.Pointer_Spring.vote.service;
 
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.report.domain.Report;
+import pointer.Pointer_Spring.report.domain.RestrictedUser;
+import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
@@ -27,18 +31,20 @@ public class VoteServiceImpl implements VoteService {
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
+    private final RestrictedUserRepository restrictedUserRepository;
 
-    public VoteServiceImpl(VoteRepository voteRepository, QuestionRepository questionRepository, UserRepository userRepository, RoomRepository roomRepository, RoomMemberRepository roomMemberRepository) {
+    public VoteServiceImpl(VoteRepository voteRepository, QuestionRepository questionRepository, UserRepository userRepository, RoomRepository roomRepository, RoomMemberRepository roomMemberRepository, RestrictedUserRepository restrictedUserRepository) {
         this.voteRepository = voteRepository;
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.roomMemberRepository = roomMemberRepository;
+        this.restrictedUserRepository = restrictedUserRepository;
     }
 
     @Transactional
     @Override
-    public List<VoteDto.CreateResponse> createVote(VoteDto.CreateRequest dto) {
+    public List<VoteDto.CreateResponse> createVote(UserPrincipal userPrincipal, VoteDto.CreateRequest dto) {
         // 질문 validation
         Question question = questionRepository.findById(dto.getQuestionId())
                 .orElseThrow(() -> {
@@ -46,10 +52,25 @@ public class VoteServiceImpl implements VoteService {
                 });
 
         // 유저 validation check
-        User user = userRepository.findByUserId(dto.getUserId())
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
+
+//        //신고 당한 유저인지
+        if(user.isHintRestricted()){
+//            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(user.getUserId(), question.getRoom().getRoomId(), Report.ReportType.HINT);
+//            Long questionId = question.getId();
+//
+//            if(restrictedUser.getCurrentQuestionId() != questionId) {
+//                restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
+//            }//지금 신고된 상황에서 질문의 다음 질문부터 패널티 적용됨
+//
+//            if(restrictedUser.getTemporalNum() == 0){
+//                user.updateIsHintRestricted(false);
+//            }
+            throw new CustomException(ExceptionCode.REPORTED_USER);//한 턴 동안만 막아야해
+        }//생성이 안되니까 신고 당한 유저가 있을 시 룸 멤버 수보다 투표 가능 인원 수 가 더 적게 나옴
 
         // 투표 생성
         List<VoteDto.CreateResponse> response = new ArrayList<>();
@@ -62,7 +83,7 @@ public class VoteServiceImpl implements VoteService {
 
             VoteHistory vote = VoteHistory.builder()
                     .questionId(dto.getQuestionId())
-                    .memberId(dto.getUserId())
+                    .memberId(userPrincipal.getId())
                     .candidateId(userId)
                     .candidateName(voteUser.getName())
                     .hint(dto.getHint())
@@ -82,9 +103,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetResponse getQuestionVoteCnt(Long userId, Long questionId) {
+    public VoteDto.GetResponse getQuestionVoteCnt(UserPrincipal userPrincipal, Long questionId) {
         // 유저 validation check
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -158,8 +179,8 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetHintResponse getHintResponse(Long userId, Long questionId) {
-        User user = userRepository.findByUserId(userId)
+    public VoteDto.GetHintResponse getHintResponse(UserPrincipal userPrincipal, Long questionId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -168,8 +189,8 @@ public class VoteServiceImpl implements VoteService {
         });
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
-        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());
-        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
+        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());//해당 user를 투표한 인원
+        int allVoteCnt = voteRepository.countByQuestionId(question.getId());//해당 질문에 대해 투표한 사람의 수
         List<String> hints = new ArrayList<>();
         List<String> voterNm = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {

@@ -34,7 +34,7 @@ public class Friend extends BaseEntity {
 
     // relation
     public enum Relation {
-        BLOCK, REQUEST, REQUESTED, SUCCESS,
+        BLOCK, REQUEST, REQUESTED, SUCCESS, REFUSE,
     }
 
     @Column(nullable = false)

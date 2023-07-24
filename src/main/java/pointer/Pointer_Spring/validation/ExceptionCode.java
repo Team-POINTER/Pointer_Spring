@@ -96,7 +96,7 @@ public enum ExceptionCode {
     FRIEND_CANCEL_OK(SUCCESS, "J004", "친구 요청 취소"),
     FRIEND_REFUSE_OK(SUCCESS, "J005", "친구 거절 성공"),
     FRIEND_FIND_OK(SUCCESS, "J006", "친구 조회 성공"),
-    USER_FIND_FRIEND_OK(SUCCESS, "J007", "유저 조회 성공"),
+    USER_FIND_FRIEND_FAIL(SUCCESS, "J007", "유저 조회 실패"),
     FRIEND_BLOCK_OK(SUCCESS, "J008", "친구 차단 성공"),
     FRIEND_CANCEL_NOT(INVALID_ACCESS, "J009", "친구 취소 요청 실패"),
     FRIEND_REQUEST_CANCEL_OK(SUCCESS, "J010", "요청 취소 성공"),
@@ -125,13 +125,28 @@ public enum ExceptionCode {
     QUESTION_CREATED_FAILED(INVALID_ACCESS, "K000", "질문 생성 실패"),
     CURRENT_QUESTION_NOT_FOUND(INVALID_ACCESS, "K001", "현재 질문이 없습니다."),
     QUESTION_NOT_FOUND(INVALID_ACCESS, "K002", "질문이 없습니다."),
-    QUESTION_MODIFY_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 수정 권한이 없습니다."),
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
 
+    HINT_NOT_FOUND(INVALID_ACCESS, "K004", "힌트를 찾을 수 없습니다."),
+
+
     /**
-     * 질문
+     * 신고
      */
     REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
+    REPORT_NOT_FOUND(NOT_FOUND_VALUE, "L001", "신고 존재하지 않음"),
+    REPORTED_USER(INVALID_ACCESS, "L002", "일시적 신고 처리된 유저"),
+    ALREADY_REPORT(DUPLICATED_VALUE, "L003", "이미 처리된 신고"),
+    REPORT_GET_SUCCESS(SUCCESS, "L004", "신고 조회 성공"),
+    REPORT_HANDLE_SUCCESS(SUCCESS, "L005", "신고 처리 성공"),
+
+    /**
+     * 알림
+     */
+
+    ACTIVE_ALARM_NOT_FOUND(NOT_FOUND_VALUE, "L000", "활동 알림이 존재하지 않습니다"),
+    KAKAO_TOKEN_REGISTER_FAIL(INVALID_ACCESS, "L001", "카카오 토큰 등록 실패"),
+    KAKAO_PUSH_SEND_FAIL(INVALID_ACCESS, "L002", "카카오 푸시 전송 실패"),
 
     /**
      * 잘못된 ExceptionCode

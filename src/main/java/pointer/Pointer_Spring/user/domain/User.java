@@ -2,15 +2,13 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.user.dto.UserDto;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "User")
 public class User extends BaseEntity {
@@ -36,6 +34,9 @@ public class User extends BaseEntity {
 
     @Column(name = "event_alarm_flag")
     private boolean eventAlarmFlag;
+
+    @Column(name = "all_alarm_flag")
+    private boolean allAlarmFlag;
 
 
     // social login
@@ -63,6 +64,7 @@ public class User extends BaseEntity {
     private boolean marketing;
 
     @Column(name = "room_limit")
+    @ColumnDefault("0")
     private Integer roomLimit;
 
     @Column(length = 400)
@@ -74,7 +76,13 @@ public class User extends BaseEntity {
     @ColumnDefault("false")
     private boolean tokenExpired;
 
+    @ColumnDefault("0")
     private Long point;
+
+    @Column(name = "question_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isQuestionRestricted;
+    @Column(name = "hint_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isHintRestricted;
 
     // builder
     @Builder
@@ -87,6 +95,8 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        //this.roomLimit = 0;
     }
 
     // test builder
@@ -96,6 +106,7 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.password = password;
+        //this.roomLimit = 0;
     }
 
 
@@ -111,6 +122,8 @@ public class User extends BaseEntity {
         this.chatAlarmFlag = true;
         this.activeAlarmFlag = true;
         this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -165,5 +178,16 @@ public class User extends BaseEntity {
     public void updateRoomLimit(Integer roomLimit) {
         this.roomLimit = roomLimit;
     }
+    public void updateIsQuestionRestricted(boolean isQuestionRestricted){
+        this.isQuestionRestricted = isQuestionRestricted;
+    }
+    public void updateIsHintRestricted(boolean isHintRestricted){
+        this.isHintRestricted = isHintRestricted;
+    }
 
+    @PrePersist
+    public void prePersist() {
+        this.roomLimit = 0;
+        this.point = 0L;
+    }
 }

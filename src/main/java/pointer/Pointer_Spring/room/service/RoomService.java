@@ -21,7 +21,7 @@ public interface RoomService {
 //    void modifyRoomInfo(Long roomId);
 
     ResponseRoom createRoom(UserPrincipal userPrincipal, CreateRequest dto, HttpServletRequest request);
-    ResponseMemberRoom updateRoomNm(RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
+    ResponseMemberRoom updateRoomNm(UserPrincipal userPrincipal, RoomMemberDto.ModifyRoomNmRequest modifyRoomNmRequestDto);
     ResponseRoom exitRoom(Long roomId, UserPrincipal userPrincipal);
 
     //InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
