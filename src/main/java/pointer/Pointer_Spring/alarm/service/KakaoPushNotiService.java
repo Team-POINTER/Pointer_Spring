@@ -16,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.validation.CustomException;
@@ -49,7 +50,7 @@ public class KakaoPushNotiService {
                 .build();
 
         try {
-            Integer code = webClient.post()
+            webClient.post()
                     .uri(uriBuilder -> uriBuilder
                             .pathSegment("v2", "push", "register")
                             .build())
@@ -61,7 +62,20 @@ public class KakaoPushNotiService {
                     )
                     .retrieve()
                     .bodyToMono(Integer.class)
-                    .block();
+                    .doOnError(WebClientResponseException.class, ex -> {
+                        // WebClientResponseException은 서버로부터 오류 응답을 받은 경우 발생하는 예외
+                        String errorMessage = ex.getResponseBodyAsString();
+                        int statusCode = ex.getRawStatusCode();
+                        log.info("Push 알림 토큰 등록 오류");
+                        log.info("상태 코드: {}", statusCode);
+                        log.info("오류 메시지: {}" , errorMessage);
+                    })
+                    .doOnError(Throwable.class, ex -> {
+                        // 그 외 예상치 못한 예외가 발생한 경우 처리할 작업
+                        log.info("Push 알림 토큰 등록 중 예상치 못한 오류 발생!");
+                        ex.printStackTrace();
+                    })
+                    .subscribe();
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new CustomException(ExceptionCode.KAKAO_TOKEN_REGISTER_FAIL);
@@ -91,7 +105,25 @@ public class KakaoPushNotiService {
                 )
                 .retrieve()
                 .bodyToMono(Integer.class)
-                .block();
+                .doOnSuccess(response -> {
+                    // 요청이 성공적으로 완료된 경우 처리할 작업
+                    System.out.println("Push 알림을 성공적으로 보냈습니다.");
+                    System.out.println("응답 메시지: " + response);
+                })
+                .doOnError(WebClientResponseException.class, ex -> {
+                    // WebClientResponseException은 서버로부터 오류 응답을 받은 경우 발생하는 예외
+                    String errorMessage = ex.getResponseBodyAsString();
+                    int statusCode = ex.getRawStatusCode();
+                    log.info("Push 알림 전송 중 오류 발생!");
+                    log.info("상태 코드: {}", statusCode);
+                    log.info("오류 메시지: {}" , errorMessage);
+                })
+                .doOnError(Throwable.class, ex -> {
+                    // 그 외 예상치 못한 예외가 발생한 경우 처리할 작업
+                    log.info("Push 알림 전송 중 예상치 못한 오류 발생!");
+                    ex.printStackTrace();
+                })
+                .subscribe();
 //        Map<String, Object> formData = new HashMap<>();
 //        formData.put("uuids", String.join(",", request.getUuids()));
 //        formData.put("push_message", Map.of("for_apns", Map.of("message", request.getMessage())));
