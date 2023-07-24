@@ -130,6 +130,11 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.checkId(userPrincipal, info), HttpStatus.OK);
     }
 
+    @PostMapping("/user/logout") // 로그아웃
+    public ResponseEntity<Object> logout(@CurrentUser UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(authServiceImpl.logout(userPrincipal), HttpStatus.OK);
+    }
+
     @DeleteMapping("/user/resign") // 회원 탈퇴
     public ResponseEntity<Object> resign(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.resign(userPrincipal), HttpStatus.OK);

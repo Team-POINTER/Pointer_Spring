@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
     private static final SecureRandom random = new SecureRandom();
 
     public String getKakaoAccessToken(String code, boolean web) {
-        String access_Token;
+        String token;
         //String refresh_Token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token";
 
@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
             }
 
             JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-            access_Token = jsonObject.get("access_token").getAsString();
+            token = jsonObject.get("token").getAsString();
             //refresh_Token = jsonObject.get("refresh_token").getAsString();
 
             br.close();
@@ -121,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (IOException e) {
             throw new CustomException(ExceptionCode.USER_KAKAO_INVALID);
         }
-        return access_Token;
+        return token;
     }
 
 
@@ -165,6 +165,32 @@ public class AuthServiceImpl implements AuthService {
                     .build();
         } catch (Exception e) {
             throw new CustomException(ExceptionCode.USER_KAKAO_INVALID);
+        }
+    }
+
+    public void kakaoLogout(String token) {
+        System.out.println("token = " + token);
+        String reqURL = "https://kapi.kakao.com/v1/user/logout";
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("responseCode : " + responseCode);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String result = "";
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }
+            System.out.println(result);
+        } catch (Exception e) {
+            throw new CustomException(ExceptionCode.LOGOUT_INVALID);
         }
     }
 
@@ -231,6 +257,7 @@ public class AuthServiceImpl implements AuthService {
         }
         else {
             user = findUser.get();
+            user.setSocialToken(code);
         }
 
         if (user.getId().equals(User.SignupType.KAKAO+user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : SignupType + email
@@ -311,8 +338,12 @@ public class AuthServiceImpl implements AuthService {
             }
             user = signup(kakaoDto, id, password);
             user.setId(id, COMPLETE);
-        } else {
+        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
+            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
+        }
+        else {
             user = findUser.get();
+            user.setSocialToken(code);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -331,6 +362,22 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         return new UserDto.TokenResponse(ExceptionCode.SIGNUP_COMPLETE, tokenDto);
+    }
+
+    @Override
+    public Object logout(UserPrincipal userPrincipal) {
+
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+
+        if (user.getType().equals(User.SignupType.KAKAO)) {
+            kakaoLogout(user.getSocialToken());
+        }
+        /*else {
+            // apple 로그아웃
+        }*/
+
+        SecurityContextHolder.getContext().setAuthentication(null);
+        return new UserDto.UserResponse(ExceptionCode.LOGOUT_OK);
     }
 
     @Override

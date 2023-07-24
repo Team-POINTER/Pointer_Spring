@@ -15,5 +15,6 @@ public interface AuthService {
     Object checkId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo);
     Object reissue(UserPrincipal userPrincipal);
 
+    Object logout(UserPrincipal userPrincipal);
     Object resign(UserPrincipal userPrincipal);
 }

@@ -145,6 +145,10 @@ public class User extends BaseEntity {
         this.tokenExpired = true;
     }
 
+    public void setSocialToken(String token) {
+        this.socialToken = token;
+    }
+
     public void setId(String id, int checkId) {
         this.id = id;
         this.checkId = checkId;
