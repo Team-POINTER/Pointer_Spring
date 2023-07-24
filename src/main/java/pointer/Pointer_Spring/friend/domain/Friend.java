@@ -25,6 +25,9 @@ public class Friend extends BaseEntity {
     @Column(name = "friend_name", nullable = false)
     private String friendName;
 
+    @Column(name = "friend_user_id", nullable = false)
+    private String friendUserId;
+
 
     @Column(name = "user_friend_id", nullable = false)
     private Long userFriendId;
@@ -47,6 +50,7 @@ public class Friend extends BaseEntity {
     public Friend(User user, User friend, Relation relationship) {
         this.user = user;
         this.friendName = friend.getName();
+        this.friendUserId = friend.getId();
         this.userFriendId = friend.getUserId();
         this.relationship = relationship;
     }

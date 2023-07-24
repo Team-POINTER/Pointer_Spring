@@ -11,7 +11,7 @@ public enum ExceptionCode {
     SIGNUP_CREATED_OK(CREATED, "A000", "회원가입 성공"),
     SIGNUP_COMPLETE(CREATED, "A001", "이미 존재하는 회원"),
     SIGNUP_DUPLICATED_ID(DUPLICATED_VALUE, "A002", "ID 중복"),
-    SIGNUP_DUPLICATED_USERNAME(DUPLICATED_VALUE, "A003", "USERNAME 중복"),
+    SIGNUP_DUPLICATED_EMAIL(DUPLICATED_VALUE, "A003", "EMAIL 중복"),
     USER_KAKAO_INVALID(NOT_FOUND_VALUE, "A004","카카오 소셜 로그인 실패"),
     SIGNUP_LIMITED_ID(NOT_FOUND_VALUE, "A005","제한된 회원"),
     SIGNUP_PERMANENT_LIMITED_ID(NOT_FOUND_VALUE, "A006","영구 제한된 회원"),
@@ -38,6 +38,7 @@ public enum ExceptionCode {
 
     USER_AGREE_INVALID(INVALID_ACCESS, "C010", "약관에 동의하지 않은 사용자"),
     USER_AGREE_OK(SUCCESS, "C011", "약관 동의 성공"),
+    USER_MARKETING_OK(SUCCESS, "C011", "마케팅 상태 변경 성공"),
 
     USER_UPDATE_OK(SUCCESS, "D000", "회원정보 수정 성공"),
     IMAGE_GET_OK(SUCCESS, "D001", "사진 조회 성공"),

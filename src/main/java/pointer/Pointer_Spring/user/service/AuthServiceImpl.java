@@ -1,5 +1,7 @@
 package pointer.Pointer_Spring.user.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -76,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
     private static final SecureRandom random = new SecureRandom();
 
     public String getKakaoAccessToken(String code, boolean web) {
-        String access_Token;
+        String token;
         //String refresh_Token = "";
         String reqURL = "https://kauth.kakao.com/oauth/token";
 
@@ -112,16 +114,16 @@ public class AuthServiceImpl implements AuthService {
                 result += line;
             }
 
-            JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-            access_Token = jsonObject.get("access_token").getAsString();
-            //refresh_Token = jsonObject.get("refresh_token").getAsString();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(result);
+            token = jsonNode.get("access_token").asText();
 
             br.close();
             bw.close();
         } catch (IOException e) {
             throw new CustomException(ExceptionCode.USER_KAKAO_INVALID);
         }
-        return access_Token;
+        return token;
     }
 
 
@@ -165,6 +167,32 @@ public class AuthServiceImpl implements AuthService {
                     .build();
         } catch (Exception e) {
             throw new CustomException(ExceptionCode.USER_KAKAO_INVALID);
+        }
+    }
+
+    public void kakaoLogout(String token) {
+        System.out.println("token = " + token);
+        String reqURL = "https://kapi.kakao.com/v1/user/logout";
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("responseCode : " + responseCode);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String result = "";
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }
+            System.out.println(result);
+        } catch (Exception e) {
+            throw new CustomException(ExceptionCode.LOGOUT_INVALID);
         }
     }
 
@@ -216,7 +244,7 @@ public class AuthServiceImpl implements AuthService {
             return new ResponseKakaoUser(ExceptionCode.USER_NOT_FOUND);
         }
 
-        Optional<User> findUser = userRepository.findByEmailAndTypeAndStatus(kakaoDto.getEmail(), User.SignupType.KAKAO,1);
+        Optional<User> findUser = userRepository.findByEmailAndStatus(kakaoDto.getEmail(),1);
         User user;
         ExceptionCode exception;
 
@@ -226,8 +254,12 @@ public class AuthServiceImpl implements AuthService {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }*/
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
-        } else {
+        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
+            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
+        }
+        else {
             user = findUser.get();
+            user.setSocialToken(code);
         }
 
         if (user.getId().equals(User.SignupType.KAKAO+user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : SignupType + email
@@ -308,8 +340,12 @@ public class AuthServiceImpl implements AuthService {
             }
             user = signup(kakaoDto, id, password);
             user.setId(id, COMPLETE);
-        } else {
+        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
+            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
+        }
+        else {
             user = findUser.get();
+            user.setSocialToken(code);
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -331,6 +367,22 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Object logout(UserPrincipal userPrincipal) {
+
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+
+        if (user.getType().equals(User.SignupType.KAKAO)) {
+            kakaoLogout(user.getSocialToken());
+        }
+        /*else {
+            // apple 로그아웃
+        }*/
+
+        SecurityContextHolder.getContext().setAuthentication(null);
+        return new UserDto.UserResponse(ExceptionCode.LOGOUT_OK);
+    }
+
+    @Override
     public Object saveAgree(UserPrincipal userPrincipal, UserDto.UserAgree agree) {
         if (!agree.isServiceAgree() || !agree.isServiceAge()) {
             return new UserDto.UserResponse(ExceptionCode.USER_AGREE_INVALID);
@@ -339,6 +391,14 @@ public class AuthServiceImpl implements AuthService {
         user.setService(agree);
         userRepository.save(user);
         return new UserDto.UserResponse(ExceptionCode.USER_AGREE_OK);
+    }
+
+    @Override
+    public Object updateMarketing(UserPrincipal userPrincipal, UserDto.UserMarketing marketing) {
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        user.setMarketing(marketing.isMarketing());
+        userRepository.save(user);
+        return new UserDto.UserResponse(ExceptionCode.USER_MARKETING_OK);
     }
 
     @Override
@@ -399,7 +459,7 @@ public class AuthServiceImpl implements AuthService {
 
         // alarm 부분은 status가 없어서 임시 제거 불가?
 
-        userRepository.delete(user);
+        user.delete();
 
         return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
     }

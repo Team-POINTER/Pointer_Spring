@@ -158,6 +158,10 @@ public class User extends BaseEntity {
         this.tokenExpired = true;
     }
 
+    public void setSocialToken(String token) {
+        this.socialToken = token;
+    }
+
     public void setId(String id, int checkId) {
         this.id = id;
         this.checkId = checkId;
@@ -165,6 +169,10 @@ public class User extends BaseEntity {
 
     public void setCheckId(int checkId) {
         this.checkId = checkId;
+    }
+
+    public void setMarketing(boolean marketing) {
+        this.marketing = marketing;
     }
 
     public void updateRoomLimit(Integer roomLimit) {

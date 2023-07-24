@@ -44,7 +44,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 if (tokenProvider.isTokenExpired(jwt)) {
                     createResponse(ExceptionCode.EXPIRED_JWT_TOKEN, response);
                 } else {
-                    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(jwt); // jwt check
+                    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(jwt);
 
                     Long userId = tokenProvider.getUserIdFromToken(jwt);
                     UserDetails userDetails = customUserDetailsService.loadUserById(userId);
@@ -60,7 +60,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
             }
 
-        } catch (WeakKeyException ex) {
+        } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");
             createResponse(ExceptionCode.INVALID_JWT_SIGNATURE, response);
         } catch (MalformedJwtException ex) {

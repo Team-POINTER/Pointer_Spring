@@ -115,6 +115,11 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.saveAgree(userPrincipal, agree), HttpStatus.OK);
     }
 
+    @PostMapping("/user/marketing") // 마케팅 상태 변경
+    public ResponseEntity<Object> updateMarketing(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.UserMarketing marketing) {
+        return new ResponseEntity<>(authServiceImpl.updateMarketing(userPrincipal, marketing), HttpStatus.OK);
+    }
+
     @PostMapping("/user/id") // id 저장
     public ResponseEntity<Object> saveId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(userPrincipal, info), HttpStatus.OK);
@@ -125,7 +130,12 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.checkId(userPrincipal, info), HttpStatus.OK);
     }
 
-    @PostMapping("/user/resign") // 회원 탈퇴
+    @PostMapping("/user/logout") // 로그아웃
+    public ResponseEntity<Object> logout(@CurrentUser UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(authServiceImpl.logout(userPrincipal), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/user/resign") // 회원 탈퇴
     public ResponseEntity<Object> resign(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.resign(userPrincipal), HttpStatus.OK);
     }

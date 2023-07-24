@@ -11,6 +11,8 @@ public interface FriendService {
 
     UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request);
     FriendDto.FriendInfoListResponse getFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto, HttpServletRequest request);
+    FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request);
+    FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request);
 
     FriendDto.FriendInfoListResponse getBlockFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto, HttpServletRequest request);
     ResponseFriend requestFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request);
