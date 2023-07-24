@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.friend.repository.FriendRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.repository.UserRepository;
@@ -21,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final FriendRepository friendRepository;
 
     @Override
     public ResponseUser getPoints(Long userId){
@@ -79,29 +83,25 @@ public class UserServiceImpl implements UserService {
         return id.matches(pattern);
     }
 
-    public ResponseUser getUserInfo(Long userId) {
-        Optional<User> userOptional = userRepository.findByUserId(userId);
+    public ResponseUser getUserInfo(UserPrincipal userPrincipal, Long targetUserId) {
+        if(targetUserId == null){
+            User user = userRepository.findByUserId(userPrincipal.getId()).orElseThrow(
+                    ()-> new CustomException(ExceptionCode.USER_NOT_FOUND)
+            );
+            return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user ,cloudinaryService.getImages(user.getUserId())));
+        }
+        Optional<User> userOptional = userRepository.findByUserId(targetUserId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            System.out.println(user.getUserId());
-            return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user, cloudinaryService.getImages(userId)));
+            Friend.Relation relation = friendRepository.findByUserUserIdAndUserFriendId(userPrincipal.getId(), targetUserId)
+                    .orElseThrow(()->new CustomException(ExceptionCode.USER_FIND_FRIEND_FAIL)).getRelationship();
+            return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user, relation ,cloudinaryService.getImages(targetUserId)));
         } else {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         }
 //        return userRepository.findByUserId(userId)
 //                .map(user -> new UserDto.UserInfo(user,cloudinaryService.getImages(userId)))
 //                .orElseThrow(()-> new CustomException(ExceptionCode.USER_NOT_FOUND));
-    }
-
-    //더미데이터 위한 api
-    @Override
-    @Transactional
-    public User createUser(UserDto.CreateUserRequest createUserRequest){
-        System.out.println(createUserRequest.getEmail());
-        System.out.println(createUserRequest.getName());
-        User user = new User(createUserRequest.getId(),createUserRequest.getEmail(), createUserRequest.getName(), createUserRequest.getPassword());
-        userRepository.save(user);
-        return user;
     }
 
 }

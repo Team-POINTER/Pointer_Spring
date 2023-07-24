@@ -4,12 +4,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
 import pointer.Pointer_Spring.config.ResponseType;
+import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;
+
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class UserDto {
 
@@ -31,7 +36,7 @@ public class UserDto {
     @Getter
     public static class UserResponse extends ResponseType {
 
-        @JsonInclude(JsonInclude.Include.NON_NULL)
+        @JsonInclude(NON_NULL)
         Long userId;
 
         public UserResponse(ExceptionCode exceptionCode) {
@@ -120,9 +125,21 @@ public class UserDto {
         String id;
         String userName;
         Long point;
+
+        @JsonInclude(NON_NULL)
+        Integer relationship;
         ImageDto.ImageUrlResponse imageUrls;
 
-        public UserInfo(User user, ImageDto.ImageUrlResponse imageUrlResponse) {
+        public UserInfo(User user, Friend.Relation relationship, ImageDto.ImageUrlResponse imageUrlResponse) {
+            this.userId = user.getUserId();
+            this.id = user.getId();
+            this.userName = user.getName();
+            this.point = user.getPoint();
+            this.relationship = relationship.ordinal();
+            this.imageUrls = imageUrlResponse;
+
+        }
+        public UserInfo(User user,ImageDto.ImageUrlResponse imageUrlResponse) {
             this.userId = user.getUserId();
             this.id = user.getId();
             this.userName = user.getName();

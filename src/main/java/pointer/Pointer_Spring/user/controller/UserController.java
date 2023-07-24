@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.security.CurrentUser;
@@ -39,8 +40,8 @@ public class UserController {
         return userService.updateId(userPrincipal.getId(), updateIdRequest.getId());
     }
 
-    @GetMapping("/info")
-    public ResponseUser getUserInfo(@CurrentUser UserPrincipal userPrincipal){
-        return userService.getUserInfo(userPrincipal.getId());
+    @GetMapping(value = {"{targetUserId}/info", "/info"})
+    public ResponseUser getUserInfo(@CurrentUser UserPrincipal userPrincipal, @PathVariable(required = false) Long targetUserId){
+        return userService.getUserInfo(userPrincipal, targetUserId);
     }
 }
