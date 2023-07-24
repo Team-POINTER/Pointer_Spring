@@ -33,6 +33,20 @@ public class FriendController {
         return friendService.getFriendList(userPrincipal, dto, request);
     }
 
+    @GetMapping("/friend/search") // 친구 중 검색
+    public FriendDto.FriendInfoListResponse getUserFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                                              @RequestBody FriendDto.FindFriendDto dto,
+                                                              HttpServletRequest request) {
+        return friendService.getUserFriendList(userPrincipal, dto, request);
+    }
+
+    @GetMapping("/friend/block/search") // 차단친구 중 검색
+    public FriendDto.FriendInfoListResponse getUserBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                                              @RequestBody FriendDto.FindFriendDto dto,
+                                                              HttpServletRequest request) {
+        return friendService.getUserBlockFriendList(userPrincipal, dto, request);
+    }
+
     // 친구 관계 설정
 
     @PostMapping("/friend/request") // 친구 요청
