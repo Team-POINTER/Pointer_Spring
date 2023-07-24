@@ -3,6 +3,9 @@ package pointer.Pointer_Spring.vote.controller;
 import lombok.Getter;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.common.response.BaseResponse;
+import pointer.Pointer_Spring.security.CurrentUser;
+import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.vote.dto.VoteDto;
 import pointer.Pointer_Spring.vote.service.VoteServiceImpl;
 
@@ -22,20 +25,23 @@ public class VoteController {
 
     // 투표하기
     @PostMapping()
-    public BaseResponse<List<VoteDto.CreateResponse>> createVote(@Valid @RequestBody VoteDto.CreateRequest dto) {
-        return new BaseResponse<>(voteService.createVote(dto));
+    public BaseResponse<List<VoteDto.CreateResponse>> createVote(
+            @CurrentUser UserPrincipal userPrincipal, @Valid @RequestBody VoteDto.CreateRequest dto) {
+        return new BaseResponse<>(voteService.createVote(userPrincipal, dto));
     }
 
     // 지목화면 결과 조회
-    @GetMapping("/{userId}/{questionId}")
-    public BaseResponse<VoteDto.GetResponse> getVotes(@PathVariable Long userId, @PathVariable Long questionId) {
-        return new BaseResponse<>(voteService.getQuestionVoteCnt(userId, questionId));
+    @GetMapping("/{questionId}")
+    public BaseResponse<VoteDto.GetResponse> getVotes(
+            @CurrentUser UserPrincipal userPrincipal, @PathVariable Long questionId) {
+        return new BaseResponse<>(voteService.getQuestionVoteCnt(userPrincipal, questionId));
     }
 
     // 힌트보기
-    @GetMapping("/hint/{userId}/{questionId}")
-    public BaseResponse<VoteDto.GetHintResponse> getHintResponse(@PathVariable Long userId, @PathVariable Long questionId) {
-        return new BaseResponse<>(voteService.getHintResponse(userId, questionId));
+    @GetMapping("/hint/{questionId}")
+    public BaseResponse<VoteDto.GetHintResponse> getHintResponse(
+            @CurrentUser UserPrincipal userPrincipal, @PathVariable Long questionId) {
+        return new BaseResponse<>(voteService.getHintResponse(userPrincipal, questionId));
     }
 
     // 지목하지 않은 사람 조회

@@ -15,17 +15,14 @@ public class VoteDto {
     public static class CreateRequest {
         @NotNull(message = "questionId를 입력해주세요.")
         private Long questionId;
-        @NotNull(message = "userId를 입력해주세요.")
-        private Long userId;
         @Size(min = 1, message = "votedUserIds는 최소 1개 이상이어야 합니다.")
         private List<Long> votedUserIds;
         @NotNull(message = "hint를 입력해주세요.")
         private String hint;
 
         @Builder
-        public CreateRequest(Long questionId, Long userId, List<Long> votedUserIds, String hint) {
+        public CreateRequest(Long questionId, List<Long> votedUserIds, String hint) {
             this.questionId = questionId;
-            this.userId = userId;
             this.votedUserIds = votedUserIds;
             this.hint = hint;
         }

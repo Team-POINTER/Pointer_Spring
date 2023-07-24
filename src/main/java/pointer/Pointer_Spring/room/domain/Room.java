@@ -49,6 +49,10 @@ public class Room extends BaseEntity {
     }
 
 
+    public void addQuestion(Question question) {
+        this.questions.add(question);
+    }
+
     @Builder
     public Room(Long creatorId, String name) {
         this.creatorId = creatorId;

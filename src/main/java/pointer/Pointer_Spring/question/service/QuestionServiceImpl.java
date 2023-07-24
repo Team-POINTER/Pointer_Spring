@@ -1,6 +1,10 @@
 package pointer.Pointer_Spring.question.service;
 
 import org.springframework.stereotype.Service;
+import pointer.Pointer_Spring.alarm.domain.Alarm;
+import pointer.Pointer_Spring.alarm.dto.AlarmDto;
+import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
@@ -8,6 +12,7 @@ import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
@@ -18,7 +23,9 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -28,24 +35,28 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final VoteRepository voteRepository;
+    private final AlarmRepository alarmRepository;
+    private final KakaoPushNotiService kakaoPushNotiService;
 
     public QuestionServiceImpl(
             QuestionRepository questionRepository,
             RoomRepository roomRepository,
             UserRepository userRepository,
             RoomMemberRepository roomMemberRepository,
-            VoteRepository voteRepository
-    ) {
+            VoteRepository voteRepository,
+            AlarmRepository alarmRepository, KakaoPushNotiService kakaoPushNotiService) {
         this.questionRepository = questionRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.roomMemberRepository = roomMemberRepository;
         this.voteRepository = voteRepository;
+        this.alarmRepository = alarmRepository;
+        this.kakaoPushNotiService = kakaoPushNotiService;
     }
 
     @Override
     @Transactional
-    public QuestionDto.CreateResponse createQuestion(QuestionDto.CreateRequest request) {
+    public QuestionDto.CreateResponse createQuestion(UserPrincipal userPrincipal, QuestionDto.CreateRequest request) {
 
         // 방 조회
         Room room = roomRepository.findById(request.getRoomId())
@@ -54,7 +65,7 @@ public class QuestionServiceImpl implements QuestionService {
                 });
 
         // 유저 조회
-        User user = userRepository.findByUserId(request.getUserId())
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -70,6 +81,32 @@ public class QuestionServiceImpl implements QuestionService {
 
         questionRepository.save(question);
         question.getRoom().setUpdatedAt(question.getUpdatedAt());
+        room.addQuestion(question);
+
+        // 알림
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        for(RoomMember roomMember : roomMembers) {
+            User member = roomMember.getUser();
+            if(!member.isActiveAlarmFlag()) continue;
+
+            Alarm alarm = Alarm.builder()
+                    .sendUserId(user.getUserId())
+                    .receiveUserId(member.getUserId())
+                    .type(Alarm.AlarmType.QUESTION)
+                    .content(Alarm.AlarmType.QUESTION.getMessage())
+                    .build();
+
+            alarmRepository.save(alarm);
+
+            AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
+                    .forApns(AlarmDto.PushType.builder()
+                            .message(alarm.getContent())
+                            .apnsEnv("sandbox")
+                            .build())
+                    .build();
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
+        }
+
         return QuestionDto.CreateResponse.builder()
                 .questionId(question.getId())
                 .content(question.getQuestion())
@@ -98,7 +135,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public QuestionDto.GetCurrentResponse getCurrentQuestion(Long userId, Long roomId) {
+    public QuestionDto.GetCurrentResponse getCurrentQuestion(UserPrincipal userPrincipal, Long roomId) {
         LocalDateTime now = LocalDateTime.now().minusDays(1);
 
         Room room = roomRepository.findById(roomId).orElseThrow(() -> {
@@ -109,7 +146,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.CURRENT_QUESTION_NOT_FOUND);
         });
 
-        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, currentQuestion.getId());
+        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userPrincipal.getId(), currentQuestion.getId());
 
         List<QuestionDto.GetMemberResponse> roomMembers = roomMemberRepository.findAllByRoom(room).stream()
                 .map((m) -> QuestionDto.GetMemberResponse.builder()
@@ -129,8 +166,8 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<QuestionDto.GetResponse> getQuestions(Long userId, Long roomId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+    public List<QuestionDto.GetResponse> getQuestions(UserPrincipal userPrincipal, Long roomId) {
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         });
 
@@ -162,8 +199,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void modifyQuestion(Long userId, Long questionId, QuestionDto.ModifyRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+    public void modifyQuestion(UserPrincipal userPrincipal, Long questionId, QuestionDto.ModifyRequest request) {
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         });
         Question question = questionRepository.findById(questionId).orElseThrow(() -> {
@@ -171,7 +208,7 @@ public class QuestionServiceImpl implements QuestionService {
         });
 
         boolean checkRoomMember = roomMemberRepository
-                .existsByUserUserIdAndRoomRoomId(userId, question.getRoom().getRoomId());
+                .existsByUserUserIdAndRoomRoomId(userPrincipal.getId(), question.getRoom().getRoomId());
 
         if(!checkRoomMember)
             throw new CustomException(ExceptionCode.QUESTION_DELETE_NOT_AUTHENTICATED);
@@ -182,8 +219,8 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     @Transactional
-    public void deleteQuestion(Long userId, Long questionId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+    public void deleteQuestion(UserPrincipal userPrincipal, Long questionId) {
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         });
         Question question = questionRepository.findById(questionId).orElseThrow(() -> {
@@ -191,7 +228,7 @@ public class QuestionServiceImpl implements QuestionService {
         });
 
         boolean checkRoomMember = roomMemberRepository
-                .existsByUserUserIdAndRoomRoomId(userId, question.getRoom().getRoomId());
+                .existsByUserUserIdAndRoomRoomId(user.getUserId(), question.getRoom().getRoomId());
 
         if(!checkRoomMember)
             throw new CustomException(ExceptionCode.QUESTION_DELETE_NOT_AUTHENTICATED);

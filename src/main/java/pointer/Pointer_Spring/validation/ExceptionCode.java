@@ -133,6 +133,14 @@ public enum ExceptionCode {
     REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
 
     /**
+     * 알림
+     */
+
+    ACTIVE_ALARM_NOT_FOUND(NOT_FOUND_VALUE, "L000", "활동 알림이 존재하지 않습니다"),
+    KAKAO_TOKEN_REGISTER_FAIL(INVALID_ACCESS, "L001", "카카오 토큰 등록 실패"),
+    KAKAO_PUSH_SEND_FAIL(INVALID_ACCESS, "L002", "카카오 푸시 전송 실패"),
+
+    /**
      * 잘못된 ExceptionCode
      */
     INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
