@@ -64,6 +64,7 @@ public class User extends BaseEntity {
     private boolean marketing;
 
     @Column(name = "room_limit")
+    @ColumnDefault("0")
     private Integer roomLimit;
 
     @Column(length = 400)
@@ -75,7 +76,13 @@ public class User extends BaseEntity {
     @ColumnDefault("false")
     private boolean tokenExpired;
 
+    @ColumnDefault("0")
     private Long point;
+
+    @Column(name = "question_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isQuestionRestricted;
+    @Column(name = "hint_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isHintRestricted;
 
     // builder
     @Builder
@@ -162,6 +169,12 @@ public class User extends BaseEntity {
 
     public void updateRoomLimit(Integer roomLimit) {
         this.roomLimit = roomLimit;
+    }
+    public void updateIsQuestionRestricted(boolean isQuestionRestricted){
+        this.isQuestionRestricted = isQuestionRestricted;
+    }
+    public void updateIsHintRestricted(boolean isHintRestricted){
+        this.isHintRestricted = isHintRestricted;
     }
 
     @PrePersist
