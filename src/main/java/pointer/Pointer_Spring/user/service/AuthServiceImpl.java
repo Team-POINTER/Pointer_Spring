@@ -1,5 +1,7 @@
 package pointer.Pointer_Spring.user.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -112,9 +114,9 @@ public class AuthServiceImpl implements AuthService {
                 result += line;
             }
 
-            JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-            token = jsonObject.get("token").getAsString();
-            //refresh_Token = jsonObject.get("refresh_token").getAsString();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(result);
+            token = jsonNode.get("access_token").asText();
 
             br.close();
             bw.close();

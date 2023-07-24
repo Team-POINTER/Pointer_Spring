@@ -47,17 +47,17 @@ public class TokenProvider {
     }
 
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().
-                setSigningKey(appProperties.getAuth().getTokenSecret()).build()
-                .parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser()
+                .setSigningKey(appProperties.getAuth().getTokenSecret())
+                .parseClaimsJws(token)
+                .getBody();
 
         return Long.parseLong(claims.getSubject());
     }
 
     public ExceptionCode validateToken(String authToken) {
         try {
-            Jwts.parserBuilder().
-                    setSigningKey(appProperties.getAuth().getTokenSecret()).build().parseClaimsJws(authToken).getBody();
+            Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);
             return ExceptionCode.TOKEN_SUCCESS;
         } catch (WeakKeyException ex) {
             logger.error("Invalid JWT signature");
@@ -79,9 +79,10 @@ public class TokenProvider {
 
     public boolean isTokenExpired(String token) {
         try {
-            Claims claims = Jwts.parserBuilder().
-                    setSigningKey(appProperties.getAuth().getTokenSecret()).build()
-                    .parseClaimsJws(token).getBody();
+            Claims claims = Jwts.parser()
+                    .setSigningKey(appProperties.getAuth().getTokenSecret())
+                    .parseClaimsJws(token)
+                    .getBody();
 
             Date expirationDate = claims.getExpiration();
             return expirationDate.before(new Date());
