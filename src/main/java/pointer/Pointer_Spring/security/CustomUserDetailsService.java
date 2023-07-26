@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.exception.ResourceNotFoundException;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.UserRepository;
+import pointer.Pointer_Spring.validation.CustomException;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +26,9 @@ public class CustomUserDetailsService implements UserDetailsService { // 로그�
         //System.out.println("CustomUserDetailsService.loadUserByUsername");
 
         User user = userRepository.findByEmailAndStatus(email, STATUS)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User is not found. email : " + email)
-                );
+                .orElseThrow(() -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                });
 
         return UserPrincipal.create(user);
     }
@@ -34,9 +36,10 @@ public class CustomUserDetailsService implements UserDetailsService { // 로그�
     @Transactional
     public UserDetails loadUserById(Long id) {
         //System.out.println("CustomUserDetailsService.loadUserById");
-        User user = userRepository.findByUserIdAndStatus(id, STATUS).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", id)
-        );
+        User user = userRepository.findByUserIdAndStatus(id, STATUS)
+                .orElseThrow(() -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                });
 
         return UserPrincipal.create(user);
     }

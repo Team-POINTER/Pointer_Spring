@@ -46,7 +46,7 @@ public class FriendServiceImpl implements FriendService {
 
     // 검색
     private List<User> fetchPagesOffsetUser(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
-        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("name"));
 
         return userRepository.findUsersWithKeywordAndStatusNotFriendOfUser
                 (userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
@@ -379,15 +379,13 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public UserDto.UserListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+    public FriendDto.RoomFriendListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
         User foundUser = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
         RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(roomId, foundUser.getUserId(), 1).orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
 
         // roomMember 인지
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(roomMember.getRoom(), STATUS);
         List<Friend> friends = fetchPagesOffsetUserFriend(userPrincipal, dto);
-
-        List<UserDto.UserList> friendList = new ArrayList<>();
 
         List<FriendDto.FriendRoomInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : friends) {
@@ -396,23 +394,21 @@ public class FriendServiceImpl implements FriendService {
 
             if (roomMembers.stream().filter(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId())).findAny().isPresent()) {
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 0, friend.getRelationship())
-                            .setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 0, friend.getRelationship()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0));
                 }
             } else {
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 1, friend.getRelationship())
-                            .setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,1).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 1, friend.getRelationship()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,1));
                 }
             }
         }
 
         Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
-        return new UserDto.UserListResponse(ExceptionCode.ROOM_FRIEND_OK, total, friendList);
+        return new FriendDto.RoomFriendListResponse(ExceptionCode.ROOM_FRIEND_OK, friendInfoList, total);
     }
 
     /*@Override

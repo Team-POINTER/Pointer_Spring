@@ -12,23 +12,18 @@ import java.util.List;
 
 public class FriendDto {
 
-    /*@Getter
-    public static class FriendListResponse extends ResponseType {
+    @Getter
+    public static class RoomFriendListResponse extends ResponseType {
 
-        List<FriendList> userList;
+        List<FriendRoomInfoList> friendList;
         Long total;
 
-        public FriendListResponse(ExceptionCode exceptionCode, List<FriendList> userList, Long total) {
+        public RoomFriendListResponse(ExceptionCode exceptionCode, List<FriendRoomInfoList> friendList, Long total) {
             super(exceptionCode);
             this.total = total;
-            this.userList = userList;
+            this.friendList = friendList;
         }
-
-        public FriendListResponse(ExceptionCode exceptionCode, List<FriendList> userList) {
-            super(exceptionCode);
-            this.userList = userList;
-        }
-    }*/
+    }
 
     @Getter
     public static class FriendInfoListResponse extends ResponseType {
@@ -115,15 +110,13 @@ public class FriendDto {
         Long friendId;
         String id;
         String friendName;
-        int status;
         String file;
-        Friend.Relation relationship;
+        int status;
 
-        public FriendRoomInfoList(Friend friend, User user, int status, Friend.Relation relationship) {
+        public FriendRoomInfoList(User user, int status) {
             this.friendId = user.getUserId();
             this.id = user.getId();
-            this.friendName = friend.getFriendName();
-            this.relationship = relationship;
+            this.friendName = user.getName();
             this.status = status;
         }
 

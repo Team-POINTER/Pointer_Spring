@@ -5,11 +5,10 @@ import lombok.Data;
 import lombok.Getter;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -80,6 +79,19 @@ public class UserDto {
             super(exceptionCode);
             this.total = total;
             this.userList = userList;
+        }
+    }
+
+    @Getter
+    public static class RoomUserListResponse extends ResponseType{
+
+        List<FriendDto.FriendList> friendList;
+        Long total;
+
+        public RoomUserListResponse(ExceptionCode exceptionCode, Long total, List<FriendDto.FriendList> friendList) {
+            super(exceptionCode);
+            this.total = total;
+            this.friendList = friendList;
         }
     }
 

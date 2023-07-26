@@ -16,7 +16,7 @@ public class Friend extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "friend_id")
+    @Column(name = "friend_id", unique = true)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
