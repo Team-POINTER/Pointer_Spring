@@ -36,6 +36,7 @@ public class AlarmServiceImpl implements AlarmService {
     private final KakaoPushNotiService kakaoPushNotiService;
 
     private static final int PAGE_SIZE = 30;
+    private static final int STATUS = 1;
 
     public AlarmServiceImpl(AlarmRepository alarmRepository, UserRepository userRepository, QuestionRepository questionRepository, RoomMemberRepository roomMemberRepository, VoteRepository voteRepository, ChatAlarmRepository chatAlarmRepository, KakaoPushNotiService kakaoPushNotiService) {
         this.alarmRepository = alarmRepository;
@@ -58,7 +59,7 @@ public class AlarmServiceImpl implements AlarmService {
             throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
 
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(question.getRoom(), STATUS);
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
             if (!member.isActiveAlarmFlag()) continue;

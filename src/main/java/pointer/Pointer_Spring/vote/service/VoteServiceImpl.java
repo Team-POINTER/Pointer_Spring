@@ -33,6 +33,8 @@ public class VoteServiceImpl implements VoteService {
     private final RoomMemberRepository roomMemberRepository;
     private final RestrictedUserRepository restrictedUserRepository;
 
+    private final Integer STATUS = 1;
+
     public VoteServiceImpl(VoteRepository voteRepository, QuestionRepository questionRepository, UserRepository userRepository, RoomRepository roomRepository, RoomMemberRepository roomMemberRepository, RestrictedUserRepository restrictedUserRepository) {
         this.voteRepository = voteRepository;
         this.questionRepository = questionRepository;
@@ -123,7 +125,7 @@ public class VoteServiceImpl implements VoteService {
                 .votedMemberCnt(targetVotedCnt)
                 .build();
 
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(question.getRoom(), STATUS);
 
         // 룸 유저들 정보 조회
         List<VoteDto.GetMemberResponse> memberResponses = new ArrayList<>();
@@ -162,7 +164,7 @@ public class VoteServiceImpl implements VoteService {
             throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
         // 쿼리문 변경 예정
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(question.getRoom(), STATUS);
         List<VoteDto.GetNotVotedMember> notVotedMembers = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();

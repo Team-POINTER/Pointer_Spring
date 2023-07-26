@@ -2,6 +2,7 @@ package pointer.Pointer_Spring.room.service;
 
 import javax.servlet.http.HttpServletRequest;
 
+import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomDto.CreateRequest;
 import pointer.Pointer_Spring.room.dto.RoomDto.DetailResponse;
@@ -10,6 +11,7 @@ import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.dto.UserDto;
 
 import java.util.List;
 

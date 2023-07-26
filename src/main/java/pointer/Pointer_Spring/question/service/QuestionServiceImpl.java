@@ -40,6 +40,8 @@ public class QuestionServiceImpl implements QuestionService {
     private final KakaoPushNotiService kakaoPushNotiService;
     private final RestrictedUserRepository restrictedUserRepository;
 
+    private final Integer STATUS = 1;
+
     public QuestionServiceImpl(
             QuestionRepository questionRepository,
             RoomRepository roomRepository,
@@ -96,7 +98,7 @@ public class QuestionServiceImpl implements QuestionService {
         room.addQuestion(question);
 
         // 알림
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS);
         for(RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
             if(!member.isActiveAlarmFlag()) continue;
@@ -182,7 +184,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userPrincipal.getId(), currentQuestion.getId());
 
-        List<QuestionDto.GetMemberResponse> roomMembers = roomMemberRepository.findAllByRoom(room).stream()
+        List<QuestionDto.GetMemberResponse> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS).stream()
                 .map((m) -> QuestionDto.GetMemberResponse.builder()
                         .userId(m.getUser().getUserId())
                         .nickname(m.getUser().getName())

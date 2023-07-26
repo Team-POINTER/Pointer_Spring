@@ -15,11 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.dto.UserDto;
+import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
@@ -33,6 +37,7 @@ import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.room.response.ResponseMemberRoom;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
+import pointer.Pointer_Spring.user.service.AuthService;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 import pointer.Pointer_Spring.vote.domain.VoteHistory;
@@ -49,7 +54,13 @@ public class RoomServiceImpl implements RoomService {
     private final FriendRepository friendRepository;
     private final VoteRepository voteRepository;
     private final QuestionRepository questionRepository;
+    private final ImageRepository imageRepository;
+    private final AuthService authService;
+
     private final String FIRST_QUESTION = "첫인상이 좋았던 사람을 지목해주세요";
+
+    private final Integer STATUS = 1;
+    private final Integer PAGE_COUNT = 30;
 
     @Transactional
     @Override//질문 생성 시 마다 room updateAt도 같이 시간 update하기
@@ -95,7 +106,7 @@ public class RoomServiceImpl implements RoomService {
         return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new ListResponse(roomListDto));
     }
     private String getTopUserNm(Room room, Long latestQuestionId){
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS);
         int maxVote = 0;
         RoomMember topMem = roomMembers.get(0);
         for (RoomMember roomMem : roomMembers) {
@@ -129,7 +140,7 @@ public class RoomServiceImpl implements RoomService {
                         }
                 );
 
-        List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(foundRoom).stream()
+        List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoomAndStatus(foundRoom,STATUS).stream()
                 .map(RoomMemberResopnose::new).toList();
         return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, latestQuestion, roomMemberResopnoseList));
     }
@@ -171,7 +182,7 @@ public class RoomServiceImpl implements RoomService {
 
         questionRepository.save(question);
 
-        List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoom(savedRoom).stream()
+        List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoomAndStatus(savedRoom, STATUS).stream()
                 .map(RoomMemberResopnose::new).toList();
         CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
@@ -258,7 +269,7 @@ public class RoomServiceImpl implements RoomService {
                 .collect(Collectors.toList());
         roomMemberRepository.saveAllAndFlush(roomMembers);
 
-        List<RoomMember> invitedRoomMemberInfoList = roomMemberRepository.findAllByRoom(foundRoom);
+        List<RoomMember> invitedRoomMemberInfoList = roomMemberRepository.findAllByRoomAndStatus(foundRoom, STATUS);
         List<InviteMember> invitedMemberList = invitedRoomMemberInfoList.stream()
                 .map(RoomDto.InviteMember::new).toList();
 
@@ -327,7 +338,6 @@ public class RoomServiceImpl implements RoomService {
 
         return friendRepository.findAllByUserUserIdAndRelationshipAndStatus(userId, Friend.Relation.SUCCESS, 1, pageable);
     }
-
 
 
 //    public String createLink(Room room) {

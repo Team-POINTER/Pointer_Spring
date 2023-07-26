@@ -49,6 +49,7 @@ public enum ExceptionCode {
     USER_IMAGE_UPDATE_SUCCESS(SUCCESS, "D006", "회원 사진 수정 성공"),
     BACKGROUND_IMAGE_UPDATE_SUCCESS(SUCCESS, "D007", "배경 사진 수정 성공"),
 
+    USER_SEARCH_OK(SUCCESS, "D008", "회원 검색 성공"),
 
     /**
      * 채팅
@@ -101,6 +102,17 @@ public enum ExceptionCode {
     FRIEND_CANCEL_NOT(INVALID_ACCESS, "J009", "친구 취소 요청 실패"),
     FRIEND_REQUEST_CANCEL_OK(SUCCESS, "J010", "요청 취소 성공"),
     FRIEND_REQUEST_CANCEL_NOT(SUCCESS, "J011", "요청 취소 실패"),
+    FRIEND_BLOCK_CANCEL_OK(SUCCESS, "J012", "친구 차단 해제 성공"),
+
+    FRIEND_SEARCH_OK(SUCCESS, "J013", "친구 검색 성공"),
+    FRIEND_BLOCK_SEARCH_OK(SUCCESS, "J014", "차단 친구 검색 성공"),
+
+    FRIEND_LIST_SEARCH_OK(SUCCESS, "J015", "친구 리스트 조회 성공"),
+    FRIEND_LIST_FIND_OK(SUCCESS, "J016", "차단 친구 리스트 조회 성공"),
+
+    FRIEND_INVALID(INVALID_ACCESS, "J017","잘못된 접근"),
+    FRIEND_BLOCK_CANCEL_NOT(INVALID_ACCESS, "J018", "친구 차단 해제 실패"),
+
 
     /**
      * room
@@ -118,6 +130,8 @@ public enum ExceptionCode {
     ROOMMEMBER_DUPLICATE_VALUE(INVALID_ACCESS, "J009", "sql 룸 멤버 중복 에러"),
     ROOMMEMBER_GET_SUCCESS(SUCCESS, "J0011", "룸 멤버 조회 성공"),
     INVITATION_LIST_GET_SUCCESS(SUCCESS, "J0012", "초대 목록 조회 성공"),
+
+    ROOM_FRIEND_OK(SUCCESS, "J013", "룸 초대 가능 친구 목록"),
 
     /**
      * 질문

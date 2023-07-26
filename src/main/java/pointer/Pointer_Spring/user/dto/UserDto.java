@@ -70,13 +70,14 @@ public class UserDto {
         private boolean marketing;
     }
 
-    @Data
-    public static class UserListResponse {
+    @Getter
+    public static class UserListResponse extends ResponseType{
 
         List<UserList> userList;
         Long total;
 
-        public UserListResponse(Long total, List<UserList> userList) {
+        public UserListResponse(ExceptionCode exceptionCode, Long total, List<UserList> userList) {
+            super(exceptionCode);
             this.total = total;
             this.userList = userList;
         }

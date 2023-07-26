@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import pointer.Pointer_Spring.friend.dto.FriendDto;
+import pointer.Pointer_Spring.friend.service.FriendService;
 import pointer.Pointer_Spring.room.dto.RoomDto;
 import pointer.Pointer_Spring.room.dto.RoomMemberDto;
 import pointer.Pointer_Spring.room.response.ResponseRoom;
@@ -31,6 +33,7 @@ import java.util.List;
 public class RoomController {
 
     private final RoomService roomService;
+    private final FriendService friendService;
 
     @GetMapping//jwt로 하면 get으로 바꾸고 requestbody 없애기
     public ResponseRoom getRoomList(@CurrentUser UserPrincipal userPrincipal, @RequestParam(required = false) String kwd, HttpServletRequest request) {
@@ -78,6 +81,14 @@ public class RoomController {
     @GetMapping("/{room-id}/exit")
     public Object exitRoom(@PathVariable(name = "room-id") Long roomId, @CurrentUser UserPrincipal userPrincipal, HttpServletRequest request) {
         return roomService.exitRoom(roomId, userPrincipal);
+    }
+
+    // 초대 가능 친구 목록
+    @GetMapping("/{room-id}/friends")
+    public Object getRoomFriendList(@PathVariable(name = "room-id") Long roomId,
+                                    @CurrentUser UserPrincipal userPrincipal,
+                                    @RequestBody FriendDto.FindFriendDto dto) {
+        return friendService.getRoomFriendList(roomId, userPrincipal, dto);
     }
 
     // 초대 링크 조회
