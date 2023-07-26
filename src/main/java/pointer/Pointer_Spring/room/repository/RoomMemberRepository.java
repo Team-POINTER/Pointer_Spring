@@ -14,7 +14,7 @@ import pointer.Pointer_Spring.room.domain.RoomMember;
 @Repository
 public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
-    List<RoomMember> findAllByRoom(Room room);
+    List<RoomMember> findAllByRoomAndStatus(Room room, int status);
 
     List<RoomMember> findByRoomMemberId(Long RoomMemberId);
     int countByRoom(Room room);

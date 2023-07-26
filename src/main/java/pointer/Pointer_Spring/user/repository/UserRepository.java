@@ -32,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u " +
             "WHERE u.userId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :userId AND f.relationship = 0 AND f.status = :status) " +
             "AND NOT u.userId = :userId AND (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status " +
-            "ORDER BY u.userId DESC")
+            "ORDER BY u.name")
     List<User> findUsersWithKeywordAndStatusNotFriendOfUser(@Param("userId")Long userId,
                                                             @Param("keyword")String keyword,
                                                             @Param("status")int status,

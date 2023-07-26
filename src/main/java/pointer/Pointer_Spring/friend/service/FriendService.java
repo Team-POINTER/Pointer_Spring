@@ -23,4 +23,6 @@ public interface FriendService {
     //FriendDto.FriendInfoListResponse getFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto);
     //FriendDto.FriendInfoListResponse getBlockFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto);
 
+    UserDto.UserListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+
 }

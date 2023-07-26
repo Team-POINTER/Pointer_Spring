@@ -13,6 +13,8 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.friend.response.ResponseFriend;
+import pointer.Pointer_Spring.room.domain.RoomMember;
+import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
@@ -32,6 +34,7 @@ public class FriendServiceImpl implements FriendService {
 
     private final FriendRepository friendRepository;
     private final UserRepository userRepository;
+    private final RoomMemberRepository roomMemberRepository;
     private final ImageRepository imageRepository;
     private final AlarmRepository alarmRepository;
     private final KakaoPushNotiService kakaoPushNotiService;
@@ -373,6 +376,43 @@ public class FriendServiceImpl implements FriendService {
             return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
+    }
+
+    @Override
+    public UserDto.UserListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        User foundUser = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(roomId, foundUser.getUserId(), 1).orElseThrow(() -> new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+
+        // roomMember 인지
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(roomMember.getRoom(), STATUS);
+        List<Friend> friends = fetchPagesOffsetUserFriend(userPrincipal, dto);
+
+        List<UserDto.UserList> friendList = new ArrayList<>();
+
+        List<FriendDto.FriendRoomInfoList> friendInfoList = new ArrayList<>();
+        for (Friend friend : friends) {
+            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+
+            if (roomMembers.stream().filter(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId())).findAny().isPresent()) {
+                if (image.isPresent()) {
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 0, friend.getRelationship())
+                            .setFile(image.get().getImageUrl()));
+                } else {
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 0, friend.getRelationship()));
+                }
+            } else {
+                if (image.isPresent()) {
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 1, friend.getRelationship())
+                            .setFile(image.get().getImageUrl()));
+                } else {
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(friend, user, 1, friend.getRelationship()));
+                }
+            }
+        }
+
+        Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new UserDto.UserListResponse(ExceptionCode.ROOM_FRIEND_OK, total, friendList);
     }
 
     /*@Override

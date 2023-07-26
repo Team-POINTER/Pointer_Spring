@@ -49,6 +49,25 @@ public class FriendDto {
         }
     }
 
+    @Getter
+    public static class FriendRoomInfoListResponse extends ResponseType {
+
+        List<FriendInfoList> friendInfoList;
+        String name;
+        Long total;
+
+        public FriendRoomInfoListResponse(ExceptionCode exceptionCode,  String name, Long total, List<FriendInfoList> friendInfoList) {
+            super(exceptionCode);
+            this.total = total;
+            this.name = name;
+            this.friendInfoList = friendInfoList;
+        }
+        public FriendRoomInfoListResponse(ExceptionCode exceptionCode, List<FriendInfoList> friendInfoList) {
+            super(exceptionCode);
+            this.friendInfoList = friendInfoList;
+        }
+    }
+
     @Data
     public static class FriendList {
         Long friendId;
@@ -89,6 +108,31 @@ public class FriendDto {
             return this;
         }
     }
+
+    @Data
+    public static class FriendRoomInfoList {
+
+        Long friendId;
+        String id;
+        String friendName;
+        int status;
+        String file;
+        Friend.Relation relationship;
+
+        public FriendRoomInfoList(Friend friend, User user, int status, Friend.Relation relationship) {
+            this.friendId = user.getUserId();
+            this.id = user.getId();
+            this.friendName = friend.getFriendName();
+            this.relationship = relationship;
+            this.status = status;
+        }
+
+        public FriendRoomInfoList setFile(String file) {
+            this.file = file;
+            return this;
+        }
+    }
+
 
     @Data
     public static class FriendUserDto {

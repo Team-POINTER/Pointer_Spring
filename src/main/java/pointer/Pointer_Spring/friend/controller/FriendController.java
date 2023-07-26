@@ -17,7 +17,7 @@ public class FriendController {
 
     private final FriendService friendService;
 
-    // 검색
+    // 조회 및 검색
 
     @GetMapping("/search") // 유저 검색
     public UserDto.UserListResponse getUserList(@CurrentUser UserPrincipal userPrincipal,
