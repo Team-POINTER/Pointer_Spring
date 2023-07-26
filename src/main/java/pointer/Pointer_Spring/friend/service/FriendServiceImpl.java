@@ -22,7 +22,6 @@ import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 
@@ -43,22 +42,80 @@ public class FriendServiceImpl implements FriendService {
     // 친구 요청, 취소만 알림 -> 친구 성공시, 알림 갱신
 
     // 검색
-    private List<User> fetchPagesOffsetUser(FriendDto.FindFriendDto findFriendDto){
-        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("userId"));
-        return userRepository.findAllByIdContainingOrNameContainingAndStatusOrderByUserIdDesc
-                (findFriendDto.getKeyword(), findFriendDto.getKeyword(), STATUS, pageRequest);
+    private List<User> fetchPagesOffsetUser(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
+
+        return userRepository.findUsersWithKeywordAndStatusNotFriendOfUser
+                (userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
-        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("friendName"));
-        return friendRepository.findAllByUserUserIdAndFriendUserIdContainingOrFriendNameContainingAndRelationshipNotAndStatusOrderByUserIdDesc
-                (userPrincipal.getId(), findFriendDto.getKeyword(), findFriendDto.getKeyword(), Friend.Relation.BLOCK, STATUS, pageRequest);
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
+        return friendRepository.findUsersAndFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetUserBlockFriend(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
-        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("friendName"));
-        return friendRepository.findAllByUserUserIdAndFriendUserIdContainingOrFriendNameContainingAndRelationshipAndStatusOrderByUserIdDesc
-                (userPrincipal.getId(), findFriendDto.getKeyword(), findFriendDto.getKeyword(), Friend.Relation.BLOCK, STATUS, pageRequest);
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by(Sort.Direction.DESC,"updatedAt"));
+        return friendRepository.findUsersAndBlockFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
+    }
+
+    @Override
+    public UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
+        List<UserDto.UserList> friendList = new ArrayList<>();
+        for (User user : userList) {
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+            if (image.isPresent()) {
+                friendList.add(new UserDto.UserList(user).setFile(image.get().getImageUrl()));
+            } else {
+                friendList.add(new UserDto.UserList(user));
+            }
+        }
+
+        Long total = userRepository.countUsersWithKeywordAndStatusNotFriendOfUser(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new UserDto.UserListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList);
+    }
+
+    @Override
+    public FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        List<Friend> objects = fetchPagesOffsetUserFriend(userPrincipal, dto);
+        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
+        for (Friend friend : objects) {
+            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+
+            if (image.isPresent()) {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship())
+                        .setFile(image.get().getImageUrl()));
+            } else {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship()));
+            }
+        }
+
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_SEARCH_OK, user.getName(), total, friendInfoList);
+    }
+
+    @Override
+    public FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        List<Friend> objects = fetchPagesOffsetUserBlockFriend(userPrincipal, dto);
+        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
+        for (Friend friend : objects) {
+            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+
+            if (image.isPresent()) {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship())
+                        .setFile(image.get().getImageUrl()));
+            } else {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship()));
+            }
+        }
+
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        Long total = friendRepository.countUsersByBlockFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_BLOCK_SEARCH_OK, user.getName(), total, friendInfoList);
     }
 
     // 조회
@@ -75,145 +132,15 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request) {
-        List<User> userList = fetchPagesOffsetUser(dto);
-        List<UserDto.UserList> friendList = new ArrayList<>();
-        for (User user : userList) {
-            if (!user.getUserId().equals(userPrincipal.getId())) { // 차단
-                Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
-                if (image.isPresent()) {
-                    friendList.add(new UserDto.UserList(user).setFile(image.get().getImageUrl()));
-                } else {
-                    friendList.add(new UserDto.UserList(user));
-                }
-            }
-        }
-        Long total = userRepository.countByIdContainingOrNameContainingAndStatus(dto.getKeyword(), dto.getKeyword(), STATUS);
-        return new UserDto.UserListResponse(total, friendList);
-    }
-
-    @Override
-    public FriendDto.FriendInfoListResponse getFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto, HttpServletRequest request) {
-        List<Friend> friendList = fetchPagesOffsetFriend(userPrincipal, dto);
-
-        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
-        for (Friend friend : friendList) {
-            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
-            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                    () -> {
-                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
-                    }
-            );
-            if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
-                        .setFile(image.get().getImageUrl()));
-            } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
-            }
-        }
-
-        Long total = friendRepository.countByUserUserIdAndRelationshipNotAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
-        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
-    }
-
-    @Override
-    public FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request) {
-        List<Friend> userFriendList = fetchPagesOffsetUserFriend(userPrincipal, dto);
-        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
-        for (Friend friend : userFriendList) {
-            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
-            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                    () -> {
-                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
-                    }
-            );
-
-            if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
-                        .setFile(image.get().getImageUrl()));
-            } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
-            }
-        }
-
-        Long total = friendRepository.countByUserUserIdAndRelationshipNotAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
-        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
-    }
-
-    @Override
-    public FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto, HttpServletRequest request) {
-        List<Friend> userFriendList = fetchPagesOffsetUserBlockFriend(userPrincipal, dto);
-        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
-        for (Friend friend : userFriendList) {
-            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
-            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                    () -> {
-                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
-                    }
-            );
-
-            if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
-                        .setFile(image.get().getImageUrl()));
-            } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
-            }
-        }
-
-        Long total = friendRepository.countByUserUserIdAndRelationshipAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
-        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
-    }
-
-    @Override
-    public FriendDto.FriendInfoListResponse getBlockFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto, HttpServletRequest request) {
-        List<Friend> friendList = fetchPagesOffsetBlock(userPrincipal, dto);
-
-        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
-        for (Friend friend : friendList) {
-            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                    () -> {
-                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
-                    }
-            );
-
-            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
-                    () -> {
-                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
-                    }
-            );
-
-            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
-
-            if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK)
-                        .setFile(image.get().getImageUrl()));throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
-            } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK));
-            }
-        }
-
-        Long total = friendRepository.countByUserUserIdAndRelationshipAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
-        return new FriendDto.FriendInfoListResponse(total, friendInfoList);
-    }
-
-    /*private List<Friend> fetchPages(FriendDto.FindFriendDto findFriendDto)  { // findFriendDto에 lastName의 userId 추가 필요
-        PageRequest pageRequest = PageRequest.of(0, findFriendDto.getSize());
-        if (findFriendDto.getLastId() == null) { // 처음 조회
-            return friendRepository.findAllByUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
-                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
-        }
-        else { // 불러오기
-            return friendRepository.findAllByUserFriendIdLessThanAndUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
-                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
-        }
-    }*/
-
-    @Override
-    public ResponseFriend requestFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend requestFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Optional<Friend> findFriendUser
                 = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS);
         Optional<Friend> findFriendMember
                 = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(dto.getMemberId(), userPrincipal.getId(), STATUS);
+
+        if (userPrincipal.getId().equals(dto.getMemberId())) {
+            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
+        }
 
         if (findFriendUser.isEmpty()) { // 요청 삭제 -> 요청
             User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
@@ -235,8 +162,8 @@ public class FriendServiceImpl implements FriendService {
                     .build();
             friendRepository.save(friendUser);
 
-            System.out.println(friendUser.getFriendName());
-            System.out.println(friendUser.getUser().getName());
+            //System.out.println(friendUser.getFriendName());
+            //System.out.println(friendUser.getUser().getName());
 
             // 차단 아닌 경우에만 친구 조회 범위에 포함
             if (findFriendMember.isEmpty()) { // ! findFriendMember.get().getRelationship().equals(Friend.Relation.BLOCK) 의미
@@ -270,7 +197,6 @@ public class FriendServiceImpl implements FriendService {
                                 .build())
                         .build();
                 kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(friend.getUserId())), kakaoPushRequest);
-
             }
 
             return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_OK);
@@ -280,7 +206,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public ResponseFriend acceptFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend acceptFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriendUser = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
@@ -290,6 +216,10 @@ public class FriendServiceImpl implements FriendService {
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                 });
+
+        if (userPrincipal.getId().equals(dto.getMemberId())) {
+            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
+        }
 
         if (findFriendUser.getRelationship().equals(Friend.Relation.REQUESTED)) { // 수락
             // 차단 : 알림을 받지 못해서 자동으로 요청 불가
@@ -318,18 +248,22 @@ public class FriendServiceImpl implements FriendService {
                             .build())
                     .build();
             kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendUser.getUser().getUserId())), kakaoPushRequest);
-
             return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_OK);
         }
-        return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_NOT);
+        return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_NOT);
     }
 
     @Override
-    public ResponseFriend refuseFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend refuseFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
+
+        if (userPrincipal.getId().equals(dto.getMemberId())) {
+            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
+        }
+
         if (findFriend.getRelationship().equals(Friend.Relation.REQUEST)) { // 관계 존재
             findFriend.setRelationship(Friend.Relation.REFUSE);
             friendRepository.save(findFriend);
@@ -345,11 +279,18 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public ResponseFriend blockFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend blockFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Optional<Friend> findFriendUser = friendRepository
                 .findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS);
 
+        if (userPrincipal.getId().equals(dto.getMemberId())) {
+            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
+        }
+
         if (findFriendUser.isPresent()) { // 관계 존재 : request, requested, success
+            if (findFriendUser.get().getRelationship().equals(Friend.Relation.BLOCK)) {
+                return new ResponseFriend(ExceptionCode.FRIEND_BLOCK_CANCEL_NOT);
+            }
             // 내 알림에서 친구 관련 알림 모두 숨김
             findFriendUser.get().setRelationship(Friend.Relation.BLOCK);
         } else {
@@ -376,7 +317,23 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public ResponseFriend cancelRequest(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend cancelBlockFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
+
+        if (userPrincipal.getId().equals(dto.getMemberId())) {
+            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
+        }
+
+        Friend friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS)
+                .orElseThrow(() -> {
+                    throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
+                });
+
+        friendRepository.delete(friend);
+        return new ResponseFriend(ExceptionCode.FRIEND_BLOCK_CANCEL_OK);
+    }
+
+    @Override
+    public ResponseFriend cancelRequest(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriendUser = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS)
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
@@ -399,7 +356,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public ResponseFriend cancelFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto, HttpServletRequest request) {
+    public ResponseFriend cancelFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriendUser = friendRepository
                 .findByUserUserIdAndUserFriendIdAndRelationshipNotAndStatus(userPrincipal.getId(), dto.getMemberId(), Friend.Relation.BLOCK, STATUS)
                 .orElseThrow(() -> {
@@ -417,4 +374,72 @@ public class FriendServiceImpl implements FriendService {
         }
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
     }
+
+    /*@Override
+    public FriendDto.FriendInfoListResponse getFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto) {
+        List<Friend> friendList = fetchPagesOffsetFriend(userPrincipal, dto);
+
+        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
+        for (Friend friend : friendList) {
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
+                    }
+            );
+            if (image.isPresent()) {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship())
+                        .setFile(image.get().getImageUrl()));
+            } else {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, friend.getRelationship()));
+            }
+        }
+
+        Long total = friendRepository.countByUserUserIdAndRelationshipNotAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_LIST_SEARCH_OK, total, friendInfoList);
+    }*/
+
+    /*@Override
+    public FriendDto.FriendInfoListResponse getBlockFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto) {
+        List<Friend> friendList = fetchPagesOffsetBlock(userPrincipal, dto);
+
+        List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
+        for (Friend friend : friendList) {
+            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                    }
+            );
+
+            User friendUser = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).orElseThrow(
+                    () -> {
+                        throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
+                    }
+            );
+
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+
+            if (image.isPresent()) {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK)
+                        .setFile(image.get().getImageUrl()));throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
+            } else {
+                friendInfoList.add(new FriendDto.FriendInfoList(friend, friendUser, Friend.Relation.BLOCK));
+            }
+        }
+
+        Long total = friendRepository.countByUserUserIdAndRelationshipAndStatus(userPrincipal.getId(), Friend.Relation.BLOCK, STATUS);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_LIST_FIND_OK, total, friendInfoList);
+    }*/
+
+    /*private List<Friend> fetchPages(FriendDto.FindFriendDto findFriendDto)  { // findFriendDto에 lastName의 userId 추가 필요
+        PageRequest pageRequest = PageRequest.of(0, findFriendDto.getSize());
+        if (findFriendDto.getLastId() == null) { // 처음 조회
+            return friendRepository.findAllByUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
+                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
+        }
+        else { // 불러오기
+            return friendRepository.findAllByUserFriendIdLessThanAndUserUserIdAndRelationshipNotAndStatusOrderByNameDesc
+                    (findFriendDto.getUserId(), Friend.Relation.BLOCK, STATUS, findFriendDto.getName(), pageRequest);
+        }
+    }*/
 }

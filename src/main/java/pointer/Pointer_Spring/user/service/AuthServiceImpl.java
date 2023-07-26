@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
-import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
@@ -59,6 +59,12 @@ public class AuthServiceImpl implements AuthService {
     @Value("${kakao.web.redirectURI}")
     private String webRedirectUri;
 
+    @Value("${default.profile.image.path}")
+    private String profileImg;
+
+    @Value("${default.background.image.path}")
+    private String backgroundImg;
+
 
     private final UserRepository userRepository;
     //private final PasswordEncoder passwordEncoder;
@@ -69,8 +75,7 @@ public class AuthServiceImpl implements AuthService {
     private final FriendRepository friendRepository; // 자기 기준, 상대쪽 모두 제거
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository; // 혼자만 있는 방
-    private final QuestionRepository questionRepository; // 삭제 되는 방의 질문
-
+    private final RestrictedUserRepository restrictedUserRepository;
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -214,7 +219,6 @@ public class AuthServiceImpl implements AuthService {
             return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK);
         }
         return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
-
     }
 
     @Override
@@ -306,6 +310,11 @@ public class AuthServiceImpl implements AuthService {
         User user = new User(kakaoRequestDto.getEmail(), id, kakaoRequestDto.getName(),
                 encoder.encode(password), User.SignupType.KAKAO, kakaoRequestDto.getToken());
         userRepository.save(user);
+
+        // 기본 이미지 추가
+        imageRepository.save(new Image(profileImg, Image.ImageType.PROFILE, user));
+        imageRepository.save(new Image(backgroundImg, Image.ImageType.BACKGROUND, user));
+
         return user;
     }
 
@@ -457,7 +466,7 @@ public class AuthServiceImpl implements AuthService {
             room.delete();
         }
 
-        // alarm 부분은 status가 없어서 임시 제거 불가?
+        // alarm 부분 제거 필요
 
         user.delete();
 
