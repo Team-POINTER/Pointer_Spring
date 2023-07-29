@@ -52,6 +52,20 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
                                     @Param("keyword") String keyword,
                                     @Param("status") int status);
 
+    // 상대 친구 조회
+    @Query("SELECT f FROM Friend f JOIN f.user u " +
+            "WHERE NOT f.relationship = 0 AND f.user.userId = :userUserId AND f.status = :status " +
+            "ORDER BY u.name")
+    List<Friend> findFriendUsersAndFriends(@Param("userUserId") Long userUserId,
+                                           @Param("status") int status,
+                                           PageRequest pageRequest);
+
+    @Query("SELECT COUNT(f) FROM Friend f JOIN f.user u " +
+            "WHERE u.status = :status AND NOT f.relationship = 0 AND f.user.userId = :userUserId AND f.status = :status" )
+    Long countFriendUsersByFriendCriteria(@Param("userUserId") Long userUserId,
+                                          @Param("status") int status);
+
+
     // 차단 친구 검색 : 업데이트 순
     @Query("SELECT f FROM Friend f JOIN f.user u " +
             "WHERE f.userFriendId IN (SELECT u.userId FROM User u " +

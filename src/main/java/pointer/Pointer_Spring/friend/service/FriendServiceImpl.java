@@ -57,6 +57,11 @@ public class FriendServiceImpl implements FriendService {
         return friendRepository.findUsersAndFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
+    private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto findFriendDto){
+        PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
+        return friendRepository.findFriendUsersAndFriends(userPrincipal.getId(), STATUS, pageRequest);
+    }
+
     private List<Friend> fetchPagesOffsetUserBlockFriend(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
         PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by(Sort.Direction.DESC,"updatedAt"));
         return friendRepository.findUsersAndBlockFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
@@ -98,6 +103,25 @@ public class FriendServiceImpl implements FriendService {
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
         Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
         return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_SEARCH_OK, user.getName(), total, friendInfoList);
+    }
+
+    @Override
+    public UserDto.UserListResponse getFriendFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto dto) {
+        List<Friend> objects = fetchPagesOffsetUserFriend(userPrincipal, dto);
+        List<UserDto.UserList> friendInfoList = new ArrayList<>();
+        for (Friend friend : objects) {
+            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
+
+            if (image.isPresent()) {
+                friendInfoList.add(new UserDto.UserList(user).setFile(image.get().getImageUrl()));
+            } else {
+                friendInfoList.add(new UserDto.UserList(user));
+            }
+        }
+
+        Long total = friendRepository.countFriendUsersByFriendCriteria(userPrincipal.getId(), STATUS);
+        return new UserDto.UserListResponse(ExceptionCode.FRIEND_LIST_SEARCH_OK, total, friendInfoList);
     }
 
     @Override
@@ -392,7 +416,7 @@ public class FriendServiceImpl implements FriendService {
             User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(friend.getId(), PROFILE_TYPE, STATUS);
 
-            if (roomMembers.stream().filter(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId())).findAny().isPresent()) {
+            if (roomMembers.stream().anyMatch(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId()))) {
                 if (image.isPresent()) {
                     friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0).setFile(image.get().getImageUrl()));
                 } else {
