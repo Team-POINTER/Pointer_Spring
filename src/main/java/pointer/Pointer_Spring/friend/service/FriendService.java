@@ -9,6 +9,8 @@ public interface FriendService {
 
     UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
     FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+    UserDto.UserListResponse getFriendFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto dto);
+
     FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
 
     ResponseFriend requestFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto);

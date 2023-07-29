@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.friend.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
 import pointer.Pointer_Spring.config.ResponseType;
@@ -29,6 +30,8 @@ public class FriendDto {
     public static class FriendInfoListResponse extends ResponseType {
 
         List<FriendInfoList> friendInfoList;
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         String name;
         Long total;
 
@@ -138,6 +141,15 @@ public class FriendDto {
     @Data
     public static class FindFriendDto {
         //private Long userId;
+        private String keyword;
+        // pageable
+        private int lastPage;
+
+    }
+
+    @Data
+    public static class FindFriendFriendDto {
+        private Long userId;
         private String keyword;
         // pageable
         private int lastPage;
