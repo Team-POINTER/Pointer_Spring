@@ -6,6 +6,7 @@ import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.service.QuestionServiceImpl;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -58,6 +59,18 @@ public class QuestionController {
     public BaseResponse<Void> deleteQuestion(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long questionId) {
         questionService.deleteQuestion(userPrincipal, questionId);
         return new BaseResponse<>();
+    }
+
+
+    @GetMapping("check/{roomId}")
+    public BaseResponse<Boolean> checkQuestion(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long roomId){
+        Boolean isCreateQuestion = questionService.validQuestionTime(roomId);
+        if(!isCreateQuestion) {
+            return new BaseResponse<>(ExceptionCode.INVALID_QUESTION_CREATION, isCreateQuestion);
+        }
+        else {
+            return new BaseResponse<>(isCreateQuestion);
+        }
     }
 
 }

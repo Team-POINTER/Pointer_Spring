@@ -202,6 +202,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public Object saveId(UserPrincipal userPrincipal, UserDto.BasicUser userInfo) {
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
         /*.orElseThrow(

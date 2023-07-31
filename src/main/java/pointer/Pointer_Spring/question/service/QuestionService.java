@@ -16,4 +16,6 @@ public interface QuestionService {
     void modifyQuestion(UserPrincipal userPrincipal, Long questionId, QuestionDto.ModifyRequest request);
 
     void deleteQuestion(UserPrincipal userPrincipal, Long questionId);
+
+    boolean validQuestionTime(Long roomId);
 }

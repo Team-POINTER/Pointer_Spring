@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
-    Optional<Question> findTopByOrderByIdDesc();
+    Optional<Question> findTopByRoomRoomIdOrderByIdDesc(Long roomId);
 
     Optional<Question> findByCreatedAtAfterAndRoomRoomId(LocalDateTime now, Long roomId);
 

@@ -83,7 +83,9 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         // 질문 생성 가능한지 확인
-        validQuestionTime();
+        if(!validQuestionTime(room.getRoomId())){
+            throw new CustomException(ExceptionCode.QUESTION_CREATED_FAILED);
+        }
 
         //모든 맴버가 투표를 했으면 질문 활성화해야함
 
@@ -149,8 +151,9 @@ public class QuestionServiceImpl implements QuestionService {
         }
     }
 
-    private void validQuestionTime() {
-        Question prevQuestion = questionRepository.findTopByOrderByIdDesc().orElse(null);
+    @Override
+    public boolean validQuestionTime(Long roomId) {
+        Question prevQuestion = questionRepository.findTopByRoomRoomIdOrderByIdDesc(roomId).orElse(null);
 
         if(prevQuestion != null) {
             LocalDateTime now = LocalDateTime.now();
@@ -162,12 +165,13 @@ public class QuestionServiceImpl implements QuestionService {
                 if(roomMemberCount == voteCount) {
                     prevQuestion.setCreatedAt(now);
                     questionRepository.save(prevQuestion);
-                    return ;
+                    return true;
                 }
-
-                throw new CustomException(ExceptionCode.QUESTION_CREATED_FAILED);
+                return false;
             }
+            return true;
         }
+        throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
     }
 
     @Override

@@ -3,6 +3,7 @@ package pointer.Pointer_Spring.user.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
@@ -20,6 +21,10 @@ public class UserDto {
     @Getter
     public static class BasicUser {
         String id;
+
+        public BasicUser(String id) {// for test
+            this.id = id;
+        }
     }
 
     @Getter

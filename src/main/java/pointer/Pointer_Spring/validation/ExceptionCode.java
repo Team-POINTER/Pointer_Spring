@@ -142,6 +142,8 @@ public enum ExceptionCode {
     QUESTION_DELETE_NOT_AUTHENTICATED(INVALID_ACCESS, "K003", "질문 삭제 권한이 없습니다."),
 
     HINT_NOT_FOUND(INVALID_ACCESS, "K004", "힌트를 찾을 수 없습니다."),
+    INVALID_QUESTION_CREATION(INVALID_ACCESS, "K005", "질문을 생성할 수 없는 상태"),
+    HINT_DELETE_OK(SUCCESS, "K006", "힌트 삭제"),
 
 
     /**

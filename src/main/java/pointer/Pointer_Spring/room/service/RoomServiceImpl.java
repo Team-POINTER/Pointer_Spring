@@ -79,7 +79,7 @@ public class RoomServiceImpl implements RoomService {
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
                         boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
-                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
+                        return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, 1).stream()
@@ -99,7 +99,7 @@ public class RoomServiceImpl implements RoomService {
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
                         boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
-                        return new ListRoom(roomMember, latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
+                        return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     })
                     .collect(Collectors.toList());
         }

@@ -50,6 +50,9 @@ public class VoteController {
         return new BaseResponse<>(voteService.getNotVotedMember(questionId));
     }
 
-
+    @PostMapping("delete/hint")
+    public BaseResponse<Void> deleteHint(@CurrentUser UserPrincipal userPrincipal, @RequestBody VoteDto.DeleteHintRequest deleteHintRequest) {
+        return voteService.deleteHint(userPrincipal, deleteHintRequest);
+    }
 
 }

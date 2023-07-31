@@ -8,6 +8,7 @@ import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.vote.domain.VoteHistory;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
@@ -29,4 +30,9 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
 
     VoteHistory findTopByQuestionIdAndCandidateIdOrderByUpdatedAtDesc(Long questionId, Long userId);
     VoteHistory findAllByRoomId(Long roomId);
+
+    @Override
+    Optional<VoteHistory> findById(Long aLong);
+
+    Optional<VoteHistory> findByQuestionIdAndCandidateIdAndMemberId(Long questionId, Long cadidateId, Long userId);
 }

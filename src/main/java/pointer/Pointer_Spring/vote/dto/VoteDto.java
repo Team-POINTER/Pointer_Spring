@@ -3,6 +3,7 @@ package pointer.Pointer_Spring.vote.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -104,19 +105,42 @@ public class VoteDto {
     @NoArgsConstructor
     public static class GetHintResponse {
         private List<String> hint;
-        private List<String> voterNm;
+        private List<VoterInfo> voters;
         private int allVoteCnt;
         private int targetVotedCnt;
         private String createdAt;
 
         @Builder
-        public GetHintResponse(List<String> hint, List<String> voterNm,  int allVoteCnt, int targetVotedCnt, String createdAt) {
+        public GetHintResponse(List<String> hint, List<VoterInfo> voter,  int allVoteCnt, int targetVotedCnt, String createdAt) {
             this.hint = hint;
-            this.voterNm = voterNm;
+            this.voters = voter;
             this.allVoteCnt = allVoteCnt;
             this.targetVotedCnt = targetVotedCnt;
             this.createdAt = createdAt;
         }
 
     }
+
+    @Getter
+    public static class VoterInfo{
+        private Long voterId;
+        private String voterNm;
+
+        public VoterInfo(Long userId, String name) {
+            this.voterId = userId;
+            this.voterNm = name;
+        }
+    }
+
+    @Getter
+    public static class DeleteHintRequest{
+        Long questionId;
+        Long voterId;//투표한 사람
+
+        public DeleteHintRequest(Long questionId, Long voterId){
+            this.questionId = questionId;
+            this.voterId = voterId;
+        }
+    }
+
 }

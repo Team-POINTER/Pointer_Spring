@@ -36,7 +36,7 @@ public class BaseResponse<T> {
     }
 
     public BaseResponse(ExceptionCode exceptionCode, T result) {
-        this.status = exceptionCode.getStatus();
+//        this.status = exceptionCode.getStatus();
         this.message = exceptionCode.getMessage();
         this.code = exceptionCode.getCode();
         this.result = result;

@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.vote.service;
 
 import org.springframework.stereotype.Service;
+import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.RestrictedUser;
@@ -194,18 +195,28 @@ public class VoteServiceImpl implements VoteService {
         List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());//해당 user를 투표한 인원
         int allVoteCnt = voteRepository.countByQuestionId(question.getId());//해당 질문에 대해 투표한 사람의 수
         List<String> hints = new ArrayList<>();
-        List<String> voterNm = new ArrayList<>();
+        List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
             hints.add(vote.getHint());
-            voterNm.add(userRepository.findByUserId(vote.getMemberId()).get().getName());
+            User votingUser = userRepository.findByUserId(vote.getMemberId()).get();
+            voters.add(new VoteDto.VoterInfo(votingUser.getUserId(), votingUser.getName()));
         }
 
         return VoteDto.GetHintResponse.builder()
                 .targetVotedCnt(voteHistories.size())
                 .allVoteCnt(allVoteCnt)
                 .hint(hints)
-                .voterNm(voterNm)
+                .voter(voters)
                 .createdAt(question.getCreatedAt().format(formatter))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public BaseResponse<Void> deleteHint(UserPrincipal userPrincipal, VoteDto.DeleteHintRequest deleteHintRequest){
+        VoteHistory vote = voteRepository.findByQuestionIdAndCandidateIdAndMemberId(deleteHintRequest.getQuestionId(), userPrincipal.getId() ,deleteHintRequest.getVoterId())
+                .orElseThrow(()-> new CustomException(ExceptionCode.HINT_NOT_FOUND));
+        vote.updateHint(" ");
+        return new BaseResponse<>(ExceptionCode.HINT_DELETE_OK);
     }
 }

@@ -28,19 +28,24 @@ public class RoomDto {
 
         Long roomId;
         String roomNm;
+        Long questionId;
         String question;
         int memberCnt;
         String topUserName;
         boolean voted;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime limitedAt;
         //String topUserId;
 
-        public ListRoom(RoomMember roomMember, String question, String userNm, boolean isVoted) {
+        public ListRoom(RoomMember roomMember, Long questionId, String question, String userNm, boolean isVoted) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
             this.memberCnt = roomMember.getRoom().getMemberNum();
+            this.questionId = questionId;
             this.question = question;
             this.topUserName = userNm;
             this.voted = isVoted;
+            this.limitedAt = roomMember.getRoom().getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
             //this.topUserId = user.getId();
         }
 

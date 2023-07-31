@@ -93,8 +93,11 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUserId(targetUserId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-//            Friend.Relation relation = friendRepository.findByUserUserIdAndUserFriendId(userPrincipal.getId(), targetUserId)
-//                    .orElseThrow(()->new CustomException(ExceptionCode.USER_FIND_FRIEND_FAIL)).getRelationship();
+            Friend friend = friendRepository.findByUserUserIdAndUserFriendId(userPrincipal.getId(), targetUserId)
+                    .orElse(null);
+            if(friend != null) {
+                return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user, friend.getRelationship() ,cloudinaryService.getImages(targetUserId)));
+            }
             return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user ,cloudinaryService.getImages(targetUserId)));
         } else {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);

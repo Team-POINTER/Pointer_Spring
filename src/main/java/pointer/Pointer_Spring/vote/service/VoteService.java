@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.vote.service;
 
+import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.vote.dto.VoteDto;
 
@@ -13,4 +14,7 @@ public interface VoteService {
     List<VoteDto.GetNotVotedMember> getNotVotedMember(Long questionId);
 
     VoteDto.GetHintResponse getHintResponse(UserPrincipal userPrincipal, Long questionId);
-}
+
+    BaseResponse<Void> deleteHint(UserPrincipal userPrincipal, VoteDto.DeleteHintRequest deleteHintRequest);
+
+    }

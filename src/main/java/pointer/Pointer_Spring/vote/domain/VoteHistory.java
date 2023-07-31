@@ -54,6 +54,7 @@ public class VoteHistory extends BaseEntity {
         this.hint = hint;
     }
 
+    @Column(nullable = true)
     public void updateHint(String newHint){
         this.hint = newHint;
     }
