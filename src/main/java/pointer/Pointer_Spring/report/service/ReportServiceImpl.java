@@ -82,10 +82,10 @@ public class ReportServiceImpl implements ReportService {
 
         //중복확인
         if(reportRequest.getType()== Report.ReportType.HINT &&
-                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndType(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.HINT)){
+                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndTypeAndDataId(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.HINT, dataId)){
             throw new CustomException(ExceptionCode.ALREADY_REPORT);
         } else if ((reportRequest.getType()== Report.ReportType.QUESTION &&
-                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndType(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.QUESTION))){
+                reportRepository.existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndTypeAndDataId(reportingUserId, targetUser.getUserId(), reportRoom.getRoomId(), Report.ReportType.QUESTION, dataId))){
             throw new CustomException(ExceptionCode.ALREADY_REPORT);
         }
 
