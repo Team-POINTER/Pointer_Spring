@@ -13,5 +13,5 @@ public interface ReportRepository  extends JpaRepository<Report, Long> {
     boolean existsByTargetUserUserIdAndReportingUserId(Long reportingUserId, Long targetUserId);
     Report findByTargetUserUserIdAndReportingUserId(Long userId, Long targetUserId);
     List<Report> findAllByTargetUserUserId(Long targetUserId);
-    boolean existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndType(Long reportingUserId ,Long targetUserId, Long roomId, Report.ReportType reportType);
+    boolean existsByReportingUserIdAndTargetUserUserIdAndRoomRoomIdAndAndTypeAndDataId(Long reportingUserId ,Long targetUserId, Long roomId, Report.ReportType reportType, Long dataId);
 }
