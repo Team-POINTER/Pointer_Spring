@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
@@ -77,6 +78,7 @@ public class AuthServiceImpl implements AuthService {
     private final FriendRepository friendRepository; // 자기 기준, 상대쪽 모두 제거
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository; // 혼자만 있는 방
+    private final AlarmRepository alarmRepository;
     private final RestrictedUserRepository restrictedUserRepository;
 
     private final Integer CHECK = 1;
@@ -257,7 +259,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (findUser.isEmpty()) {
             // 제한된 회원 확인
-            if (blockedUserRepository.existsByEmailAndStatus(kakaoDto.getEmail(), STATUS)) {
+            if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
@@ -341,7 +343,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (findUser.isEmpty()) {
             // 제한된 회원 확인
-            if (blockedUserRepository.existsByEmailAndStatus(kakaoDto.getEmail(), STATUS)) {
+            if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
 
@@ -425,7 +427,7 @@ public class AuthServiceImpl implements AuthService {
         // reissue 비교
 
         /*if (findUser.isEmpty()) {
-            return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
+            return new ResponseKakaoUser(ExceptioㅣnCode.INVALID_REFRESH_TOKEN);
         }*/
 
         User user = findUser.get();
@@ -475,6 +477,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // alarm 부분 제거 필요
+
 
         user.delete();
 

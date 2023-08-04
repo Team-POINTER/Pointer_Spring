@@ -63,7 +63,7 @@ public class AlarmServiceImpl implements AlarmService {
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
             if (!member.isActiveAlarmFlag()) continue;
-            boolean vote = voteRepository.existsByMemberId(member.getUserId());
+            boolean vote = voteRepository.existsByMemberIdAndStatus(member.getUserId(), STATUS);
             if (!vote) {
                 Alarm alarm = Alarm.builder()
                         .type(Alarm.AlarmType.POKE)
@@ -173,7 +173,7 @@ public class AlarmServiceImpl implements AlarmService {
 
         // 안읽은 알람 있는지 체크
         boolean newAlarm = alarmRepository.existsByReceiveUserIdAndReadCheck(userPrincipal.getId(), false);
-        List<ChatAlarm> newFriendAlarm = chatAlarmRepository.findAllBySendUserIdAndReadCheck(userPrincipal.getId(), false);
+        List<ChatAlarm> newFriendAlarm = chatAlarmRepository.findAllBySendUserIdAndReadCheckAndStatus(userPrincipal.getId(), false, STATUS);
 
         // 30개씩 페이징
         PageRequest pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("id").descending());
