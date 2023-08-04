@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
@@ -76,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository; // 혼자만 있는 방
     private final RestrictedUserRepository restrictedUserRepository;
+    private final AlarmRepository alarmRepository;
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -457,6 +459,7 @@ public class AuthServiceImpl implements AuthService {
         for (RoomMember member : roomMembers) {
             member.getRoom().updateMemberNum();
             member.delete();
+
         }
 
         List<Room> rooms = roomRepository.findBymemberNumAndStatus(0, STATUS);
@@ -468,6 +471,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // alarm 부분 제거 필요
+        alarmRepository.deleteAllByReceiveUserIdOrSendUserId(user.getUserId(), user.getUserId());
 
         user.delete();
 
