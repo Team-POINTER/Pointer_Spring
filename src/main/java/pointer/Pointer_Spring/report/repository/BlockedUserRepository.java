@@ -6,5 +6,5 @@ import pointer.Pointer_Spring.report.domain.BlockedUser;
 
 @Repository
 public interface BlockedUserRepository extends JpaRepository<BlockedUser, Long> {
-    boolean existsByEmail(String email);
+    boolean existsByEmailAndStatus(String email, int status);
 }

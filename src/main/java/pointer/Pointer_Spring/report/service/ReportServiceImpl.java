@@ -39,6 +39,9 @@ public class ReportServiceImpl implements ReportService {
     private final QuestionRepository questionRepository;
     private final BlockedUserRepository blockedUserRepository;
     private final RestrictedUserRepository restrictedUserRepository;
+
+    private final Integer STATUS = 1;
+
     @Override
     @Transactional
     public ReportDto.UserReportResponse saveUserReport(ReportDto.UserReportRequest reportRequest) {
@@ -162,7 +165,7 @@ public class ReportServiceImpl implements ReportService {
         user.setStatus(0);
     }
     private boolean checkDuplicatedPermanentRestriction(String email){
-        return blockedUserRepository.existsByEmail(email);
+        return blockedUserRepository.existsByEmailAndStatus(email, STATUS);
     }
 
     //일시적인 기능 제한

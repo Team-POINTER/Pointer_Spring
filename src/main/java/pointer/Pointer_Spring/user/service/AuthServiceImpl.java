@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
@@ -67,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     private final UserRepository userRepository;
+    private final BlockedUserRepository blockedUserRepository;
     //private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
@@ -254,10 +256,10 @@ public class AuthServiceImpl implements AuthService {
         ExceptionCode exception;
 
         if (findUser.isEmpty()) {
-            // 제한된 회원 확인 : user -> 제한 회원 table?
-            /*if (~Repository.findByEmailAndStatus(kakaoDto.getEmail(), STATUS).isPresent()) {
+            // 제한된 회원 확인
+            if (blockedUserRepository.existsByEmailAndStatus(kakaoDto.getEmail(), STATUS)) {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
-            }*/
+            }
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
         } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
             return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
@@ -338,6 +340,11 @@ public class AuthServiceImpl implements AuthService {
         User user;
 
         if (findUser.isEmpty()) {
+            // 제한된 회원 확인
+            if (blockedUserRepository.existsByEmailAndStatus(kakaoDto.getEmail(), STATUS)) {
+                return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
+            }
+
             String id = null;
             for (int i = 0; i < 10; i++) {
                 id = generateRandomId();
