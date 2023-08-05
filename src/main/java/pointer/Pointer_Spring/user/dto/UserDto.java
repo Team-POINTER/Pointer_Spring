@@ -18,13 +18,9 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 public class UserDto {
 
-    @Getter
+    @Data
     public static class BasicUser {
         String id;
-
-        public BasicUser(String id) {// for test
-            this.id = id;
-        }
     }
 
     @Getter
@@ -69,7 +65,7 @@ public class UserDto {
         private boolean marketing;
     }
 
-    @Getter
+    @Data
     public static class UserMarketing  {
         private boolean marketing;
     }

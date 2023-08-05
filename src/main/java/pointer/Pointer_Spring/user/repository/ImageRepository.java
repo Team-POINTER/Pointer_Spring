@@ -1,7 +1,10 @@
 package pointer.Pointer_Spring.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.user.domain.Image;
 
 import java.util.List;
@@ -14,4 +17,10 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     Optional<Image> findByUserUserIdAndImageSort(Long userId, Image.ImageType imageSort);
 
     List<Image> findByUserUserIdAndStatus(Long userUserId, int status);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM Image WHERE user_user_id = :userUserId", nativeQuery = true)
+    void deleteAllByUserUserId(Long userUserId);
+
 }
