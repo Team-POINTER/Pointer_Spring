@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.report.repository.ReportRepository;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.report.repository.UserReportRepository;
@@ -82,6 +83,7 @@ public class AuthServiceImpl implements AuthService {
     private final QuestionRepository questionRepository;
     private final ReportRepository reportRepository;
     private final UserReportRepository userReportRepository;
+    private final BlockedUserRepository blockedUserRepository;
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -260,10 +262,10 @@ public class AuthServiceImpl implements AuthService {
         ExceptionCode exception;
 
         if (findUser.isEmpty()) {
-            // 제한된 회원 확인 : user -> 제한 회원 table?
-            /*if (~Repository.findByEmailAndStatus(kakaoDto.getEmail(), STATUS).isPresent()) {
+            // 제한된 회원 확인
+            if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
-            }*/
+            }
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
         } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
             return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
@@ -344,6 +346,11 @@ public class AuthServiceImpl implements AuthService {
         User user;
 
         if (findUser.isEmpty()) {
+            // 제한된 회원 확인 : user -> 제한 회원 table?
+            if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
+                return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
+            }
+
             String id = null;
             for (int i = 0; i < 10; i++) {
                 id = generateRandomId();

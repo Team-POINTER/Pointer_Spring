@@ -39,6 +39,7 @@ public class ReportServiceImpl implements ReportService {
     private final QuestionRepository questionRepository;
     private final BlockedUserRepository blockedUserRepository;
     private final RestrictedUserRepository restrictedUserRepository;
+
     @Override
     @Transactional
     public ReportDto.UserReportResponse saveUserReport(ReportDto.UserReportRequest reportRequest) {
