@@ -39,7 +39,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     private final ImageRepository imageRepository;
     private final Cloudinary cloudinary;
 
-
+    private final Integer STATUS = 1;
 
     public CloudinaryServiceImpl(UserRepository userRepository, ImageRepository imageRepository, @Value("${cloudinary.cloud.name}") String cloudinaryName,
                                  @Value("${cloudinary.apikey}") String cloudinaryApiKey,
@@ -72,7 +72,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     }
     @Override
     public ImageUrlResponse getImages(Long userId){
-        Image profileImage = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.PROFILE).orElseThrow(
+        Image profileImage = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, ImageType.PROFILE, STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
@@ -80,7 +80,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         String publicId = profileImage.getImageUrl();
         String profileImageUrl = cloudinary.url().generate(publicId);
 
-        Image backgroundImage = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.BACKGROUND).orElseThrow(
+        Image backgroundImage = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, ImageType.BACKGROUND, STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
@@ -94,7 +94,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     public ResponseImage changeDefaultProfileImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
         deleteImageInCloudinary(userId, ImageType.PROFILE);
 
-        Image image = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.PROFILE).orElseThrow(
+        Image image = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, ImageType.PROFILE, STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
@@ -106,7 +106,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     public ResponseImage changeDefaultBackgroundImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
         deleteImageInCloudinary(userId, ImageType.BACKGROUND);
 
-        Image image = imageRepository.findByUserUserIdAndImageSort(userId, ImageType.BACKGROUND).orElseThrow(
+        Image image = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, ImageType.BACKGROUND, STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
@@ -119,7 +119,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
 
 
     private String uploadImageInCloudinary(Long userId, String folderNm, @NonNull MultipartFile multipartFile) throws IOException{
-        String fileNm = userId.toString() + "_" + UUID.randomUUID().toString();
+        String fileNm = userId.toString() + "_" + UUID.randomUUID();
 
         Map<String, Object> params = new HashMap<>();
         params.put("folder", folderNm); // 프로필 사진을 저장할 폴더
@@ -128,13 +128,12 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         // 이미지 업로드
         Map<String, Object> uploadResult = cloudinary.uploader().upload(multipartFile.getBytes(), params); //public_id는 매개변수 이름, 뒤의 값이 저장될 이미지 이름
         // 업로드 응답에서 public_id 가져오기
-        String publicId = uploadResult.get("public_id").toString();
-        return publicId;
+        return uploadResult.get("public_id").toString();
     }
     private String uploadImage(Long userId, String publicId, String extension, ImageType imageType) throws IOException {
         String filePath = publicId + extension;
         String imageUrl = cloudinary.url().generate(filePath);
-        Image foundImage = imageRepository.findByUserUserIdAndImageSort(userId, imageType).orElse(null);
+        Image foundImage = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, imageType, STATUS).orElse(null);
 
         if(foundImage != null){
             deleteImageInCloudinary(userId, imageType);

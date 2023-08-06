@@ -14,8 +14,6 @@ import pointer.Pointer_Spring.user.response.ResponseUser;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
-import javax.validation.Valid;
-import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -25,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
     private final FriendRepository friendRepository;
+
+    private final Integer STATUS = 1;
 
     @Override
     public ResponseUser getPoints(Long userId){
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUserId(targetUserId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            Friend friend = friendRepository.findByUserUserIdAndUserFriendId(userPrincipal.getId(), targetUserId)
+            Friend friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), targetUserId, STATUS)
                     .orElse(null);
             if(friend != null) {
                 return new ResponseUser(ExceptionCode.USER_GET_OK , new UserDto.UserInfo(user, friend.getRelationship() ,cloudinaryService.getImages(targetUserId)));

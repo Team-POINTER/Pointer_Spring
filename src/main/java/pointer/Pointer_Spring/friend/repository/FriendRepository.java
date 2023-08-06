@@ -27,11 +27,9 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Friend save(Friend friend);
 
     List<Friend> findAllByUserUserIdAndRelationshipAndStatusAndFriendNameContaining(Long userUserId, Friend.Relation relation, int status, String kwd,  PageRequest pageRequest);
-    List<Friend> findAllByFriendNameAfterAndUserUserIdAndRelationshipAndStatusAndFriendNameContainingOrderByFriendNameAsc(Long userFriendId, String friendName, Long userUserId, Friend.Relation relation, int stauts, String kwd, Pageable pageable);
+    List<Friend> findAllByFriendNameAfterAndUserUserIdAndRelationshipAndStatusAndFriendNameContainingOrderByFriendNameAsc(Long userFriendId, String friendName, Long userUserId, Friend.Relation relation, int status, String kwd, Pageable pageable);
 
     List<Friend> findByUserUserIdOrUserFriendIdAndStatus(Long userUserId, Long userFriendId, int status);
-    Optional<Friend> findByUserUserIdAndUserFriendId(Long userId, Long userFriendId);
-
 
     // 친구 검색 (제외: 차단 친구)
     @Query("SELECT f FROM Friend f JOIN f.user u " +

@@ -7,7 +7,7 @@ import pointer.Pointer_Spring.report.domain.RestrictedUser;
 
 @Repository
 public interface RestrictedUserRepository extends JpaRepository<RestrictedUser, Long> {
-    RestrictedUser findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(Long userId, Long roomId, Report.ReportType reportType);
-    boolean existsByTargetUserIdAndRoomIdAndReportType(Long userId, Long roomId, Report.ReportType reportType);
+    RestrictedUser findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(Long userId, Long roomId, Report.ReportType reportType, int status);
+    boolean existsByTargetUserIdAndRoomIdAndReportTypeAndStatus(Long userId, Long roomId, Report.ReportType reportType, int status);
 
 }
