@@ -52,8 +52,16 @@ public class UserDto {
     @Getter
     public static class DuplicateUserResponse extends ResponseType {
 
+        @JsonInclude(NON_NULL)
+        String id;
+
         public DuplicateUserResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
+        }
+
+        public DuplicateUserResponse(ExceptionCode exceptionCode, String id) {
+            super(exceptionCode);
+            this.id = id;
         }
     }
 
