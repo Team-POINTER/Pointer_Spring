@@ -22,9 +22,9 @@ public class UserDto {
     public static class BasicUser {
         String id;
 
-        public BasicUser(String id) {// for test
-            this.id = id;
-        }
+//        public BasicUser(String id) {// for test
+//            this.id = id;
+//        }
     }
 
     @Getter
