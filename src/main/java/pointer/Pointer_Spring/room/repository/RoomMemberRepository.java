@@ -15,19 +15,18 @@ import pointer.Pointer_Spring.room.domain.RoomMember;
 public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
 
     List<RoomMember> findAllByRoomAndStatus(Room room, int status);
+    List<RoomMember> findByRoomMemberIdAndStatus(Long RoomMemberId, int status);
+    int countByRoomAndStatus(Room room, int status);
+    List<RoomMember> findAllByRoom(Room room);
 
-    List<RoomMember> findByRoomMemberId(Long RoomMemberId);
-    int countByRoom(Room room);
-    Optional<RoomMember> findByRoom_RoomIdAndUser_UserIdAndStatus(Long roomId, Long userId, int status);
-
-    Boolean existsByUserUserIdAndRoomRoomId(Long userId, Long roomId);
+    Boolean existsByUserUserIdAndRoomRoomIdAndStatus(Long userId, Long roomId, int status);
     Boolean existsByUserUserIdAndRoomRoomIdAndStatusEquals(Long userId, Long roomId, int status);
     List<RoomMember> findAllByRoom_RoomIdAndStatusEquals(Long roomId, int status);
     //List<RoomMember> findAllByUser_UserIdAndRoom_StatusEqualsAndPrivateRoomNmContaining(Long roomId, int status, String kwd);
     List<RoomMember> findAllByUserUserIdAndPrivateRoomNmContainingAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(Long userId, String kwd, int status);
     List<RoomMember> findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(Long userId, int status);
-    List<RoomMember> findAllByRoomAndUserIsQuestionRestrictedEquals(Room room, boolean isQuestionRestricted);
-    List<RoomMember> findAllByRoomAndUserIsHintRestrictedEquals(Room room, boolean isHintRestricted);
+    List<RoomMember> findAllByRoomAndUserIsQuestionRestrictedAndStatusEquals(Room room, boolean isQuestionRestricted, int status);
+    List<RoomMember> findAllByRoomAndUserIsHintRestrictedAndStatusEquals(Room room, boolean isHintRestricted, int status);
 
     List<RoomMember> findByUserUserIdAndStatus(Long userId, int status);
 

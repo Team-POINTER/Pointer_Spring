@@ -31,5 +31,5 @@ public interface RoomService {
     ResponseRoom inviteMembers(InviteRequest dto, HttpServletRequest request);
     ResponseRoom isInviteMembersList(UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request);
 
-    //Object findLink(Long roomId);
+//    ResponseRoom findLink(Long roomId);
 }

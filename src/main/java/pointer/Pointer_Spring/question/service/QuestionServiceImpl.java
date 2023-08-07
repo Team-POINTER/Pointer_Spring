@@ -123,7 +123,8 @@ public class QuestionServiceImpl implements QuestionService {
             kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
         }
 
-        handlingReportRoomMembers(roomMemberRepository.findAllByRoomAndUserIsQuestionRestrictedEquals(room, true), roomMemberRepository.findAllByRoomAndUserIsHintRestrictedEquals(room, true));
+        handlingReportRoomMembers(roomMemberRepository.findAllByRoomAndUserIsQuestionRestrictedAndStatusEquals(room, true, STATUS),
+                roomMemberRepository.findAllByRoomAndUserIsHintRestrictedAndStatusEquals(room, true, STATUS));
 
         return QuestionDto.CreateResponse.builder()
                 .questionId(question.getId())
@@ -132,7 +133,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
     private void handlingReportRoomMembers(List<RoomMember> questionRestrictedRoomMembers, List<RoomMember> hintRestrictedRoomMembers){
         for(RoomMember roomMember : questionRestrictedRoomMembers){
-            RestrictedUser restrictedUser = restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.QUESTION);
+            RestrictedUser restrictedUser = restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.QUESTION, STATUS);
 
             restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
             if (restrictedUser.getTemporalNum() == 0) {
@@ -141,7 +142,7 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
         for(RoomMember roomMember : hintRestrictedRoomMembers){//힌트는 현재 질문에서 투표를 했든 안했든 다음 부터 적용되는데 만약 지금 질문에 투표를 안했다면 지금 질문을 제외하고도 3번 더 투표흫 못 함
-            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportType(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.HINT);
+            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.HINT, STATUS);
             if(restrictedUser.getTemporalNum() == 0){
                 roomMember.getUser().updateIsHintRestricted(false);
                 restrictedUser.setStatus(0);
@@ -153,14 +154,14 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public boolean validQuestionTime(Long roomId) {
-        Question prevQuestion = questionRepository.findTopByRoomRoomIdOrderByIdDesc(roomId).orElse(null);
+        Question prevQuestion = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(roomId, STATUS).orElse(null);
 
         if(prevQuestion != null) {
             LocalDateTime now = LocalDateTime.now();
 
             if(now.isBefore(prevQuestion.getCreatedAt().plusDays(1))) {
-                int roomMemberCount = roomMemberRepository.countByRoom(prevQuestion.getRoom());
-                int voteCount = voteRepository.countDistinctUserByQuestion(prevQuestion.getId());
+                int roomMemberCount = roomMemberRepository.countByRoomAndStatus(prevQuestion.getRoom(), STATUS);
+                int voteCount = voteRepository.countDistinctUserByQuestionAndStatus(prevQuestion.getId(), STATUS);
 
                 if(roomMemberCount == voteCount) {
                     prevQuestion.setCreatedAt(now);
@@ -182,11 +183,11 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
         });
 
-        Question currentQuestion = questionRepository.findByCreatedAtAfterAndRoomRoomId(now, roomId).orElseThrow(() -> {
+        Question currentQuestion = questionRepository.findByCreatedAtAfterAndRoomRoomIdAndStatus(now, roomId, STATUS).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.CURRENT_QUESTION_NOT_FOUND);
         });
 
-        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userPrincipal.getId(), currentQuestion.getId());
+        boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userPrincipal.getId(), currentQuestion.getId(), STATUS);
 
         List<QuestionDto.GetMemberResponse> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS).stream()
                 .map((m) -> QuestionDto.GetMemberResponse.builder()
@@ -215,13 +216,13 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
         });
 
-        List<Question> questions = questionRepository.findAllByRoomOrderByCreatedAtDesc(room);
+        List<Question> questions = questionRepository.findAllByRoomAndStatusOrderByCreatedAtDesc(room, STATUS);
         List<QuestionDto.GetResponse> response = new ArrayList<>();
         for(Question question : questions) {
             //int roomMemberCount = roomMemberRepository.countByRoom(room);
             //int voteCount = voteRepository.countDistinctUsersByQuestion(question);
-            int allVoteCount = voteRepository.countByQuestionId(question.getId());
-            int voteCount = voteRepository.countByCandidateIdAndQuestionId(user.getUserId(), question.getId());
+            int allVoteCount = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);
+            int voteCount = voteRepository.countByCandidateIdAndQuestionIdAndStatus(user.getUserId(), question.getId(), STATUS);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
@@ -248,7 +249,7 @@ public class QuestionServiceImpl implements QuestionService {
         });
 
         boolean checkRoomMember = roomMemberRepository
-                .existsByUserUserIdAndRoomRoomId(userPrincipal.getId(), question.getRoom().getRoomId());
+                .existsByUserUserIdAndRoomRoomIdAndStatus(userPrincipal.getId(), question.getRoom().getRoomId(), STATUS);
 
         if(!checkRoomMember)
             throw new CustomException(ExceptionCode.QUESTION_DELETE_NOT_AUTHENTICATED);
@@ -268,7 +269,7 @@ public class QuestionServiceImpl implements QuestionService {
         });
 
         boolean checkRoomMember = roomMemberRepository
-                .existsByUserUserIdAndRoomRoomId(user.getUserId(), question.getRoom().getRoomId());
+                .existsByUserUserIdAndRoomRoomIdAndStatus(user.getUserId(), question.getRoom().getRoomId(), STATUS);
 
         if(!checkRoomMember)
             throw new CustomException(ExceptionCode.QUESTION_DELETE_NOT_AUTHENTICATED);

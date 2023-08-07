@@ -17,8 +17,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Optional<Question> findByCreatedAtAfterAndRoomRoomId(LocalDateTime now, Long roomId);
 
-    List<Question> findAllByRoomOrderByCreatedAtDesc(Room room);
-    List<Question> findAllByQuestionContaining(String kwd);
+    List<Question> findAllByRoomAndStatusOrderByCreatedAtDesc(Room room, int status);
+    List<Question> findAllByQuestionContainingAndStatus(String kwd, int status);
 
     @Transactional
     @Modifying

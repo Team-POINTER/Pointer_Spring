@@ -91,13 +91,13 @@ public class RoomController {
         return friendService.getRoomFriendList(roomId, userPrincipal, dto);
     }
 
-    // 초대 링크 조회
+     //초대 링크 조회
 //    @GetMapping("/{room-id}/invitation")
-//    public ResponseEntity<Object> createInvitation(@PathVariable("room-id") Long roomId) {
-//        return new ResponseEntity<>(roomService.findLink(roomId), HttpStatus.OK);
+//    public ResponseRoom createInvitation(@PathVariable("room-id") Long roomId) {
+//        return roomService.findLink(roomId);
 //    }
 
-    // 링크를 통한 진입
+     //링크를 통한 진입
 //    @GetMapping("/invitation/{invitation}")
 //    public ResponseEntity<Object> getRoom(@PathVariable String invitation) {
 //        return new ResponseEntity<>(roomService.findRoom(invitation), HttpStatus.OK);

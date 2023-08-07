@@ -60,5 +60,13 @@ public class Room extends BaseEntity {
         this.memberNum = 1;
         this.votingNum = 0;
     }
+    @Builder
+    public Room(Long creatorId, String name, String code) {
+        this.creatorId = creatorId;
+        this.name = name;
+        this.code = code;
+        this.memberNum = 1;
+        this.votingNum = 0;
+    }
 
 }

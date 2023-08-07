@@ -12,17 +12,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.friend.domain.Friend;
-import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.room.response.ResponseNoRoom;
 import pointer.Pointer_Spring.security.UserPrincipal;
-import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
-import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -68,7 +65,7 @@ public class RoomServiceImpl implements RoomService {
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         Long userId = userPrincipal.getId();
         if (kwd == null) {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, 1)
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId,  STATUS)
                     .stream()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
@@ -78,11 +75,11 @@ public class RoomServiceImpl implements RoomService {
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
-                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userId, latestQuestion.getId(), STATUS);
                         return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     }).toList();
         } else {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, 1).stream()
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, STATUS).stream()
                     .filter(roomMember -> {
                         Room room = roomMember.getRoom();
                         Optional<Question> latestQuestion = room.getQuestions().stream()
@@ -98,7 +95,7 @@ public class RoomServiceImpl implements RoomService {
 
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
-                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionId(userId, latestQuestion.getId());
+                        boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userId, latestQuestion.getId(), STATUS);
                         return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
                     })
                     .collect(Collectors.toList());
@@ -106,7 +103,7 @@ public class RoomServiceImpl implements RoomService {
         return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new ListResponse(roomListDto));
     }
     private String getTopUserNm(Room room, Long latestQuestionId){
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
         int maxVote = 0;
         RoomMember topMem = roomMembers.get(0);
         for (RoomMember roomMem : roomMembers) {
@@ -186,6 +183,10 @@ public class RoomServiceImpl implements RoomService {
                 .map(RoomMemberResopnose::new).toList();
         CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
+    }
+    private String createCode(Room room) {
+        return room.getCode();
+        //room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
     }
 
     @Override
@@ -306,7 +307,7 @@ public class RoomServiceImpl implements RoomService {
             Long userFriendId = f.getUserFriendId();
 
             IsInviteMember isInviteMember = new IsInviteMember(userRepository.findById(userFriendId).get(), f);
-            if(roomMemberRepository.existsByUserUserIdAndRoomRoomId(userFriendId, roomId)){
+            if(roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(userFriendId, roomId, STATUS)){
                 isInviteMember.updateIsInvite(false, IsInviteMember.Reason.ALREADY);
             } else if (userRepository.findById(f.getUserFriendId()).get().getRoomLimit()>30) {
                 isInviteMember.updateIsInvite(false, IsInviteMember.Reason.OVERLIMIT);
@@ -340,18 +341,16 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-//    public String createLink(Room room) {
-//        return room.getCode();
-//                //room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
-//    }
+
 
 //    @Override
-//    public Object findLink(Long roomId) {
+//    public ResponseRoom findLink(Long roomId) {
 //        Optional<Room> room = roomRepository.findById(roomId);
 //        if (room.isEmpty()) {
-//            return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
+//            return new ResponseRoom(ExceptionCode.INVITATION_NOT_FOUND);
 //        }
-//        return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);//new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, room.get().getInvitation());
+//        String url = room.get().getCode();
+//        return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
 //    }
 
 }

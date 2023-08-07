@@ -3,8 +3,6 @@ package pointer.Pointer_Spring.vote.service;
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.question.domain.Question;
-import pointer.Pointer_Spring.report.domain.Report;
-import pointer.Pointer_Spring.report.domain.RestrictedUser;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
@@ -117,7 +115,7 @@ public class VoteServiceImpl implements VoteService {
         });
 
         // 해당 유저 정보 조회
-        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
+        int allVoteCnt = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);
         int targetVotedCnt = voteRepository.countByQuestionIdAndCandidateId(question.getId(), user.getUserId());
         VoteDto.GetMemberResponse targetUser = VoteDto.GetMemberResponse.builder()
                 .userId(user.getUserId())
@@ -142,7 +140,7 @@ public class VoteServiceImpl implements VoteService {
         }
 
         // 투표안한 유저 개수
-        int votedUserCnt = voteRepository.countDistinctUserByQuestion(question.getId());
+        int votedUserCnt = voteRepository.countDistinctUserByQuestionAndStatus(question.getId(), STATUS);
         int notVotedCnt = roomMembers.size() - votedUserCnt;
 
         System.out.println(roomMembers.size());
@@ -169,7 +167,7 @@ public class VoteServiceImpl implements VoteService {
         List<VoteDto.GetNotVotedMember> notVotedMembers = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
-            boolean vote = voteRepository.existsByMemberId(member.getUserId());
+            boolean vote = voteRepository.existsByMemberIdAndStatus(member.getUserId(), STATUS);
             if (!vote) {
                 notVotedMembers.add(VoteDto.GetNotVotedMember.builder()
                         .userId(member.getUserId())
@@ -193,7 +191,7 @@ public class VoteServiceImpl implements VoteService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
         List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());//해당 user를 투표한 인원
-        int allVoteCnt = voteRepository.countByQuestionId(question.getId());//해당 질문에 대해 투표한 사람의 수
+        int allVoteCnt = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);//해당 질문에 대해 투표한 사람의 수
         List<String> hints = new ArrayList<>();
         List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {

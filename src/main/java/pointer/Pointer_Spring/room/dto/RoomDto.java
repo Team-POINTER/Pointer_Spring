@@ -146,11 +146,12 @@ public class RoomDto {
         Reason reason;
         //Long userId;
         String nickNm;
+        String id;
         LocalDateTime updateAt;
 
         public IsInviteMember( User user, Friend f) {
             this.isInvite = true;
-            //this.userId = user.getUserId();
+            this.id = user.getId();
             this.nickNm = f.getFriendName();
             this.reason = Reason.INVITE;
             this.updateAt = f.getUpdatedAt();
