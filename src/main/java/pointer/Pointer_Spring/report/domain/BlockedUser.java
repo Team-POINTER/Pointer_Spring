@@ -3,13 +3,14 @@ package pointer.Pointer_Spring.report.domain;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import pointer.Pointer_Spring.config.BaseEntity;
 
 import javax.persistence.*;
 
 @Getter
 @Entity(name = "BlockedUser")
 @NoArgsConstructor
-public class BlockedUser {
+public class BlockedUser extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "blocked_user_id", unique = true)

@@ -1,4 +1,4 @@
-package com.example.springsocial.util;
+package pointer.Pointer_Spring.security.oauth2;
 
 import org.springframework.util.SerializationUtils;
 import javax.servlet.http.Cookie;

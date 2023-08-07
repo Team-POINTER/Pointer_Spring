@@ -11,20 +11,19 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.apple.service.AppleAuthServiceImpl;
 import pointer.Pointer_Spring.user.domain.User;
-import pointer.Pointer_Spring.user.dto.KakaoRequestDto;
-import pointer.Pointer_Spring.user.dto.TokenDto;
-import pointer.Pointer_Spring.user.dto.TokenRequest;
-import pointer.Pointer_Spring.user.dto.UserDto;
+import pointer.Pointer_Spring.user.dto.*;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.user.service.AuthServiceImpl;
 
 import java.util.Optional;
 
-@Controller
+@RestController
 //@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthController {
@@ -34,6 +33,7 @@ public class AuthController {
     //private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
+    private final AppleAuthServiceImpl appleAuthService;
 
     @PostMapping("/auth/test")
     public ResponseEntity<Object> test(@RequestBody KakaoRequestDto signUpRequest) {
@@ -100,9 +100,14 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.kakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
     }
 
-    @PostMapping("/auth/login/web")
+    @PostMapping("/auth/login/web")// kakao social signup
     public Object webKakaoLogin(@RequestBody TokenRequest tokenRequest) {
         return new ResponseEntity<>(authServiceImpl.webKakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/login/apple")
+    public BaseResponse<TokenDto> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
+        return new BaseResponse<>(appleAuthService.login(appleLoginRequest.getIdentityToken()));
     }
 
     @PostMapping("/user/reissue") // token 재발급
