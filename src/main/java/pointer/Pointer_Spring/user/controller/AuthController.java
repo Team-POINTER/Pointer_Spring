@@ -10,17 +10,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.security.CurrentUser;
-import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.KakaoRequestDto;
 import pointer.Pointer_Spring.user.dto.TokenDto;
 import pointer.Pointer_Spring.user.dto.TokenRequest;
 import pointer.Pointer_Spring.user.dto.UserDto;
+import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
+import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
 import pointer.Pointer_Spring.user.service.AuthServiceImpl;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import java.util.Optional;
 
@@ -33,45 +38,48 @@ public class AuthController {
     //  test
     //private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final BlockedUserRepository blockedUserRepository;
+    private final ImageRepository imageRepository;
     private final AuthenticationManager authenticationManager;
 
+    @Transactional
     @PostMapping("/auth/test")
     public ResponseEntity<Object> test(@RequestBody KakaoRequestDto signUpRequest) {
 
-        Optional<User> findUser = userRepository.findByEmailAndStatus(signUpRequest.getEmail(), 1);
+        String password = "1111"; // 오류
+        KakaoRequestDto kakaoDto = new KakaoRequestDto(signUpRequest.getId(), signUpRequest.getEmail(), signUpRequest.getName(), "test");
+
+        Optional<User> findUser = userRepository.findByEmailAndStatus(kakaoDto.getEmail(),1);
         User user;
+        ExceptionCode exception;
+
         if (findUser.isEmpty()) {
-
-            // {id}ENCODED_PASSWORD 형태
-            PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-
-            user = new User(signUpRequest.getEmail(), signUpRequest.getId(), signUpRequest.getName(),
-                    encoder.encode("1111"), User.SignupType.KAKAO, "test"); // password
-            userRepository.save(user);
-
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                    user.getEmail(), "1111");
-
-            Authentication authentication = authenticationManager.authenticate(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            //System.out.println("SecurityContextHolder.getContext().toString() = " + SecurityContextHolder.getContext().toString());
-
-            TokenDto tokenDto = authServiceImpl.createToken(authentication, user.getUserId());
-            user.setToken(tokenDto.getRefreshToken());
-            userRepository.save(user);
-            return new ResponseEntity<>(tokenDto, HttpStatus.OK);
+            if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
+                return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID), HttpStatus.OK);
+            }
+            user = authServiceImpl.signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
+            exception = ExceptionCode.SIGNUP_CREATED_OK;
+        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
+            return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL), HttpStatus.OK);
         }
-        user = findUser.get();
+        else {
+            user = findUser.get();
+            exception = ExceptionCode.SIGNUP_COMPLETE;
+        }
 
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), "1111");
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        "1111" // password
+                )
+        );
 
-        Authentication authentication = authenticationManager.authenticate(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         TokenDto tokenDto = authServiceImpl.createToken(authentication, user.getUserId());
-        tokenDto.setId(user.getId());
-        tokenDto.setUserId(user.getUserId());
         user.setToken(tokenDto.getRefreshToken());
+        tokenDto.setUserId(user.getUserId());
+        tokenDto.setExceptionCode(exception);
         userRepository.save(user);
 
         return new ResponseEntity<>(tokenDto, HttpStatus.OK);

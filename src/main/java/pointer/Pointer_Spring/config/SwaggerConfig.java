@@ -30,7 +30,7 @@ import java.util.List;
         info = @Info(title = "Pointer API 명세서",
                 description = "API 명세서",
                 version = "v1",
-                contact = @Contact(name = "pointer", email = "pointer@gmail.com"),
+                contact = @Contact(name = "pointer", email = "pointeFr@gmail.com"),
                 license = @License(name = "Apache 2.0",
                         url = "http://www.apache.org/licenses/LICENSE-2.0.html")
         )

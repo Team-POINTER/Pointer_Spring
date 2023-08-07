@@ -44,7 +44,7 @@ public class Room extends BaseEntity {
         this.memberNum = memberNum;
     }
 
-    public void updateMemberNum(){
+    public void minusMemberNum(){
         this.memberNum -= 1;
     }
 

@@ -1,7 +1,10 @@
 package pointer.Pointer_Spring.report.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.report.domain.UserReport;
 
 import java.util.List;
@@ -14,4 +17,9 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long> {
     UserReport findByTargetUserUserIdAndReportingUserIdAndStatus(Long userId, Long targetUserId, int status);
 
     List<UserReport> findAllByTargetUserUserIdAndStatus(Long targetId, int status);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM UserReport WHERE target_user_id = :userId", nativeQuery = true)
+    void deleteAllByTargetUserUserId(Long userId);
 }

@@ -3,9 +3,11 @@ package pointer.Pointer_Spring.friend.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.friend.domain.Friend;
 
 import org.springframework.data.domain.PageRequest;
@@ -82,5 +84,10 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     Long countUsersByBlockFriendCriteria(@Param("userUserId") Long userUserId,
                                          @Param("keyword") String keyword,
                                          @Param("status") int status);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM Friend WHERE user_friend_id = :userFriendId OR user_user_id = :userUserId", nativeQuery = true)
+    void deleteAllByUserFriendIdOrUserUserId(Long userFriendId, Long userUserId);
 
 }

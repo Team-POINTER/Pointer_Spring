@@ -13,5 +13,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 //    List<Room> findAllByAndNameContainingAndStatusEquals(String kwd, int status);
 //    List<Room> findAllByStatusEquals();
 
-    List<Room> findBymemberNumAndStatus(int memberNum, int status);
+    List<Room> findAllByMemberNum(int memberNum);
 }

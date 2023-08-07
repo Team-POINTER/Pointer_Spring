@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.hibernate.secure.spi.IntegrationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,11 +16,12 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
-import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
-import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
+import pointer.Pointer_Spring.report.repository.ReportRepository;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
+import pointer.Pointer_Spring.report.repository.UserReportRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
@@ -44,8 +43,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -74,7 +71,6 @@ public class AuthServiceImpl implements AuthService {
 
 
     private final UserRepository userRepository;
-    private final BlockedUserRepository blockedUserRepository;
     //private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
@@ -83,8 +79,12 @@ public class AuthServiceImpl implements AuthService {
     private final FriendRepository friendRepository; // 자기 기준, 상대쪽 모두 제거
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository; // 혼자만 있는 방
-    private final AlarmRepository alarmRepository;
     private final RestrictedUserRepository restrictedUserRepository;
+    private final AlarmRepository alarmRepository;
+    private final QuestionRepository questionRepository;
+    private final ReportRepository reportRepository;
+    private final UserReportRepository userReportRepository;
+    private final BlockedUserRepository blockedUserRepository;
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -351,7 +351,7 @@ public class AuthServiceImpl implements AuthService {
         User user;
 
         if (findUser.isEmpty()) {
-            // 제한된 회원 확인
+            // 제한된 회원 확인 : user -> 제한 회원 table?
             if (blockedUserRepository.existsByEmail(kakaoDto.getEmail())) {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
@@ -436,7 +436,7 @@ public class AuthServiceImpl implements AuthService {
         // reissue 비교
 
         /*if (findUser.isEmpty()) {
-            return new ResponseKakaoUser(ExceptioㅣnCode.INVALID_REFRESH_TOKEN);
+            return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
         }*/
 
         User user = findUser.get();
@@ -456,40 +456,45 @@ public class AuthServiceImpl implements AuthService {
         return new UserDto.TokenResponse(ExceptionCode.REISSUE_TOKEN, tokenDto);
     }
 
+    @Transactional
     @Override
     public Object resign(UserPrincipal userPrincipal) {
-        /*Optional<User> findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS);
-        if (findUser.isEmpty()) {
-            return new ResponseKakaoUser(ExceptionCode.INVALID_REFRESH_TOKEN);
-        }*/
 
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(),STATUS).get();
 
-        List<Friend> friends = friendRepository.findByUserUserIdOrUserFriendIdAndStatus(user.getUserId(), user.getUserId(), STATUS);
-        for (Friend friend : friends) friend.delete();
+        friendRepository.deleteAllByUserFriendIdOrUserUserId(user.getUserId(), user.getUserId());
+        imageRepository.deleteAllByUserUserId(user.getUserId());
 
-        List<Image> images = imageRepository.findByUserUserIdAndStatus(user.getUserId(), STATUS);
-        for (Image image : images) image.delete();
-
+        // roomMember status 0 처리
         List<RoomMember> roomMembers = roomMemberRepository.findByUserUserIdAndStatus(user.getUserId(), STATUS);
         for (RoomMember member : roomMembers) {
-            member.getRoom().updateMemberNum();
+            member.getRoom().minusMemberNum();
             member.delete();
+            roomMemberRepository.save(member);
         }
 
-        List<Room> rooms = roomRepository.findBymemberNumAndStatus(0, STATUS);
+        // 위 내용에 의해 빈 room이 생성된 경우, room 삭제
+        List<Room> rooms = roomRepository.findAllByMemberNum(0);
         for (Room room : rooms) {
-            for (Question question : room.getQuestions()) {
-                question.delete();
-            }
-            room.delete();
+            roomMemberRepository.deleteAllByUserUserId(user.getUserId());
+            questionRepository.deleteAllByRoomId(room.getRoomId());
+            reportRepository.deleteAllByRoomRoomId(room.getRoomId());
+
+            roomRepository.delete(room);
         }
 
         // alarm 부분 제거 필요
+        alarmRepository.deleteAllByReceiveUserIdOrSendUserId(user.getUserId(), user.getUserId());
 
-
+        // user status 0 처리
+        user.setEmail("resign"+ user.getUserId()); // 재 가입 대비 email 변경
+        user.setId("resign"+ user.getUserId());
         user.delete();
+        userRepository.save(user);
 
+        userReportRepository.deleteAllByTargetUserUserId(user.getUserId());
+
+        SecurityContextHolder.getContext().setAuthentication(null);
         return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
     }
 }
