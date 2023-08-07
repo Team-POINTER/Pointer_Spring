@@ -30,7 +30,7 @@ public enum ExceptionCode {
     USER_NOT_FOUND(NOT_FOUND_VALUE, "C001", "회원정보 없음"),
     USER_FRIEND_NOT_FOUND(NOT_FOUND_VALUE, "C002", "상대 회원정보 없음"),
 
-    USER_SAVE_ID_OK(SUCCESS, "C003", "ID 저장 성공"),
+    USER_SAVE_ID_OK(SUCCESS, "C003", "ID 확인 요청"),
     USER_CHECK_ID_OK(SUCCESS, "C004", "ID 중복 확인 성공"),
     USER_NO_CHECK_ID(SUCCESS, "C005", "ID 중복 확인 없음"),
     USER_DUPLICATED_ID(DUPLICATED_VALUE, "C008", "중복된 아이디"),

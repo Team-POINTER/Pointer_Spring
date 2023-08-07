@@ -18,11 +18,13 @@ public class FriendDto {
 
         List<FriendRoomInfoList> friendList;
         Long total;
+        int currentPage;
 
-        public RoomFriendListResponse(ExceptionCode exceptionCode, List<FriendRoomInfoList> friendList, Long total) {
+        public RoomFriendListResponse(ExceptionCode exceptionCode, List<FriendRoomInfoList> friendList, Long total, int currentPage) {
             super(exceptionCode);
             this.total = total;
             this.friendList = friendList;
+            this.currentPage = currentPage;
         }
     }
 
@@ -34,12 +36,14 @@ public class FriendDto {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         String name;
         Long total;
+        int currentPage;
 
-        public FriendInfoListResponse(ExceptionCode exceptionCode,  String name, Long total, List<FriendInfoList> friendInfoList) {
+        public FriendInfoListResponse(ExceptionCode exceptionCode,  String name, Long total, List<FriendInfoList> friendInfoList, int currentPage) {
             super(exceptionCode);
             this.total = total;
             this.name = name;
             this.friendInfoList = friendInfoList;
+            this.currentPage = currentPage;
         }
         public FriendInfoListResponse(ExceptionCode exceptionCode, List<FriendInfoList> friendInfoList) {
             super(exceptionCode);
@@ -53,12 +57,14 @@ public class FriendDto {
         List<FriendInfoList> friendInfoList;
         String name;
         Long total;
+        int currentPage;
 
-        public FriendRoomInfoListResponse(ExceptionCode exceptionCode,  String name, Long total, List<FriendInfoList> friendInfoList) {
+        public FriendRoomInfoListResponse(ExceptionCode exceptionCode,  String name, Long total, List<FriendInfoList> friendInfoList, int currentPage) {
             super(exceptionCode);
             this.total = total;
             this.name = name;
             this.friendInfoList = friendInfoList;
+            this.currentPage = currentPage;
         }
         public FriendRoomInfoListResponse(ExceptionCode exceptionCode, List<FriendInfoList> friendInfoList) {
             super(exceptionCode);
