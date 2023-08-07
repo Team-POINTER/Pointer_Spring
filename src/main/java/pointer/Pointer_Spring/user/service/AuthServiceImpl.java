@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -218,13 +219,17 @@ public class AuthServiceImpl implements AuthService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
         );*/
-
         Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
         if (findUser.isPresent()) { // 상대 id
             return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
         }
+
         else if (user.getCheckId() == 1) {
-            user.setId(userInfo.getId(), COMPLETE);
+            try {
+                user.setId(userInfo.getId(), COMPLETE);
+            } catch (DataIntegrityViolationException e) {
+                throw new CustomException(ExceptionCode.USER_DUPLICATED_ID);
+            }
             return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK);
         }
         return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복

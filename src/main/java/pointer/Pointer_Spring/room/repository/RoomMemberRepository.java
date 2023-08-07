@@ -27,6 +27,7 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     List<RoomMember> findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(Long userId, int status);
     List<RoomMember> findAllByRoomAndUserIsQuestionRestrictedAndStatusEquals(Room room, boolean isQuestionRestricted, int status);
     List<RoomMember> findAllByRoomAndUserIsHintRestrictedAndStatusEquals(Room room, boolean isHintRestricted, int status);
+    Optional<RoomMember> findByRoom_RoomIdAndUser_UserIdAndStatus(Long roomId, Long userId, int status);
 
     List<RoomMember> findByUserUserIdAndStatus(Long userId, int status);
 
