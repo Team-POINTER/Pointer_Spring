@@ -17,6 +17,7 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.room.response.ResponseNoRoom;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
@@ -102,7 +103,7 @@ public class RoomServiceImpl implements RoomService {
         return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new ListResponse(roomListDto));
     }
     private String getTopUserNm(Room room, Long latestQuestionId){
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS);
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
         int maxVote = 0;
         RoomMember topMem = roomMembers.get(0);
         for (RoomMember roomMem : roomMembers) {
@@ -182,6 +183,10 @@ public class RoomServiceImpl implements RoomService {
                 .map(RoomMemberResopnose::new).toList();
         CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
+    }
+    private String createCode(Room room) {
+        return room.getCode();
+        //room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
     }
 
     @Override
@@ -336,18 +341,16 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-//    public String createLink(Room room) {
-//        return room.getCode();
-//                //room.getRoomId() + passwordEncoder.encode(room.getName()); // 임시로 암호화
-//    }
+
 
 //    @Override
-//    public Object findLink(Long roomId) {
+//    public ResponseRoom findLink(Long roomId) {
 //        Optional<Room> room = roomRepository.findById(roomId);
 //        if (room.isEmpty()) {
-//            return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);
+//            return new ResponseRoom(ExceptionCode.INVITATION_NOT_FOUND);
 //        }
-//        return new ResponseNoRoom(ExceptionCode.INVITATION_NOT_FOUND);//new ResponseInvitation(ExceptionCode.INVITATION_GET_OK, room.get().getInvitation());
+//        String url = room.get().getCode();
+//        return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
 //    }
 
 }

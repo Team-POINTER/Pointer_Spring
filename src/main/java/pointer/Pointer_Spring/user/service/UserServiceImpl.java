@@ -38,13 +38,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseUser updateNm(Long userId, String newName){
+    public ResponseUser updateNm(Long userId, String userNm){
         User user = userRepository.findByUserId(userId).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
         );
-        user.changeName(newName);
+        user.changeName(userNm);
         return new ResponseUser(ExceptionCode.USER_UPDATE_OK);
     }
 

@@ -20,7 +20,8 @@ public class FriendController {
     // 프로필
     @GetMapping("/users/friend") // 상대친구 조회
     public UserDto.UserListResponse getFriendFriendList(@CurrentUser UserPrincipal userPrincipal,
-                                                        @RequestBody FriendDto.FindFriendFriendDto dto) {
+                                                        @RequestParam Long userId, @RequestParam int lastPage ) {
+        FriendDto.FindFriendFriendDto dto = new FriendDto.FindFriendFriendDto(userId, lastPage);
         return friendService.getFriendFriendList(userPrincipal, dto);
     }
 

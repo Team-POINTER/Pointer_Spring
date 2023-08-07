@@ -14,6 +14,8 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     List<RoomMember> findAllByRoomAndStatus(Room room, int status);
     List<RoomMember> findByRoomMemberIdAndStatus(Long RoomMemberId, int status);
     int countByRoomAndStatus(Room room, int status);
+    List<RoomMember> findAllByRoom(Room room);
+
     Optional<RoomMember> findByRoom_RoomIdAndUser_UserIdAndStatus(Long roomId, Long userId, int status);
 
     Boolean existsByUserUserIdAndRoomRoomIdAndStatus(Long userId, Long roomId, int status);

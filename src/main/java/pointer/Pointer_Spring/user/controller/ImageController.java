@@ -18,28 +18,27 @@ import java.io.IOException;
 public class ImageController {
     private final CloudinaryService cloudinaryService;
 
-
-    @PostMapping("upload/profile")
-    public ResponseImage uploadProfileImage(@CurrentUser UserPrincipal userPrincipal, @RequestParam("image") MultipartFile image) throws IOException {
-        return cloudinaryService.uploadProfileImage(userPrincipal.getId(), image);
-
-    }
-
-    @PostMapping("upload/background")
-    public ResponseImage uploadBackgroundImage(@CurrentUser UserPrincipal userPrincipal,  @RequestParam("image") MultipartFile image) throws IOException {
-        return cloudinaryService.uploadBackgroundImage(userPrincipal.getId(), image);
-    }
-
     @GetMapping("/get")
     public ResponseImage getImage(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseImage(ExceptionCode.IMAGE_GET_OK, cloudinaryService.getImages(userPrincipal.getId()));
     }
-    @PatchMapping("change/default/profile")
-    public ResponseImage changeDefaultProfileImage(@CurrentUser UserPrincipal userPrincipal) throws IOException {
-        return cloudinaryService.changeDefaultProfileImage(userPrincipal.getId());
-    }
-    @PatchMapping("change/default/background")
-    public ResponseImage changeDefaultBackgroundImage(@CurrentUser UserPrincipal userPrincipal) throws IOException {
-        return cloudinaryService.changeDefaultBackgroundImage(userPrincipal.getId());
-    }
+
+    //    @PostMapping("upload/profile")
+//    public ResponseImage uploadProfileImage(@CurrentUser UserPrincipal userPrincipal, @RequestParam("image") MultipartFile image) throws IOException {
+//        return cloudinaryService.uploadProfileImage(userPrincipal.getId(), image);
+//
+//    }
+//
+//    @PostMapping("upload/background")
+//    public ResponseImage uploadBackgroundImage(@CurrentUser UserPrincipal userPrincipal,  @RequestParam("image") MultipartFile image) throws IOException {
+//        return cloudinaryService.uploadBackgroundImage(userPrincipal.getId(), image);
+//    }
+//    @PatchMapping("change/default/profile")
+//    public ResponseImage changeDefaultProfileImage(@CurrentUser UserPrincipal userPrincipal) throws IOException {
+//        return cloudinaryService.changeDefaultProfileImage(userPrincipal.getId());
+//    }
+//    @PatchMapping("change/default/background")
+//    public ResponseImage changeDefaultBackgroundImage(@CurrentUser UserPrincipal userPrincipal) throws IOException {
+//        return cloudinaryService.changeDefaultBackgroundImage(userPrincipal.getId());
+//    }
 }

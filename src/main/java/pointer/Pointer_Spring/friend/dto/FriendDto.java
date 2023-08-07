@@ -154,6 +154,10 @@ public class FriendDto {
         // pageable
         private int lastPage;
 
+        public FindFriendFriendDto(Long userId, int lastPage) {
+            this.userId = userId;
+            this.lastPage = lastPage;
+        }
     }
 
     @Data

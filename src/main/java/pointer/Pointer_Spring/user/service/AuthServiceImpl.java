@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.secure.spi.IntegrationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,6 +44,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.SecureRandom;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -214,13 +219,17 @@ public class AuthServiceImpl implements AuthService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
         );*/
-
         Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
         if (findUser.isPresent()) { // 상대 id
             return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
         }
+
         else if (user.getCheckId() == 1) {
-            user.setId(userInfo.getId(), COMPLETE);
+            try {
+                user.setId(userInfo.getId(), COMPLETE);
+            } catch (DataIntegrityViolationException e) {
+                throw new CustomException(ExceptionCode.USER_DUPLICATED_ID);
+            }
             return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK);
         }
         return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복

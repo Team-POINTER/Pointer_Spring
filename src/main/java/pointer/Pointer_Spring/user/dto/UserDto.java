@@ -172,13 +172,17 @@ public class UserDto {
         }
     }
     @Getter
-    public static class UpdateUserNmRequest {
+    public static class UpdateUserInfoRequest {
         @NotBlank(message = "이름은 필수 입력 항목입니다.")
         @Size(min = 1, max = 8, message = "이름은 1자에서 8자 사이여야 합니다.")
         private String name;
-        public UpdateUserNmRequest(){}
-        public UpdateUserNmRequest(String name){
+        private boolean profileImageDefaultChange;
+        private boolean backgroundImageDefaultChange;
+        public UpdateUserInfoRequest(){}
+        public UpdateUserInfoRequest(String name, boolean profileImageDefaultChange, boolean backgroundImageDefaultChange){
             this.name = name;
+            this.profileImageDefaultChange = profileImageDefaultChange;
+            this.backgroundImageDefaultChange = backgroundImageDefaultChange;
         }
 
     }
