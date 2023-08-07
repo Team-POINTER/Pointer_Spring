@@ -12,15 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.apple.service.AppleAuthServiceImpl;
 import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
-import pointer.Pointer_Spring.user.dto.KakaoRequestDto;
-import pointer.Pointer_Spring.user.dto.TokenDto;
-import pointer.Pointer_Spring.user.dto.TokenRequest;
-import pointer.Pointer_Spring.user.dto.UserDto;
+import pointer.Pointer_Spring.user.dto.*;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
@@ -29,7 +28,7 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import java.util.Optional;
 
-@Controller
+@RestController
 //@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthController {
@@ -41,6 +40,8 @@ public class AuthController {
     private final BlockedUserRepository blockedUserRepository;
     private final ImageRepository imageRepository;
     private final AuthenticationManager authenticationManager;
+    private final AppleAuthServiceImpl appleAuthService;
+
 
     @Transactional
     @PostMapping("/auth/test")
@@ -111,6 +112,11 @@ public class AuthController {
     @PostMapping("/auth/login/web")
     public Object webKakaoLogin(@RequestBody TokenRequest tokenRequest) {
         return new ResponseEntity<>(authServiceImpl.webKakaoCheck(tokenRequest.getAccessToken()), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/login/apple")
+    public BaseResponse<TokenDto> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
+        return new BaseResponse<>(appleAuthService.login(appleLoginRequest.getIdentityToken()));
     }
 
     @PostMapping("/user/reissue") // token 재발급
