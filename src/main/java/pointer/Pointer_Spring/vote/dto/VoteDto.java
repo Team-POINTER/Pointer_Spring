@@ -32,6 +32,12 @@ public class VoteDto {
 
     @Getter
     @NoArgsConstructor
+    public static class CheckRequest {
+        private Long questionId;
+    }
+
+    @Getter
+    @NoArgsConstructor
     public static class CreateResponse {
         private Long id;
         private Long questionId;
@@ -46,6 +52,16 @@ public class VoteDto {
             this.userId = userId;
             this.votedUserId = votedUserId;
             this.hint = hint;
+        }
+
+    }
+
+    @Getter
+    public static class CheckResponse{
+        private boolean vote;
+
+        public CheckResponse(boolean vote) {
+            this.vote = vote;
         }
 
     }

@@ -30,6 +30,13 @@ public class VoteController {
         return new BaseResponse<>(voteService.createVote(userPrincipal, dto));
     }
 
+    // 투표 여부 확인하기
+    @GetMapping()
+    public BaseResponse<VoteDto.CheckResponse> isVote(
+            @CurrentUser UserPrincipal userPrincipal, @Valid @RequestBody VoteDto.CheckRequest dto) {
+        return new BaseResponse<>(voteService.isVote(userPrincipal, dto));
+    }
+
     // 지목화면 결과 조회
     @GetMapping("/{questionId}")
     public BaseResponse<VoteDto.GetResponse> getVotes(

@@ -33,7 +33,7 @@ public class FriendController {
         return friendService.getUserList(userPrincipal, dto);
     }
 
-    @GetMapping("/friend/search") // 친구 중 검색
+    @PostMapping("/friend/search") // 친구 중 검색
     public FriendDto.FriendInfoListResponse getUserFriendList(@CurrentUser UserPrincipal userPrincipal,
                                                               @RequestBody FriendDto.FindFriendDto dto) {
         return friendService.getUserFriendList(userPrincipal, dto);

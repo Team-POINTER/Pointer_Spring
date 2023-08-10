@@ -26,6 +26,9 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
 
     boolean existsByMemberIdAndStatus(Long memberId, int status);
 
+    boolean existsByQuestionIdAndMemberIdAndStatus(Long questionId, Long memberId, int status);
+
+
     int countByQuestionIdAndCandidateId(Long questionId, Long userId);
 
     List<VoteHistory> findAllByQuestionIdAndCandidateId(Long questionId, Long userId);
