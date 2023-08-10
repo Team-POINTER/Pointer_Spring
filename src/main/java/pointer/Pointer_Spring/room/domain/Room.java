@@ -2,14 +2,17 @@ package pointer.Pointer_Spring.room.domain;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import org.springframework.data.annotation.LastModifiedDate;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.question.domain.Question;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +39,9 @@ public class Room extends BaseEntity {
     @Column(name = "creator_id")
     private Long creatorId;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deadline;
+
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Question> questions = new ArrayList<>();
@@ -46,6 +52,9 @@ public class Room extends BaseEntity {
 
     public void minusMemberNum(){
         this.memberNum -= 1;
+    }
+    public void updateDeadline(LocalDateTime deadline){
+        this.deadline = deadline;
     }
 
 
@@ -60,13 +69,17 @@ public class Room extends BaseEntity {
         this.memberNum = 1;
         this.votingNum = 0;
     }
-    @Builder
-    public Room(Long creatorId, String name, String code) {
-        this.creatorId = creatorId;
-        this.name = name;
+
+    public void updateCode(String code){
         this.code = code;
-        this.memberNum = 1;
-        this.votingNum = 0;
     }
+//    @Builder
+//    public Room(Long creatorId, String name, String code) {
+//        this.creatorId = creatorId;
+//        this.name = name;
+//        this.code = code;
+//        this.memberNum = 1;
+//        this.votingNum = 0;
+//    }
 
 }
