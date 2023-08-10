@@ -87,8 +87,6 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.QUESTION_CREATED_FAILED);
         }
 
-        //모든 맴버가 투표를 했으면 질문 활성화해야함
-
         Question question = Question.builder()
                 .room(room)
                 .creatorId(user.getUserId())

@@ -115,6 +115,11 @@ public class RoomDto {
         //Long userId;//초대하는 유저
         Long roomId;
         List<Long> userFriendIdList;
+
+        public InviteRequest(Long roomId, List<Long> userId) {
+            this.roomId = roomId;
+            this.userFriendIdList = userId;
+        }
     }
 
     @Data

@@ -3,14 +3,7 @@ package pointer.Pointer_Spring.room.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
@@ -21,9 +14,8 @@ import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.room.service.RoomService;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
-import pointer.Pointer_Spring.swagger.SwaggerTestDto;
 
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 
 @Controller
 @ResponseBody
@@ -41,9 +33,8 @@ public class RoomController {
     }
 
     @GetMapping("/{room-id}")
-    public ResponseRoom getRoom(@PathVariable("room-id") Long roomId,
-        HttpServletRequest request) {
-        return roomService.getRoom(roomId, request);
+    public ResponseRoom getRoom(@PathVariable("room-id") Long roomId) {
+        return roomService.getRoom(roomId);
     }
 
     @PostMapping("create")
@@ -63,9 +54,8 @@ public class RoomController {
     }
 
     @PostMapping("/invite/members")
-    public ResponseRoom inviteMembers(@RequestBody RoomDto.InviteRequest dto, //원래 return 값 - RoomDto.InviteResponse
-        HttpServletRequest request) {
-        return roomService.inviteMembers(dto, request);
+    public ResponseRoom inviteMembers(@RequestBody RoomDto.InviteRequest dto) {
+        return roomService.inviteMembers(dto);
     }
 
     @GetMapping("/paging/friend/invitation")
@@ -92,10 +82,14 @@ public class RoomController {
     }
 
      //초대 링크 조회
-//    @GetMapping("/{room-id}/invitation")
-//    public ResponseRoom createInvitation(@PathVariable("room-id") Long roomId) {
-//        return roomService.findLink(roomId);
-//    }
+    @GetMapping("/{room-id}/invitation")
+    public ResponseRoom createInvitationCode(@CurrentUser UserPrincipal userPrincipal, @PathVariable("room-id") Long roomId) throws NoSuchAlgorithmException {
+        return roomService.findLink(userPrincipal.getId(), roomId);
+    }
+    @GetMapping("/invitation/{code}")
+    public ResponseRoom invite(@CurrentUser UserPrincipal userPrincipal, @PathVariable("code") String code) throws NoSuchAlgorithmException {
+        return roomService.getRealIDCode(userPrincipal, code);
+    }
 
      //링크를 통한 진입
 //    @GetMapping("/invitation/{invitation}")
