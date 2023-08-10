@@ -403,7 +403,7 @@ public class RoomServiceImpl implements RoomService {
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, STATUS)){
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }
-        final String URL_PREFIX = "http://pointer2024/";
+        final String URL_PREFIX = "http://pointer2024.com/";
 
         String url = URL_PREFIX + checkAndGetCode(roomId);
         return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
