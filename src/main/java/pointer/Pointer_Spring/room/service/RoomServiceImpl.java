@@ -1,5 +1,9 @@
 package pointer.Pointer_Spring.room.service;
 
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
@@ -7,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.hibernate.type.LocalDateType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,7 +23,8 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
-import pointer.Pointer_Spring.room.response.ResponseNoRoom;
+import pointer.Pointer_Spring.room.util.Base62Util;
+import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
@@ -53,6 +60,7 @@ public class RoomServiceImpl implements RoomService {
     private final QuestionRepository questionRepository;
     private final ImageRepository imageRepository;
     private final AuthService authService;
+    private final Base62Util base62Util;
 
     private final String FIRST_QUESTION = "첫인상이 좋았던 사람을 지목해주세요";
 
@@ -124,7 +132,7 @@ public class RoomServiceImpl implements RoomService {
         return msgForTopUserNm;
     }
 
-    public ResponseRoom getRoom(Long roomId, HttpServletRequest request) {//질문, 투표 등까지 같이 가져오기[합친 후에]
+    public ResponseRoom getRoom(Long roomId) {//질문, 투표 등까지 같이 가져오기[합친 후에]
         Room foundRoom = roomRepository.findById(roomId).orElseThrow(
             () -> {
                 throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
@@ -234,7 +242,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public ResponseRoom inviteMembers(InviteRequest inviteDto, HttpServletRequest request) {
+    public ResponseRoom inviteMembers(InviteRequest inviteDto) {
 
         Room foundRoom = roomRepository.findById(inviteDto.getRoomId()).orElseThrow(
                 () -> {
@@ -318,7 +326,7 @@ public class RoomServiceImpl implements RoomService {
 
 //        Comparator<IsInviteMember> comparator = Comparator.comparing(IsInviteMember::getNickNm);
 //        Collections.sort(roomMemberResponoseList, comparator);//이름 순 정렬
-        return new ResponseRoom( ExceptionCode.INVITATION_LIST_GET_SUCCESS , roomMemberResponoseList);
+        return new ResponseRoom( ExceptionCode.INVITATION_LIST_GET_SUCCESS ,currentPage, roomMemberResponoseList);
     }
 
 
@@ -341,16 +349,64 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
+    private static UUID generateCode() {
+        return UUID.randomUUID();
+    }
+
+    private String checkAndGetCode(Long roomId) throws NoSuchAlgorithmException {
+        Room room = roomRepository.findById(roomId).orElseThrow(()-> new CustomException(ExceptionCode.ROOM_NOT_FOUND));
+        String uuidToken = room.getCode();
+        String code;
+        if(uuidToken == null || uuidToken.isEmpty() || room.getDeadline().isBefore(LocalDateTime.now())){
+
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            LocalDateTime deadline = currentDateTime.plusHours(1);
+            System.out.println(currentDateTime);
+            System.out.println(deadline);
+            room.updateDeadline(deadline);
+
+            uuidToken = roomId.toString() + "-" + generateCode().toString();
+//            uuidToken = generateInvitationKey(30);
+            code = base62Util.urlEncoder(uuidToken);
+            room.updateCode(uuidToken);
+        }else{
+            code = base62Util.urlEncoder(uuidToken);
+        }
+        System.out.println(code);
+        System.out.println(uuidToken);
+        return code;
+    }
+    @Override
+    @Transactional
+    public ResponseRoom getRealIDCode(UserPrincipal userPrincipal, String code) throws NoSuchAlgorithmException {
+        String IdCode = base62Util.urlDecoder(code);
+        System.out.println(code);
+        System.out.println(IdCode);
+
+        Room room = roomRepository.findByCode(IdCode).orElseThrow(
+                ()->new CustomException(ExceptionCode.ROOM_NOT_FOUND)
+        );
+    User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
+                ()->new CustomException(ExceptionCode.USER_NOT_FOUND)
+        );
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(room.getRoomId(), user.getUserId(), STATUS)){
+            inviteMembers(new InviteRequest(room.getRoomId(), List.of(user.getUserId())));
+        }
+
+        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(room.getRoomId()));
+
+    }
 
 
-//    @Override
-//    public ResponseRoom findLink(Long roomId) {
-//        Optional<Room> room = roomRepository.findById(roomId);
-//        if (room.isEmpty()) {
-//            return new ResponseRoom(ExceptionCode.INVITATION_NOT_FOUND);
-//        }
-//        String url = room.get().getCode();
-//        return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
-//    }
+    @Override
+    public ResponseRoom findLink(Long userId, Long roomId) throws NoSuchAlgorithmException {
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, STATUS)){
+            throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
+        }
+        final String URL_PREFIX = "http://pointer2024.com/";
+
+        String url = URL_PREFIX + checkAndGetCode(roomId);
+        return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
+    }
 
 }

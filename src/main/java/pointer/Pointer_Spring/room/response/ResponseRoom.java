@@ -19,9 +19,16 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 public class ResponseRoom extends ResponseType {
     @JsonInclude(NON_NULL)
     Object data;
+    @JsonInclude(NON_NULL)
+    Integer currentPage;//for offset
 
     public ResponseRoom(ExceptionCode exceptionCode, Object data){
         super(exceptionCode);
+        this.data = data;
+    }
+    public ResponseRoom(ExceptionCode exceptionCode, Integer currentPage, Object data){
+        super(exceptionCode);
+        this.currentPage = currentPage;
         this.data = data;
     }
     public ResponseRoom(ExceptionCode exceptionCode){

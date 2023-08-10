@@ -13,12 +13,13 @@ import pointer.Pointer_Spring.room.response.ResponseRoom;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.dto.UserDto;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public interface RoomService {
     ResponseRoom getRoomList(UserPrincipal userPrincipal, String kwd, HttpServletRequest request);
 
-    ResponseRoom getRoom(Long roomId, HttpServletRequest request);
+    ResponseRoom getRoom(Long roomId);
 //    DetailResponse getRooms(user user, HttpServletRequest request);//검색까지
 //    void modifyRoomInfo(Long roomId);
 
@@ -28,8 +29,11 @@ public interface RoomService {
 
     //InviteResponse inviteMembers(InviteRequest dto, HttpServletRequest request);
     ResponseRoom getInviteMembers(Long roomId);
-    ResponseRoom inviteMembers(InviteRequest dto, HttpServletRequest request);
+    ResponseRoom inviteMembers(InviteRequest dto);
     ResponseRoom isInviteMembersList(UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request);
 
-//    ResponseRoom findLink(Long roomId);
+    ResponseRoom findLink(Long userId, Long roomId) throws NoSuchAlgorithmException;
+
+    ResponseRoom getRealIDCode(UserPrincipal userPrincipal, String code) throws NoSuchAlgorithmException;
+
 }
