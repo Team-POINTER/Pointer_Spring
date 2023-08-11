@@ -104,6 +104,17 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
+    public VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, VoteDto.CheckRequest dto) {
+
+        Question question = questionRepository.findById(dto.getQuestionId()).orElseThrow(() -> {
+            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
+        });
+
+        boolean vote = voteRepository.existsByQuestionIdAndMemberIdAndStatus(dto.getQuestionId(), userPrincipal.getId(), STATUS);
+        return new VoteDto.CheckResponse(vote);
+    }
+
+    @Override
     public VoteDto.GetResponse getQuestionVoteCnt(UserPrincipal userPrincipal, Long questionId) {
         // 유저 validation check
         User user = userRepository.findByUserId(userPrincipal.getId())

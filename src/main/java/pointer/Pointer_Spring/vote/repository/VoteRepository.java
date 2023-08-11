@@ -1,8 +1,10 @@
 package pointer.Pointer_Spring.vote.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.vote.domain.VoteHistory;
@@ -24,6 +26,9 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
 
     boolean existsByMemberIdAndStatus(Long memberId, int status);
 
+    boolean existsByQuestionIdAndMemberIdAndStatus(Long questionId, Long memberId, int status);
+
+
     int countByQuestionIdAndCandidateId(Long questionId, Long userId);
 
     List<VoteHistory> findAllByQuestionIdAndCandidateId(Long questionId, Long userId);
@@ -35,4 +40,10 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
     Optional<VoteHistory> findById(Long aLong);
 
     Optional<VoteHistory> findByQuestionIdAndCandidateIdAndMemberId(Long questionId, Long cadidateId, Long userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM VoteHistory WHERE WHERE room_room_id = :roomId", nativeQuery = true)
+    void deleteAllByRoomId(Long roomId);
+
 }

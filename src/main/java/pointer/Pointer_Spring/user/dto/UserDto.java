@@ -52,8 +52,16 @@ public class UserDto {
     @Getter
     public static class DuplicateUserResponse extends ResponseType {
 
+        @JsonInclude(NON_NULL)
+        String id;
+
         public DuplicateUserResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
+        }
+
+        public DuplicateUserResponse(ExceptionCode exceptionCode, String id) {
+            super(exceptionCode);
+            this.id = id;
         }
     }
 
@@ -75,11 +83,13 @@ public class UserDto {
 
         List<UserList> userList;
         Long total;
+        int currentPage;
 
-        public UserListResponse(ExceptionCode exceptionCode, Long total, List<UserList> userList) {
+        public UserListResponse(ExceptionCode exceptionCode, Long total, List<UserList> userList, int currentPage) {
             super(exceptionCode);
             this.total = total;
             this.userList = userList;
+            this.currentPage = currentPage;
         }
     }
 
@@ -88,11 +98,13 @@ public class UserDto {
 
         List<FriendDto.FriendList> friendList;
         Long total;
+        int currentPage;
 
-        public RoomUserListResponse(ExceptionCode exceptionCode, Long total, List<FriendDto.FriendList> friendList) {
+        public RoomUserListResponse(ExceptionCode exceptionCode, Long total, List<FriendDto.FriendList> friendList, int currentPage) {
             super(exceptionCode);
             this.total = total;
             this.friendList = friendList;
+            this.currentPage = currentPage;
         }
     }
 

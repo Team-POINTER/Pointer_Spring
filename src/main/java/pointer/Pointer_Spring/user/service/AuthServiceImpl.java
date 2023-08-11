@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
+import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -85,6 +86,7 @@ public class AuthServiceImpl implements AuthService {
     private final ReportRepository reportRepository;
     private final UserReportRepository userReportRepository;
     private final BlockedUserRepository blockedUserRepository;
+    private final VoteRepository voteRepository;
 
     private final Integer CHECK = 1;
     private final Integer COMPLETE = 2;
@@ -227,10 +229,13 @@ public class AuthServiceImpl implements AuthService {
         else if (user.getCheckId() == 1) {
             try {
                 user.setId(userInfo.getId(), COMPLETE);
+                userRepository.flush(); // DB 반영
             } catch (DataIntegrityViolationException e) {
                 throw new CustomException(ExceptionCode.USER_DUPLICATED_ID);
             }
-            return new UserDto.UserResponse(ExceptionCode.USER_SAVE_ID_OK);
+            // DB에 저장된 id
+            String realId = userRepository.findByIdAndStatus(userInfo.getId(), STATUS).get().getId();
+            return new UserDto.DuplicateUserResponse(ExceptionCode.USER_SAVE_ID_OK, realId);
         }
         return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
     }
@@ -479,6 +484,7 @@ public class AuthServiceImpl implements AuthService {
             roomMemberRepository.deleteAllByUserUserId(user.getUserId());
             questionRepository.deleteAllByRoomId(room.getRoomId());
             reportRepository.deleteAllByRoomRoomId(room.getRoomId());
+            voteRepository.deleteAllByRoomId(room.getRoomId());
 
             roomRepository.delete(room);
         }

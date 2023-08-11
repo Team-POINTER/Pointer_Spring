@@ -81,7 +81,7 @@ public class FriendServiceImpl implements FriendService {
         }
 
         Long total = userRepository.countUsersWithKeywordAndStatusNotFriendOfUser(userPrincipal.getId(), dto.getKeyword(), STATUS);
-        return new UserDto.UserListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList);
+        return new UserDto.UserListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList, dto.getLastPage());
     }
 
     @Override
@@ -102,7 +102,7 @@ public class FriendServiceImpl implements FriendService {
 
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
         Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
-        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_SEARCH_OK, user.getName(), total, friendInfoList);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_SEARCH_OK, user.getName(), total, friendInfoList, dto.getLastPage());
     }
 
     @Override
@@ -121,7 +121,7 @@ public class FriendServiceImpl implements FriendService {
         }
 
         Long total = friendRepository.countFriendUsersByFriendCriteria(userPrincipal.getId(), STATUS);
-        return new UserDto.UserListResponse(ExceptionCode.FRIEND_LIST_SEARCH_OK, total, friendInfoList);
+        return new UserDto.UserListResponse(ExceptionCode.FRIEND_LIST_SEARCH_OK, total, friendInfoList, dto.getLastPage());
     }
 
     @Override
@@ -142,7 +142,7 @@ public class FriendServiceImpl implements FriendService {
 
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
         Long total = friendRepository.countUsersByBlockFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
-        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_BLOCK_SEARCH_OK, user.getName(), total, friendInfoList);
+        return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_BLOCK_SEARCH_OK, user.getName(), total, friendInfoList, dto.getLastPage());
     }
 
     // 조회
@@ -432,7 +432,7 @@ public class FriendServiceImpl implements FriendService {
         }
 
         Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
-        return new FriendDto.RoomFriendListResponse(ExceptionCode.ROOM_FRIEND_OK, friendInfoList, total);
+        return new FriendDto.RoomFriendListResponse(ExceptionCode.ROOM_FRIEND_OK, friendInfoList, total, dto.getLastPage());
     }
 
     /*@Override
