@@ -27,7 +27,7 @@ public class FriendController {
 
     // 조회 및 검색
 
-    @GetMapping("/search") // 유저 검색
+    @PostMapping("/search") // 유저 검색
     public UserDto.UserListResponse getUserList(@CurrentUser UserPrincipal userPrincipal,
                                                 @RequestBody FriendDto.FindFriendDto dto) {
         return friendService.getUserList(userPrincipal, dto);
@@ -40,7 +40,7 @@ public class FriendController {
     }
 
 
-    @GetMapping("/friend/block/search") // 차단친구 중 검색
+    @PostMapping("/friend/block/search") // 차단친구 중 검색
     public FriendDto.FriendInfoListResponse getUserBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
                                                                    @RequestBody FriendDto.FindFriendDto dto) {
         return friendService.getUserBlockFriendList(userPrincipal, dto);
