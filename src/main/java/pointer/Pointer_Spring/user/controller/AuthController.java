@@ -115,7 +115,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login/apple")
-    public ResponseEntity<UserDto.TokenResponse> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
+    public ResponseEntity<Object> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
         return new ResponseEntity<>(appleAuthService.login(appleLoginRequest.getIdentityToken()),  HttpStatus.OK);
     }
 

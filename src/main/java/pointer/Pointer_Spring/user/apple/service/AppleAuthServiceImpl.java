@@ -35,6 +35,9 @@ public class AppleAuthServiceImpl {
     private final BlockedUserRepository blockedUserRepository;
     private final ImageRepository imageRepository;
 
+    private final Integer CHECK = 1;
+    private final Integer COMPLETE = 2;
+
     @Value("${kakao.web.redirectURI}")
     private String webRedirectUri;
 
@@ -58,7 +61,7 @@ public class AppleAuthServiceImpl {
      * @description public key 발급
      */
     @Transactional
-    public UserDto.TokenResponse login(String identityToken) {
+    public Object login(String identityToken) {
         Claims claims = appleJwtUtils.getClaimsBy(identityToken);
         String sub = (String) claims.get("sub"); // apple user id
         String email = (String) claims.get("email");
@@ -67,7 +70,7 @@ public class AppleAuthServiceImpl {
         User user;
         if(findUser.isEmpty()) {
             if (blockedUserRepository.existsByEmail(email)) {
-                throw new CustomException(ExceptionCode.SIGNUP_LIMITED_ID);
+                return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
 
             PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -77,9 +80,19 @@ public class AppleAuthServiceImpl {
             imageRepository.save(new Image(profileImg, Image.ImageType.PROFILE, user));
             imageRepository.save(new Image(backgroundImg, Image.ImageType.BACKGROUND, user));
 
+        } else if (findUser.get().getType().equals(User.SignupType.KAKAO)) { // email 중복
+            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
         }
         else {
             user = findUser.get();
+        }
+
+        ExceptionCode exception;
+        if (user.getId().equals(user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : email
+            exception = ExceptionCode.SIGNUP_CREATED_OK;
+        }
+        else {
+            exception = ExceptionCode.SIGNUP_COMPLETE;
         }
 
         Authentication authentication = authenticationManager.authenticate(
@@ -91,7 +104,7 @@ public class AppleAuthServiceImpl {
 
         TokenDto tokenDto = createToken(authentication, user.getUserId());
 
-        return new UserDto.TokenResponse(ExceptionCode.LOGIN_OK, tokenDto);
+        return new UserDto.TokenResponse(exception, tokenDto);
     }
 
     public TokenDto createToken(Authentication authentication, Long userId) { // token 발급
