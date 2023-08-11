@@ -16,6 +16,7 @@ import pointer.Pointer_Spring.user.apple.utils.AppleJwtUtils;
 import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.dto.TokenDto;
+import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
@@ -57,7 +58,7 @@ public class AppleAuthServiceImpl {
      * @description public key 발급
      */
     @Transactional
-    public TokenDto login(String identityToken) {
+    public UserDto.TokenResponse login(String identityToken) {
         Claims claims = appleJwtUtils.getClaimsBy(identityToken);
         String sub = (String) claims.get("sub"); // apple user id
         String email = (String) claims.get("email");
@@ -90,7 +91,7 @@ public class AppleAuthServiceImpl {
 
         TokenDto tokenDto = createToken(authentication, user.getUserId());
 
-        return tokenDto;
+        return new UserDto.TokenResponse(ExceptionCode.LOGIN_OK, tokenDto);
     }
 
     public TokenDto createToken(Authentication authentication, Long userId) { // token 발급

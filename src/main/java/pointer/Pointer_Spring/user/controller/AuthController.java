@@ -115,8 +115,8 @@ public class AuthController {
     }
 
     @PostMapping("/auth/login/apple")
-    public BaseResponse<TokenDto> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
-        return new BaseResponse<>(appleAuthService.login(appleLoginRequest.getIdentityToken()));
+    public ResponseEntity<UserDto.TokenResponse> loginApple(@RequestBody AppleLoginRequest appleLoginRequest) {
+        return new ResponseEntity<>(appleAuthService.login(appleLoginRequest.getIdentityToken()),  HttpStatus.OK);
     }
 
     @PostMapping("/user/reissue") // token 재발급
