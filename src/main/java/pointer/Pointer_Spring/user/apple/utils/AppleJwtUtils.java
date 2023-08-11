@@ -17,6 +17,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import pointer.Pointer_Spring.user.apple.AppleClient;
 import pointer.Pointer_Spring.user.apple.dto.ApplePublicKeyResponseDto;
+import pointer.Pointer_Spring.validation.CustomException;
+import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -63,19 +65,9 @@ public class AppleJwtUtils {
 
             return Jwts.parser().setSigningKey(publicKey).parseClaimsJws(identityToken).getBody();
 
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-        } catch (InvalidKeySpecException e) {
-        } catch (SignatureException e){
-            //토큰 서명 검증 or 구조 문제 (Invalid token)
-        } catch (MalformedJwtException e) {
-
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new CustomException(ExceptionCode.INVALID_JWT_TOKEN);
         }
-
-        return null;
     }
 
     public String makeClientSecret(
