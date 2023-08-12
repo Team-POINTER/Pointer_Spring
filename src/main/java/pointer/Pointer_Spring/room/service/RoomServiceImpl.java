@@ -1,18 +1,13 @@
 package pointer.Pointer_Spring.room.service;
 
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-import org.hibernate.type.LocalDateType;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,7 +19,6 @@ import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.room.util.Base62Util;
-import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
@@ -50,7 +44,7 @@ import pointer.Pointer_Spring.vote.repository.VoteRepository;
 
 @Service
 @Transactional
-@RequiredArgsConstructor/// 룸 전체 조회(정렬), 초대 / RoomResponse 결과 고치기(updateRoomNm) / 이후 링크로 초대<웹 초대> /
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
@@ -403,7 +397,7 @@ public class RoomServiceImpl implements RoomService {
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, STATUS)){
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }
-        final String URL_PREFIX = "http://pointer2024.com/";
+        final String URL_PREFIX = "http://pointer2024.com/invitation-link/";
 
         String url = URL_PREFIX + checkAndGetCode(roomId);
         return new ResponseRoom(ExceptionCode.INVITATION_GET_OK, url);
