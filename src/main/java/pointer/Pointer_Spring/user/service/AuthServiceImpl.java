@@ -172,13 +172,13 @@ public class AuthServiceImpl implements AuthService {
             if (hasEmail) {
                 email = element.get("kakao_account").getAsJsonObject().get("email").getAsString();
             }
-            String name = element.get("properties").getAsJsonObject().get("nickname").getAsString();
+            //String name = element.get("properties").getAsJsonObject().get("nickname").getAsString();
 
             System.out.println("response body : " + result);
             return KakaoRequestDto.builder() // kakao id -> password로 이용
                     .id(id)
                     .email(email)
-                    .name(name)
+                    .name(email.substring(0, email.indexOf("@"))) // name 가져오기
                     .token(token)
                     .build();
         } catch (Exception e) {

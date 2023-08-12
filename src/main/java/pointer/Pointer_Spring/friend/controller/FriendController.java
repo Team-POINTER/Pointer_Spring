@@ -33,7 +33,13 @@ public class FriendController {
         return friendService.getUserList(userPrincipal, dto);
     }
 
-    @PostMapping("/friend/search") // 친구 중 검색
+    @PostMapping("/user/search") // 유저 검색 : 관계 포함
+    public UserDto.UserInfoListResponse getUserInfoList(@CurrentUser UserPrincipal userPrincipal,
+                                                @RequestBody FriendDto.FindFriendDto dto) {
+        return friendService.getUserInfoList(userPrincipal, dto);
+    }
+
+    @PostMapping("/friend/search") // 친구 중 검색 : 기준 userId 추가
     public FriendDto.FriendInfoListResponse getUserFriendList(@CurrentUser UserPrincipal userPrincipal,
                                                               @RequestBody FriendDto.FindFriendDto dto) {
         return friendService.getUserFriendList(userPrincipal, dto);

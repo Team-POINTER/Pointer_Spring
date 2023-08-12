@@ -94,6 +94,21 @@ public class UserDto {
     }
 
     @Getter
+    public static class UserInfoListResponse extends ResponseType{
+
+        List<UserInfoList2> userList;
+        Long total;
+        int currentPage;
+
+        public UserInfoListResponse(ExceptionCode exceptionCode, Long total, List<UserInfoList2> userList, int currentPage) {
+            super(exceptionCode);
+            this.total = total;
+            this.userList = userList;
+            this.currentPage = currentPage;
+        }
+    }
+
+    @Getter
     public static class RoomUserListResponse extends ResponseType{
 
         List<FriendDto.FriendList> friendList;
@@ -123,6 +138,29 @@ public class UserDto {
         }
 
         public UserList setFile(String file) {
+            this.file = file;
+            return this;
+        }
+
+    }
+
+    @Data
+    public static class UserInfoList2 {
+
+        Long userId;
+        String id;
+        String userName;
+        String file;
+        Friend.Relation relationship;
+
+        public UserInfoList2(User user, Friend.Relation relationship) {
+            this.userId = user.getUserId();
+            this.id = user.getId();
+            this.userName = user.getName();
+            this.relationship = relationship;
+        }
+
+        public UserInfoList2 setFile(String file) {
             this.file = file;
             return this;
         }
