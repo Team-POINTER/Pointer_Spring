@@ -37,7 +37,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query("SELECT f FROM Friend f JOIN f.user u " +
             "WHERE f.userFriendId IN (SELECT u.userId FROM User u " +
             "WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
-            "AND NOT f.relationship = 0 AND f.user.userId = :userUserId AND f.status = :status " +
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND f.status = :status " +
             "ORDER BY u.name")
     List<Friend> findUsersAndFriends(@Param("userUserId") Long userUserId,
                                      @Param("keyword") String keyword,
@@ -47,7 +47,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query("SELECT COUNT(f) FROM Friend f JOIN f.user u " +
             "WHERE f.userFriendId IN (SELECT u.userId FROM User u " +
             "WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
-            "AND NOT f.relationship = 0 AND f.user.userId = :userUserId AND f.status = :status" )
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND f.status = :status" )
     Long countUsersByFriendCriteria(@Param("userUserId") Long userUserId,
                                     @Param("keyword") String keyword,
                                     @Param("status") int status);

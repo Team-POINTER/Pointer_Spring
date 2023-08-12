@@ -53,9 +53,9 @@ public class FriendServiceImpl implements FriendService {
                 (userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
-    private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
+    private List<Friend> fetchPagesOffsetUserFriend(User user, FriendDto.FindFriendDto findFriendDto){
         PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
-        return friendRepository.findUsersAndFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
+        return friendRepository.findUsersAndFriends(user.getUserId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto findFriendDto){
@@ -114,7 +114,14 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
-        List<Friend> objects = fetchPagesOffsetUserFriend(userPrincipal, dto);
+
+        User findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
+                () -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                }
+        );
+
+        List<Friend> objects = fetchPagesOffsetUserFriend(findUser, dto);
         List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : objects) {
             User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
@@ -437,7 +444,7 @@ public class FriendServiceImpl implements FriendService {
 
         // roomMember 인지
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(roomMember.getRoom(), STATUS);
-        List<Friend> friends = fetchPagesOffsetUserFriend(userPrincipal, dto);
+        List<Friend> friends = fetchPagesOffsetUserFriend(foundUser, dto);
 
         List<FriendDto.FriendRoomInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : friends) {
