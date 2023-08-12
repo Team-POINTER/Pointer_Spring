@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.friend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.asm.internal.Relationship;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -52,9 +53,9 @@ public class FriendServiceImpl implements FriendService {
                 (userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
-    private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendDto findFriendDto){
+    private List<Friend> fetchPagesOffsetUserFriend(User user, FriendDto.FindFriendDto findFriendDto){
         PageRequest pageRequest = PageRequest.of(findFriendDto.getLastPage(), PAGE_COUNT, Sort.by("user.name"));
-        return friendRepository.findUsersAndFriends(userPrincipal.getId(), findFriendDto.getKeyword(), STATUS, pageRequest);
+        return friendRepository.findUsersAndFriends(user.getUserId(), findFriendDto.getKeyword(), STATUS, pageRequest);
     }
 
     private List<Friend> fetchPagesOffsetUserFriend(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto findFriendDto){
@@ -85,8 +86,42 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    public UserDto.UserInfoListResponse getUserInfoList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
+        List<UserDto.UserInfoList2> friendList = new ArrayList<>();
+        for (User user : userList) {
+
+            Optional<Friend> friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
+            Friend.Relation relationship;
+            if (friend.isPresent()) {
+                relationship = friend.get().getRelationship();
+            } else {
+                relationship = Friend.Relation.NONE;
+            }
+
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+            if (image.isPresent()) {
+                friendList.add(new UserDto.UserInfoList2(user, relationship).setFile(image.get().getImageUrl()));
+            } else {
+                friendList.add(new UserDto.UserInfoList2(user, relationship));
+            }
+        }
+
+        Long total = userRepository.countUsersWithKeywordAndStatusNotFriendOfUser(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new UserDto.UserInfoListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList, dto.getLastPage());
+
+    }
+
+    @Override
     public FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
-        List<Friend> objects = fetchPagesOffsetUserFriend(userPrincipal, dto);
+
+        User findUser = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
+                () -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                }
+        );
+
+        List<Friend> objects = fetchPagesOffsetUserFriend(findUser, dto);
         List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : objects) {
             User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
@@ -409,7 +444,7 @@ public class FriendServiceImpl implements FriendService {
 
         // roomMember 인지
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(roomMember.getRoom(), STATUS);
-        List<Friend> friends = fetchPagesOffsetUserFriend(userPrincipal, dto);
+        List<Friend> friends = fetchPagesOffsetUserFriend(foundUser, dto);
 
         List<FriendDto.FriendRoomInfoList> friendInfoList = new ArrayList<>();
         for (Friend friend : friends) {

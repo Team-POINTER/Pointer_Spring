@@ -8,6 +8,9 @@ import pointer.Pointer_Spring.user.dto.UserDto;
 public interface FriendService {
 
     UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+    UserDto.UserInfoListResponse getUserInfoList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+
+
     FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
     UserDto.UserListResponse getFriendFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendFriendDto dto);
 

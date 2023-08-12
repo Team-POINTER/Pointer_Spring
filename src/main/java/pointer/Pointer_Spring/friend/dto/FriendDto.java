@@ -146,7 +146,7 @@ public class FriendDto {
 
     @Data
     public static class FindFriendDto {
-        //private Long userId;
+        private Long userId;
         private String keyword;
         // pageable
         private int lastPage;
