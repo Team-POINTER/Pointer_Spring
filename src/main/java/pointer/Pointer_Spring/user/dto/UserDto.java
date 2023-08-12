@@ -3,7 +3,6 @@ package pointer.Pointer_Spring.user.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import pointer.Pointer_Spring.config.ResponseType;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
@@ -129,8 +128,16 @@ public class UserDto {
         Long userId;
         String id;
         String userName;
+        @JsonInclude(NON_NULL)
+        Friend.Relation relationship;
         String file;
 
+        public UserList(User user, Friend.Relation relationship) {
+            this.userId = user.getUserId();
+            this.id = user.getId();
+            this.userName = user.getName();
+            this.relationship = relationship;
+        }
         public UserList(User user) {
             this.userId = user.getUserId();
             this.id = user.getId();
