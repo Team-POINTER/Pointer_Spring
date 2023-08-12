@@ -1,6 +1,7 @@
 package pointer.Pointer_Spring.friend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.aspectj.asm.internal.Relationship;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,33 @@ public class FriendServiceImpl implements FriendService {
 
         Long total = userRepository.countUsersWithKeywordAndStatusNotFriendOfUser(userPrincipal.getId(), dto.getKeyword(), STATUS);
         return new UserDto.UserListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList, dto.getLastPage());
+    }
+
+    @Override
+    public UserDto.UserInfoListResponse getUserInfoList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto) {
+        List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
+        List<UserDto.UserInfoList2> friendList = new ArrayList<>();
+        for (User user : userList) {
+
+            Optional<Friend> friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
+            Friend.Relation relationship;
+            if (friend.isPresent()) {
+                relationship = friend.get().getRelationship();
+            } else {
+                relationship = Friend.Relation.NONE;
+            }
+
+            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+            if (image.isPresent()) {
+                friendList.add(new UserDto.UserInfoList2(user, relationship).setFile(image.get().getImageUrl()));
+            } else {
+                friendList.add(new UserDto.UserInfoList2(user, relationship));
+            }
+        }
+
+        Long total = userRepository.countUsersWithKeywordAndStatusNotFriendOfUser(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        return new UserDto.UserInfoListResponse(ExceptionCode.USER_SEARCH_OK, total, friendList, dto.getLastPage());
+
     }
 
     @Override
