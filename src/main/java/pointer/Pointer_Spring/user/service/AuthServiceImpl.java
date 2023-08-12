@@ -326,7 +326,8 @@ public class AuthServiceImpl implements AuthService {
         // {id}ENCODED_PASSWORD 형태
         PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
-        User user = new User(kakaoRequestDto.getEmail(), id, kakaoRequestDto.getName(),
+        String[] name = kakaoRequestDto.getEmail().split("@");
+        User user = new User(kakaoRequestDto.getEmail(), id, name[0],
                 encoder.encode(password), User.SignupType.KAKAO, kakaoRequestDto.getToken());
         userRepository.save(user);
 

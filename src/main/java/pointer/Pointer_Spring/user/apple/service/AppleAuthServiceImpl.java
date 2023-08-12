@@ -73,8 +73,9 @@ public class AppleAuthServiceImpl {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
 
+            String[] name = email.split("@");
             PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-            user = new User(email, email, email,
+            user = new User(email, name[0], name[0],
                     encoder.encode("1111"), User.SignupType.APPLE, null); // password
             userRepository.save(user);
             imageRepository.save(new Image(profileImg, Image.ImageType.PROFILE, user));
@@ -103,6 +104,8 @@ public class AppleAuthServiceImpl {
         );
 
         TokenDto tokenDto = createToken(authentication, user.getUserId());
+        user.setToken(tokenDto.getRefreshToken());
+        userRepository.save(user);
 
         return new UserDto.TokenResponse(exception, tokenDto);
     }
