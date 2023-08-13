@@ -74,11 +74,10 @@ public class FriendServiceImpl implements FriendService {
         List<UserDto.UserList> friendList = new ArrayList<>();
         for (User user : userList) {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
-            Friend.Relation relation = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS).orElse(null).getRelationship();
             if (image.isPresent()) {
-                friendList.add(new UserDto.UserList(user, relation).setFile(image.get().getImageUrl()));
+                friendList.add(new UserDto.UserList(user).setFile(image.get().getImageUrl()));
             } else {
-                friendList.add(new UserDto.UserList(user, relation));
+                friendList.add(new UserDto.UserList(user));
             }
         }
 
@@ -91,7 +90,7 @@ public class FriendServiceImpl implements FriendService {
         List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
         List<UserDto.UserInfoList2> friendList = new ArrayList<>();
         for (User user : userList) {
-
+            System.out.println(user.getUserId());
             Optional<Friend> friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
             Friend.Relation relationship;
             if (friend.isPresent()) {
