@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.question.service;
 
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.alarm.domain.Alarm;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
@@ -82,20 +83,27 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.REPORTED_USER);//
         }
 
-        // 질문 생성 가능한지 확인
-        if(!validQuestionTime(room.getRoomId())){
-            throw new CustomException(ExceptionCode.QUESTION_CREATED_FAILED);
+        Question question;
+        try {
+            synchronized (room) {
+                // 질문 생성 가능한지 확인
+                if (!validQuestionTime(room.getRoomId())) {
+                    throw new CustomException(ExceptionCode.QUESTION_CREATED_FAILED);
+                }
+
+                question = Question.builder()
+                        .room(room)
+                        .creatorId(user.getUserId())
+                        .question(request.getContent())
+                        .build();
+
+                questionRepository.save(question);
+                question.getRoom().setUpdatedAt(question.getUpdatedAt());
+                room.addQuestion(question);
+            }
+        }catch(CannotAcquireLockException e){
+            throw new CustomException(ExceptionCode.QUESTION_GET_LOCK_FAIL);
         }
-
-        Question question = Question.builder()
-                .room(room)
-                .creatorId(user.getUserId())
-                .question(request.getContent())
-                .build();
-
-        questionRepository.save(question);
-        question.getRoom().setUpdatedAt(question.getUpdatedAt());
-        room.addQuestion(question);
 
         // 알림
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(room, STATUS);
