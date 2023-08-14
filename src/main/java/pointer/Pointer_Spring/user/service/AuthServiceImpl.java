@@ -494,8 +494,9 @@ public class AuthServiceImpl implements AuthService {
         alarmRepository.deleteAllByReceiveUserIdOrSendUserId(user.getUserId(), user.getUserId());
 
         // user status 0 처리
-        user.setEmail("resign"+ user.getUserId()); // 재 가입 대비 email 변경
-        //user.setId("resign"+ user.getUserId()); // 투표에 기록되는 내용
+        //user.setEmail("resign"+ user.getUserId()); // 재 가입 대비 email 변경
+        //user.setId("resign"+ ); // 투표에 기록되는 내용
+        user = new User("resign"+user.getUserId(), "resign"+user.getUserId(), null, user.getType());
         user.delete();
         userRepository.save(user);
 
