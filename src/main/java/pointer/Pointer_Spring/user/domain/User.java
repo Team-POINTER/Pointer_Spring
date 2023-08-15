@@ -84,6 +84,15 @@ public class User extends BaseEntity {
     @Column(name = "hint_restriction_flag", columnDefinition = "boolean default false")
     private boolean isHintRestricted;
 
+    @Column(name = "device_id")
+    private String deviceId;
+
+    @Column(name = "push_token")
+    private String pushToken;
+
+    @Column(name = "apns_env")
+    private String apnsEnv;
+
     // builder
     @Builder
     public User(String id, String email, String name, SignupType type) {

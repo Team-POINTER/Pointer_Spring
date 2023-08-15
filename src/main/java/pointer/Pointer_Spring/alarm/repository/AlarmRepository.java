@@ -22,4 +22,8 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     @Modifying
     @Query(value = "DELETE FROM Alarm WHERE receive_user_id = :receiveUserId OR send_user_id = :sendUserId", nativeQuery = true)
     void deleteAllByReceiveUserIdOrSendUserId(Long receiveUserId, Long sendUserId);
+
+    List<Alarm> findAllByReceiveUserIdAndTypeAndIdLessThanOrderByIdDesc(Long userId, Alarm.AlarmType alarmType, Long cursorId, PageRequest pageable);
+
+    Optional<Alarm> findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(Long sendUserId, Long receiveUserId, Alarm.AlarmType type);
 }
