@@ -86,6 +86,7 @@ public class AlarmServiceImpl implements AlarmService {
                         .type(Alarm.AlarmType.POKE)
                         .sendUserId(user.getUserId())
                         .receiveUserId(member.getUserId())
+                        .needId(question.getRoom().getRoomId())
                         .content(Alarm.AlarmType.POKE.getMessage())
                         .build();
 
@@ -211,6 +212,8 @@ public class AlarmServiceImpl implements AlarmService {
                     .content(alarm.getContent())
                     .type(alarm.getType().name())
                     .build();
+
+
 
             alarmResponses.add(response);
         }

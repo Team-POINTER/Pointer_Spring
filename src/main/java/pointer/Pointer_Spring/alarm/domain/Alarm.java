@@ -35,6 +35,9 @@ public class Alarm {
     @JoinColumn(name = "alarm_id")
     private ChatAlarm chatAlarm;
 
+    @Column(name = "need_id")
+    private Long needId;
+
 
     public enum AlarmType {
         CHAT(0, "채팅이 왔어요."),
@@ -58,10 +61,11 @@ public class Alarm {
     }
 
     @Builder
-    public Alarm(AlarmType type, Long sendUserId, Long receiveUserId, String content, ChatAlarm chatAlarm) {
+    public Alarm(AlarmType type, Long sendUserId, Long receiveUserId, String content, ChatAlarm chatAlarm, Long needId) {
         this.type = type;
         this.sendUserId = sendUserId;
         this.receiveUserId = receiveUserId;
+        this.needId = needId;
         this.content = content;
         this.chatAlarm = chatAlarm;
         this.readCheck = false;
