@@ -18,19 +18,11 @@ import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 
 @Component
->>>>>>> room
 @RequiredArgsConstructor
 public class TestDataRunner implements ApplicationRunner {
 
     private final UserRepository userRepository;
 
-<<<<<<< HEAD
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        User user1 = User.builder().id("test1").email("test1@naver.com").name("혜인").type(User.SignupType.KAKAO).build();
-        User user2 = User.builder().id("test2").email("test2@naver.com").name("현정").type(User.SignupType.APPLE).build();
-        User user3 = User.builder().id("test3").email("test3@naver.com").name("초명").type(User.SignupType.KAKAO).build();
-=======
     private final RoomRepository roomRepository;
 
     private final RoomMemberRepository roomMemberRepository;
