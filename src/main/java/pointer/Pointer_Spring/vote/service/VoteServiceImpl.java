@@ -206,6 +206,7 @@ public class VoteServiceImpl implements VoteService {
         List<String> hints = new ArrayList<>();
         List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
+            if (vote.getHint() == null || vote.getHint().equals(" ")) continue;
             hints.add(vote.getHint());
             User votingUser = userRepository.findByUserId(vote.getMemberId()).get();
             voters.add(new VoteDto.VoterInfo(votingUser.getUserId(), votingUser.getName()));

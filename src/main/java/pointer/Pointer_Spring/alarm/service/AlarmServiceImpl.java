@@ -169,7 +169,7 @@ public class AlarmServiceImpl implements AlarmService {
                 });
 
         return AlarmDto.GetAlarmActiveResponse.builder()
-                .allAlarm(user.isAllAlarmFlag())
+                //.allAlarm(user.isAllAlarmFlag())
                 .activeAlarm(user.isActiveAlarmFlag())
                 .chatAlarm(user.isChatAlarmFlag())
                 .eventAlarm(user.isEventAlarmFlag())
