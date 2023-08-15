@@ -126,7 +126,7 @@ public class RoomServiceImpl implements RoomService {
         return msgForTopUserNm;
     }
 
-    public ResponseRoom getRoom(Long roomId) {//질문, 투표 등까지 같이 가져오기[합친 후에]
+    public ResponseRoom getRoom(Long targetUserId, Long roomId) {//질문, 투표 등까지 같이 가져오기[합친 후에]
         Room foundRoom = roomRepository.findById(roomId).orElseThrow(
             () -> {
                 throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
@@ -141,7 +141,9 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoomAndStatus(foundRoom,STATUS).stream()
                 .map(RoomMemberResopnose::new).toList();
-        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, latestQuestion, roomMemberResopnoseList));
+        String targetUserPrivateRoomNm = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(foundRoom.getRoomId(), targetUserId, STATUS)
+                .orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST)).getPrivateRoomNm();
+        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, targetUserPrivateRoomNm, latestQuestion, roomMemberResopnoseList));
     }
 
 
@@ -387,7 +389,7 @@ public class RoomServiceImpl implements RoomService {
             inviteMembers(new InviteRequest(room.getRoomId(), List.of(user.getUserId())));
         }
 
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(room.getRoomId()));
+        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(userPrincipal.getId(), room.getRoomId()));
 
     }
 

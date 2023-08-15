@@ -33,8 +33,8 @@ public class RoomController {
     }
 
     @GetMapping("/{room-id}")
-    public ResponseRoom getRoom(@PathVariable("room-id") Long roomId) {
-        return roomService.getRoom(roomId);
+    public ResponseRoom getRoom(@CurrentUser UserPrincipal userPrincipal, @PathVariable("room-id") Long roomId) {
+        return roomService.getRoom(userPrincipal.getId(), roomId);
     }
 
     @PostMapping("create")
@@ -45,10 +45,6 @@ public class RoomController {
 
     @PatchMapping("/verify/room-name")
     @ApiOperation(value="룸 이름 수정", notes="개별적으로 룸 이름을 수정합니다.")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "요청 성공", content = @Content(schema = @Schema(implementation = SwaggerTestDto.class))),
-//            @ApiResponse(responseCode = "404", description = "500과 동일")
-//    })
     public Object updateRoomName(@CurrentUser UserPrincipal userPrincipal, @RequestBody RoomMemberDto.ModifyRoomNmRequest dto, HttpServletRequest request) {
         return roomService.updateRoomNm(userPrincipal, dto);
     }

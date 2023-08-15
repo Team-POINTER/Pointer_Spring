@@ -203,18 +203,16 @@ public class VoteServiceImpl implements VoteService {
 
         List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());//해당 user를 투표한 인원
         int allVoteCnt = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);//해당 질문에 대해 투표한 사람의 수
-        List<String> hints = new ArrayList<>();
+
         List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
-            hints.add(vote.getHint());
             User votingUser = userRepository.findByUserId(vote.getMemberId()).get();
-            voters.add(new VoteDto.VoterInfo(votingUser.getUserId(), votingUser.getName()));
+            voters.add(new VoteDto.VoterInfo(vote.getVoteHistoryId(), votingUser.getUserId(), votingUser.getName(), vote.getHint()));
         }
 
         return VoteDto.GetHintResponse.builder()
                 .targetVotedCnt(voteHistories.size())
                 .allVoteCnt(allVoteCnt)
-                .hint(hints)
                 .voter(voters)
                 .createdAt(question.getCreatedAt().format(formatter))
                 .build();

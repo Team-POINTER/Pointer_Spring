@@ -120,15 +120,13 @@ public class VoteDto {
     @Getter
     @NoArgsConstructor
     public static class GetHintResponse {
-        private List<String> hint;
         private List<VoterInfo> voters;
         private int allVoteCnt;
         private int targetVotedCnt;
         private String createdAt;
 
         @Builder
-        public GetHintResponse(List<String> hint, List<VoterInfo> voter,  int allVoteCnt, int targetVotedCnt, String createdAt) {
-            this.hint = hint;
+        public GetHintResponse(List<VoterInfo> voter,  int allVoteCnt, int targetVotedCnt, String createdAt) {
             this.voters = voter;
             this.allVoteCnt = allVoteCnt;
             this.targetVotedCnt = targetVotedCnt;
@@ -139,12 +137,16 @@ public class VoteDto {
 
     @Getter
     public static class VoterInfo{
+        private Long voteHistoryId;
         private Long voterId;
         private String voterNm;
+        private String hint;
 
-        public VoterInfo(Long userId, String name) {
+        public VoterInfo(Long voteHistoryId, Long userId, String name, String hint) {
+            this.voteHistoryId = voteHistoryId;
             this.voterId = userId;
             this.voterNm = name;
+            this.hint = hint;
         }
     }
 

@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.room.domain.Room;
@@ -76,23 +79,36 @@ public class RoomDto {
     public static class DetailResponse {
 
         Long roomId;
-        String roomNm;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String privateRoomNm;
         private Integer memberNum;
         private Integer votingNum;
         Long questionId;
         String question;
+        Long questionCreatorId;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, String privateRoomNm, Question question, List<RoomMemberResopnose> roomMembers) {
             this.roomId = room.getRoomId();
-            this.roomNm = room.getName(); // defaultname
+            this.privateRoomNm =  privateRoomNm;
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
             this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
             this.questionId = question.getId();
             this.question = question.getQuestion();
+            this.questionCreatorId = question.getCreatorId();
+            this.roomMembers = roomMembers;
+        }
+        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers) {
+            this.roomId = room.getRoomId();
+            this.memberNum = room.getMemberNum();
+            this.votingNum = room.getVotingNum();
+            this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.questionId = question.getId();
+            this.question = question.getQuestion();
+            this.questionCreatorId = question.getCreatorId();
             this.roomMembers = roomMembers;
         }
     }

@@ -19,7 +19,7 @@ import java.util.List;
 public interface RoomService {
     ResponseRoom getRoomList(UserPrincipal userPrincipal, String kwd, HttpServletRequest request);
 
-    ResponseRoom getRoom(Long roomId);
+    ResponseRoom getRoom(Long targetUserId, Long roomId);
 //    DetailResponse getRooms(user user, HttpServletRequest request);//검색까지
 //    void modifyRoomInfo(Long roomId);
 
