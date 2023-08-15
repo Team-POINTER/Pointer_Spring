@@ -90,7 +90,7 @@ public class FriendServiceImpl implements FriendService {
         List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
         List<UserDto.UserInfoList2> friendList = new ArrayList<>();
         for (User user : userList) {
-            System.out.println(user.getUserId());
+
             Optional<Friend> friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
             Friend.Relation relationship;
             if (friend.isPresent()) {
@@ -255,7 +255,7 @@ public class FriendServiceImpl implements FriendService {
                 AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                         .forApns(AlarmDto.PushType.builder()
                                 .message(alarm.getContent())
-                                .apnsEnv("sandbox")
+                                .apnsEnv(friend.getApnsEnv())
                                 .build())
                         .build();
                 kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(friend.getUserId())), kakaoPushRequest);
@@ -306,7 +306,7 @@ public class FriendServiceImpl implements FriendService {
             AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                     .forApns(AlarmDto.PushType.builder()
                             .message(alarm.getContent())
-                            .apnsEnv("sandbox")
+                            .apnsEnv(findFriendUser.getUser().getApnsEnv())
                             .build())
                     .build();
             kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendUser.getUser().getUserId())), kakaoPushRequest);
@@ -433,6 +433,13 @@ public class FriendServiceImpl implements FriendService {
             // 차단 아닌 친구 상태
             findFriendMember.ifPresent(friendRepository::delete);
             return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
+        } else if (findFriendUser.getRelationship().equals(Friend.Relation.REQUEST)) {
+            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
+                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
+
+            if(!o.isEmpty()) {
+                alarmRepository.delete(o.get());
+            }
         }
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
     }

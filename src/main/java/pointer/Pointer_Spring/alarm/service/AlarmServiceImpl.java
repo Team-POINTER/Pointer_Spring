@@ -8,12 +8,16 @@ import pointer.Pointer_Spring.alarm.domain.ChatAlarm;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
 import pointer.Pointer_Spring.alarm.repository.ChatAlarmRepository;
+import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
@@ -22,6 +26,7 @@ import pointer.Pointer_Spring.vote.repository.VoteRepository;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AlarmServiceImpl implements AlarmService {
@@ -32,19 +37,31 @@ public class AlarmServiceImpl implements AlarmService {
     private final QuestionRepository questionRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final VoteRepository voteRepository;
+    private final ImageRepository imageRepository;
+    private final FriendRepository friendRepository;
     private final ChatAlarmRepository chatAlarmRepository;
     private final KakaoPushNotiService kakaoPushNotiService;
 
     private static final int PAGE_SIZE = 30;
     private static final int STATUS = 1;
 
-    public AlarmServiceImpl(AlarmRepository alarmRepository, UserRepository userRepository, QuestionRepository questionRepository, RoomMemberRepository roomMemberRepository, VoteRepository voteRepository, ChatAlarmRepository chatAlarmRepository, KakaoPushNotiService kakaoPushNotiService) {
+    public AlarmServiceImpl(
+            AlarmRepository alarmRepository,
+            UserRepository userRepository,
+            QuestionRepository questionRepository,
+            RoomMemberRepository roomMemberRepository,
+            VoteRepository voteRepository,
+            ImageRepository imageRepository,
+            FriendRepository friendRepository, ChatAlarmRepository chatAlarmRepository,
+            KakaoPushNotiService kakaoPushNotiService) {
         this.alarmRepository = alarmRepository;
         //this.activeAlarmRepository = activeAlarmRepository;
         this.userRepository = userRepository;
         this.questionRepository = questionRepository;
         this.roomMemberRepository = roomMemberRepository;
         this.voteRepository = voteRepository;
+        this.imageRepository = imageRepository;
+        this.friendRepository = friendRepository;
         this.chatAlarmRepository = chatAlarmRepository;
         this.kakaoPushNotiService = kakaoPushNotiService;
     }
@@ -77,7 +94,7 @@ public class AlarmServiceImpl implements AlarmService {
                 AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                         .forApns(AlarmDto.PushType.builder()
                                 .message(alarm.getContent())
-                                .apnsEnv("sandbox")
+                                .apnsEnv(member.getApnsEnv())
                                 .build())
                         .build();
                 kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
@@ -152,7 +169,7 @@ public class AlarmServiceImpl implements AlarmService {
                 });
 
         return AlarmDto.GetAlarmActiveResponse.builder()
-                .allAlarm(user.isAllAlarmFlag())
+                //.allAlarm(user.isAllAlarmFlag())
                 .activeAlarm(user.isActiveAlarmFlag())
                 .chatAlarm(user.isChatAlarmFlag())
                 .eventAlarm(user.isEventAlarmFlag())
@@ -182,7 +199,7 @@ public class AlarmServiceImpl implements AlarmService {
         List<AlarmDto.GetAlarmResponse> alarmResponses = new ArrayList<>();
         for(Alarm alarm : alarms) {
             User requestUser = userRepository.findByUserId(alarm.getSendUserId()).orElse(null);
-
+            Image profileImg = imageRepository.findByUserAndImageSort(requestUser, Image.ImageType.PROFILE).orElse(null);
             // 알림 읽음 표시
             alarm.setReadCheck(true);
 
@@ -190,7 +207,7 @@ public class AlarmServiceImpl implements AlarmService {
                     .alarmId(alarm.getId())
                     .sendUserId(alarm.getSendUserId())
                     .sendUserName(requestUser!=null?requestUser.getName():null)
-                    //.requestUserProfile(requestUser.getProfile())
+                    .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
                     .content(alarm.getContent())
                     .type(alarm.getType().name())
                     .build();
@@ -223,10 +240,62 @@ public class AlarmServiceImpl implements AlarmService {
             AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                     .forApns(AlarmDto.PushType.builder()
                             .message(alarm.getContent())
-                            .apnsEnv("sandbox")
+                            .apnsEnv(user.getApnsEnv())
                             .build())
                     .build();
             kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(user.getUserId())), kakaoPushRequest);
         }
+    }
+
+    @Transactional
+    @Override
+    public List<AlarmDto.GetFriendAlarmResponse> getFriendAlarm(UserPrincipal userPrincipal, Long cursorId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                });
+
+        if(cursorId == null || cursorId == 0) {
+            cursorId = Long.MAX_VALUE;
+        }
+
+        PageRequest pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("id").descending());
+        List<Alarm> alarms = alarmRepository.findAllByReceiveUserIdAndTypeAndIdLessThanOrderByIdDesc(
+                user.getUserId(), Alarm.AlarmType.FRIEND_REQUEST, cursorId, pageable);
+        List<AlarmDto.GetFriendAlarmResponse> responses = new ArrayList<>();
+        for(Alarm alarm :alarms) {
+            Friend friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(
+                    alarm.getSendUserId(), alarm.getReceiveUserId(), 1)
+                    .orElseThrow(() -> {
+                        throw new CustomException(ExceptionCode.FRIEND_INVALID);
+                    });
+
+            if(friend.getRelationship()== Friend.Relation.BLOCK
+                    || friend.getRelationship() == Friend.Relation.REFUSE) {
+                continue;
+            }
+
+            Optional<User> o = userRepository.findByUserId(alarm.getSendUserId());
+            if(o.isEmpty()) {
+                continue;
+            }
+
+            User sendUser = o.get();
+            Image profileImg = imageRepository.findByUserAndImageSort(sendUser, Image.ImageType.PROFILE).orElse(null);
+            AlarmDto.GetFriendAlarmResponse response = AlarmDto.GetFriendAlarmResponse.builder()
+                    .alarmId(alarm.getId())
+                    .userId(sendUser.getUserId())
+                    .sendUserId(sendUser.getId())
+                    .sendUserName(sendUser.getName())
+                    .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
+                    .friendStatus(friend.getRelationship().name())
+                    .type(alarm.getType().name())
+                    .build();
+            responses.add(response);
+
+            alarm.setReadCheck(true);
+        }
+
+        return responses;
     }
 }

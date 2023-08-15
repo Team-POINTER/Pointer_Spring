@@ -3,6 +3,8 @@ package pointer.Pointer_Spring.alarm.service;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.security.UserPrincipal;
 
+import java.util.List;
+
 public interface AlarmService {
     void poke(UserPrincipal userPrincipal, Long questionId);
 
@@ -20,4 +22,5 @@ public interface AlarmService {
 
     void eventAlarm(AlarmDto.EventAlarmRequest request);
 
+    List<AlarmDto.GetFriendAlarmResponse> getFriendAlarm(UserPrincipal userPrincipal, Long cursorId);
 }

@@ -104,13 +104,13 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, VoteDto.CheckRequest dto) {
+    public VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, Long questionId) {
 
-        Question question = questionRepository.findById(dto.getQuestionId()).orElseThrow(() -> {
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
 
-        boolean vote = voteRepository.existsByQuestionIdAndMemberIdAndStatus(dto.getQuestionId(), userPrincipal.getId(), STATUS);
+        boolean vote = voteRepository.existsByQuestionIdAndMemberIdAndStatus(questionId, userPrincipal.getId(), STATUS);
         return new VoteDto.CheckResponse(vote);
     }
 
@@ -206,6 +206,8 @@ public class VoteServiceImpl implements VoteService {
 
         List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
+            if (vote.getHint() == null || vote.getHint().equals(" ")) continue;
+
             User votingUser = userRepository.findByUserId(vote.getMemberId()).get();
             voters.add(new VoteDto.VoterInfo(vote.getVoteHistoryId(), votingUser.getUserId(), votingUser.getName(), vote.getHint()));
         }

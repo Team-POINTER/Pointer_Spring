@@ -133,6 +133,11 @@ public enum ExceptionCode {
 
     ROOM_FRIEND_OK(SUCCESS, "J013", "룸 초대 가능 친구 목록"),
 
+    FIND_POINT_VERSION_OK(SUCCESS, "J014", "포인트 버전 확인"),
+    INVALID_POINT_VERSION(NOT_FOUND_VALUE, "J015", "포인트 버전 확인 실패"),
+    SAVE_POINT_VERSION(SUCCESS, "J016", "포인트 버전 저장 성공"),
+
+
     /**
      * 질문
      */
