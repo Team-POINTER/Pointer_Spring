@@ -11,6 +11,7 @@ import pointer.Pointer_Spring.question.dto.QuestionDto;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.RestrictedUser;
+import pointer.Pointer_Spring.report.enumeration.ReportType;
 import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
@@ -139,7 +140,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
     private void handlingReportRoomMembers(List<RoomMember> questionRestrictedRoomMembers, List<RoomMember> hintRestrictedRoomMembers){
         for(RoomMember roomMember : questionRestrictedRoomMembers){
-            RestrictedUser restrictedUser = restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.QUESTION, STATUS);
+            RestrictedUser restrictedUser = restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), ReportType.QUESTION, STATUS);
 
             restrictedUser.updateTemporalNum(restrictedUser.getTemporalNum() - 1);
             if (restrictedUser.getTemporalNum() == 0) {
@@ -148,7 +149,7 @@ public class QuestionServiceImpl implements QuestionService {
             }
         }
         for(RoomMember roomMember : hintRestrictedRoomMembers){//힌트는 현재 질문에서 투표를 했든 안했든 다음 부터 적용되는데 만약 지금 질문에 투표를 안했다면 지금 질문을 제외하고도 3번 더 투표흫 못 함
-            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), Report.ReportType.HINT, STATUS);
+            RestrictedUser restrictedUser =  restrictedUserRepository.findByReportTargetUserUserIdAndReportRoomRoomIdAndReportTypeAndStatus(roomMember.getUser().getUserId(), roomMember.getRoom().getRoomId(), ReportType.HINT, STATUS);
             if(restrictedUser.getTemporalNum() == 0){
                 roomMember.getUser().updateIsHintRestricted(false);
                 restrictedUser.setStatus(0);

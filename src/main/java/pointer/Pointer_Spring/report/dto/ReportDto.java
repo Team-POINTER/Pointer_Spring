@@ -9,6 +9,7 @@ import pointer.Pointer_Spring.report.domain.BlockedUser;
 import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.RestrictedUser;
 import pointer.Pointer_Spring.report.domain.UserReport;
+import pointer.Pointer_Spring.report.enumeration.ReportType;
 
 import javax.persistence.*;
 
@@ -62,13 +63,13 @@ public class ReportDto {
 
         private Long roomId;
         private Long dataId;
-        private Report.ReportType type;
+        private ReportType type;
         private Long targetUserId;
         private String reason;
         private ReportReason reasonCode;
 
         @Builder
-        public ReportRequest(Long reportId, Long roomId, Long dataId, Report.ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
+        public ReportRequest(Long reportId, Long roomId, Long dataId, ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
 
             this.roomId = roomId;
             this.dataId = dataId;
@@ -85,7 +86,7 @@ public class ReportDto {
         private Long reportId;
         private Long roomId;
         private String data;
-        private Report.ReportType type;
+        private ReportType type;
         private Long targetUserId;
         private Long reportingUserId;
         @JsonInclude(NON_NULL)
@@ -93,7 +94,7 @@ public class ReportDto {
         private ReportReason reasonCode;
 
         @Builder
-        public ReportResponse(Long reportId, Long roomId, String data, Report.ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
+        public ReportResponse(Long reportId, Long roomId, String data, ReportType type, Long targetUserId, Long reportingUserId, String reason, ReportReason reasonCode){
             this.reportId = reportId;
             this.roomId = roomId;
             this.data = data;
@@ -113,6 +114,7 @@ public class ReportDto {
             this.reason = report.getReason();
             this.reasonCode = report.getReportCode();
         }
+
     }
     @Getter
     public static class BlockedUserResponse{
@@ -132,7 +134,7 @@ public class ReportDto {
         private Long targetUserId;
         private Long roomId;
         @Enumerated(EnumType.STRING)
-        private Report.ReportType reportType;
+        private ReportType reportType;
         private Integer temporalNum;
 
         public RestrictedUserResponse(RestrictedUser restrictedUser){

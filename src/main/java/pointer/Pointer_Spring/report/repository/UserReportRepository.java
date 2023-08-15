@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.report.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,8 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long> {
     UserReport findByTargetUserUserIdAndReportingUserIdAndStatus(Long userId, Long targetUserId, int status);
 
     List<UserReport> findAllByTargetUserUserIdAndStatus(Long targetId, int status);
+    List<UserReport> findAllByUserReportIdLessThanAndStatusEqualsOrderByUserReportIdDesc(Long lastReportId, int status, Pageable pageable);
+    UserReport findFirstByOrderByUserReportIdDesc();
 
     @Transactional
     @Modifying

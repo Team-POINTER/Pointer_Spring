@@ -1,8 +1,10 @@
 package pointer.Pointer_Spring.report.service;
 
+import org.springframework.lang.Nullable;
 import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.UserReport;
 import pointer.Pointer_Spring.report.dto.ReportDto;
+import pointer.Pointer_Spring.report.enumeration.ReportType;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +30,8 @@ public interface ReportService {
     void temporalRestriction(Long reportId);
     ReportDto.BlockedUserResponse getBlockedUserReportByBlockedUserId(Long blockedUserId);
     ReportDto.RestrictedUserResponse getReportByRestrictedUserRestrictUserId(Long restrictedUserId);
-}
+
+    List<Object> fetchPagesCursorInReport (Long lastPkId, int size, ReportType type);
+    List<Object> fetchPagesCursorInManagedReport (Long lastPkId, int size, ReportType type);
+
+        }

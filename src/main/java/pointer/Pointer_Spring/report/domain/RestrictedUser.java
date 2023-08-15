@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import pointer.Pointer_Spring.config.BaseEntity;
+import pointer.Pointer_Spring.report.enumeration.ReportType;
 
 import javax.persistence.*;
 
@@ -28,7 +29,7 @@ public class RestrictedUser extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "report_type")
-    private Report.ReportType reportType;
+    private ReportType reportType;
 
     @Column(name = "temporal_num", columnDefinition = "integer default 3")
     private Integer temporalNum;
@@ -37,7 +38,7 @@ public class RestrictedUser extends BaseEntity {
 //        QUESTION, HINT, CHAT
 //    }
 
-    public RestrictedUser(Report report, Long targetUserId, Report.ReportType reportType, Long roomId){
+    public RestrictedUser(Report report, Long targetUserId, ReportType reportType, Long roomId){
         this.report = report;
         this.targetUserId = targetUserId;
         this.reportType = reportType;

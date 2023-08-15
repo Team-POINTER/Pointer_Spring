@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
 import pointer.Pointer_Spring.report.ReportReason;
+import pointer.Pointer_Spring.report.enumeration.ReportType;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.user.domain.User;
 
@@ -25,9 +26,6 @@ public class Report extends BaseEntity {
 
     @Column(name = "data_id")
     private Long dataId;
-    public enum ReportType{
-        QUESTION, HINT
-    }
 
     @Enumerated(EnumType.STRING)
     @Column(name = "report_type")
