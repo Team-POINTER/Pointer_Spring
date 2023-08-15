@@ -24,14 +24,14 @@ public class AlarmDto {
     @Getter
     @NoArgsConstructor
     public static class GetAlarmActiveResponse {
-        private boolean allAlarm;
+       // private boolean allAlarm;
         private boolean activeAlarm;
         private boolean chatAlarm;
         private boolean eventAlarm;
 
         @Builder
-        public GetAlarmActiveResponse(boolean allAlarm, boolean activeAlarm, boolean chatAlarm, boolean eventAlarm) {
-            this.allAlarm = allAlarm;
+        public GetAlarmActiveResponse(boolean activeAlarm, boolean chatAlarm, boolean eventAlarm) {
+            //this.allAlarm = allAlarm;
             this.activeAlarm = activeAlarm;
             this.chatAlarm = chatAlarm;
             this.eventAlarm = eventAlarm;
