@@ -8,6 +8,8 @@ import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/alarm")
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -84,5 +86,21 @@ public class AlarmController {
         kakaoPushNotiService.registKakaoToken(userPrincipal, request);
         return new BaseResponse<>();
     }
+
+    // 카카오 토큰 삭제
+    @PostMapping("/kakao/deregister")
+    public BaseResponse<Void> deRegisterKakaoToken(Long userId,
+                                                   @RequestBody AlarmDto.KakaoTokenDeRegisterRequest request) {
+        kakaoPushNotiService.deRegisterKakaoToken(userId, request);
+        return new BaseResponse<>();
+
+    }
+
+    @GetMapping("/friend/{cursorId}")
+    public BaseResponse<List<AlarmDto.GetFriendAlarmResponse>> getFriendAlarm(@CurrentUser UserPrincipal userPrincipal,
+                                                                              @PathVariable("cursorId") Long cursorId) {
+        return new BaseResponse<>(alarmService.getFriendAlarm(userPrincipal, cursorId));
+    }
+
 
 }

@@ -15,7 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.alarm.dto.AlarmDto;
 import pointer.Pointer_Spring.alarm.repository.AlarmRepository;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
@@ -28,6 +30,7 @@ import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
 import pointer.Pointer_Spring.security.TokenProvider;
 import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.apple.service.AppleAuthServiceImpl;
 import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
 import pointer.Pointer_Spring.user.response.ResponseKakaoUser;
@@ -75,6 +78,9 @@ public class AuthServiceImpl implements AuthService {
     //private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenProvider tokenProvider;
+
+    private final AppleAuthServiceImpl appleAuthService;
+    private final KakaoPushNotiService kakaoPushNotiService;
 
     private final ImageRepository imageRepository;
     private final FriendRepository friendRepository; // 자기 기준, 상대쪽 모두 제거
@@ -400,6 +406,7 @@ public class AuthServiceImpl implements AuthService {
         return new UserDto.TokenResponse(ExceptionCode.SIGNUP_COMPLETE, tokenDto);
     }
 
+    @Transactional
     @Override
     public Object logout(UserPrincipal userPrincipal) {
 
@@ -407,12 +414,21 @@ public class AuthServiceImpl implements AuthService {
 
         if (user.getType().equals(User.SignupType.KAKAO)) {
             kakaoLogout(user.getSocialToken());
+
+            AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
+                    .uuid(user.getId())
+                    .pushToken(user.getPushToken())
+                    .pushType(user.getPushToken())
+                    .build();
+
+            kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
         }
-        /*else {
-            // apple 로그아웃
-        }*/
+        else {
+            appleAuthService.logout(userPrincipal);
+        }
 
         SecurityContextHolder.getContext().setAuthentication(null);
+
         return new UserDto.UserResponse(ExceptionCode.LOGOUT_OK);
     }
 
@@ -502,6 +518,19 @@ public class AuthServiceImpl implements AuthService {
         userReportRepository.deleteAllByTargetUserUserId(user.getUserId());
 
         SecurityContextHolder.getContext().setAuthentication(null);
+
+        AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
+                .uuid(user.getId())
+                .pushToken(user.getPushToken())
+                .pushType(user.getPushToken())
+                .build();
+
+        kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
+        user.setPushToken(null);
+        user.setDeviceId(null);
+        user.setApnsEnv(null);
+        userRepository.save(user);
+
         return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
     }
 }

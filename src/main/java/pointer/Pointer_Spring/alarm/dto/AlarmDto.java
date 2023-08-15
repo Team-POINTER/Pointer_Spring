@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 public class AlarmDto {
 
@@ -81,6 +80,30 @@ public class AlarmDto {
 
     @Getter
     @NoArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetFriendAlarmResponse {
+        private Long alarmId;
+        private Long userId;
+        private String sendUserId;
+        private String sendUserName;
+        private String sendUserProfile;
+        private String friendStatus;
+        private String type;
+
+        @Builder
+        public GetFriendAlarmResponse(Long alarmId, Long userId, String sendUserId, String sendUserName, String sendUserProfile, String friendStatus, String type) {
+            this.alarmId = alarmId;
+            this.userId = userId;
+            this.sendUserId = sendUserId;
+            this.sendUserName = sendUserName;
+            this.sendUserProfile = sendUserProfile;
+            this.friendStatus = friendStatus;
+            this.type = type;
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor
     public static class EventAlarmRequest {
         private String content;
 
@@ -99,17 +122,18 @@ public class AlarmDto {
         private String deviceId;
         private String pushType;
         private String pushToken;
-        //private String apnsEnv;
+        private String apnsEnv;
 
         @Builder
 //        public KakaoTokenRequest(Map<String, Object> requestMap) {
 //            this.requestMap = requestMap;
 //        }
-        public KakaoTokenRequest(String deviceId, String pushType, String pushToken) {
+        public KakaoTokenRequest(String deviceId, String pushType, String pushToken, String apnsEnv) {
             //this.uuid = uuid;
             this.deviceId = deviceId;
             this.pushType = pushType;
             this.pushToken = pushToken;
+            this.apnsEnv = apnsEnv;
         }
     }
 
@@ -149,6 +173,22 @@ public class AlarmDto {
         public PushType(String message, String apnsEnv) {
             this.message = message;
             this.apnsEnv = apnsEnv;
+        }
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class KakaoTokenDeRegisterRequest {
+        private String uuid;
+        private String pushType;
+        private String pushToken;
+
+        @Builder
+        public KakaoTokenDeRegisterRequest(String uuid, String pushType, String pushToken) {
+            this.uuid = uuid;
+            this.pushType = pushType;
+            this.pushToken = pushToken;
         }
     }
 }

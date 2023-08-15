@@ -149,6 +149,12 @@ public class AuthController {
         return new ResponseEntity<>(authServiceImpl.logout(userPrincipal), HttpStatus.OK);
     }
 
+//    @PostMapping("/user/logout/apple")
+//    public ResponseEntity<Object> logoutApple(@CurrentUser UserPrincipal userPrincipal) {
+//
+//        return new ResponseEntity<>(appleAuthService.logout(userPrincipal), HttpStatus.OK);
+//    }
+
     @DeleteMapping("/user/resign") // 회원 탈퇴
     public ResponseEntity<Object> resign(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.resign(userPrincipal), HttpStatus.OK);

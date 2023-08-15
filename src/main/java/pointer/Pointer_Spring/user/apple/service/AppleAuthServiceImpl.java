@@ -10,11 +10,16 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pointer.Pointer_Spring.alarm.dto.AlarmDto;
+import pointer.Pointer_Spring.alarm.service.AlarmService;
+import pointer.Pointer_Spring.alarm.service.KakaoPushNotiService;
 import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.security.TokenProvider;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.apple.utils.AppleJwtUtils;
 import pointer.Pointer_Spring.user.domain.Image;
 import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.dto.AppleLogoutRequest;
 import pointer.Pointer_Spring.user.dto.TokenDto;
 import pointer.Pointer_Spring.user.dto.UserDto;
 import pointer.Pointer_Spring.user.repository.ImageRepository;
@@ -29,6 +34,7 @@ import java.util.Optional;
 public class AppleAuthServiceImpl {
 
     private final AppleJwtUtils appleJwtUtils;
+    private final KakaoPushNotiService kakaoPushNotiService;
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
@@ -47,8 +53,9 @@ public class AppleAuthServiceImpl {
     @Value("${default.background.image.path}")
     private String backgroundImg;
 
-    public AppleAuthServiceImpl(AppleJwtUtils appleJwtUtils, UserRepository userRepository, TokenProvider tokenProvider, AuthenticationManager authenticationManager, BlockedUserRepository blockedUserRepository, ImageRepository imageRepository) {
+    public AppleAuthServiceImpl(AppleJwtUtils appleJwtUtils, KakaoPushNotiService kakaoPushNotiService, UserRepository userRepository, TokenProvider tokenProvider, AuthenticationManager authenticationManager, BlockedUserRepository blockedUserRepository, ImageRepository imageRepository) {
         this.appleJwtUtils = appleJwtUtils;
+        this.kakaoPushNotiService = kakaoPushNotiService;
         this.userRepository = userRepository;
         this.tokenProvider = tokenProvider;
         this.authenticationManager = authenticationManager;
@@ -120,5 +127,20 @@ public class AppleAuthServiceImpl {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public Object logout(UserPrincipal userPrincipal) {
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), 1)
+                .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+
+        AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
+                .uuid(user.getId())
+                .pushToken(user.getPushToken())
+                .pushType(user.getPushToken())
+                .build();
+
+        kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
+
+        return new UserDto.UserResponse(ExceptionCode.LOGOUT_OK);
     }
 }

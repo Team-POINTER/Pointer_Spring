@@ -123,7 +123,7 @@ public class QuestionServiceImpl implements QuestionService {
             AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                     .forApns(AlarmDto.PushType.builder()
                             .message(alarm.getContent())
-                            .apnsEnv("sandbox")
+                            .apnsEnv(member.getApnsEnv())
                             .build())
                     .build();
             kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(member.getUserId())), kakaoPushRequest);
