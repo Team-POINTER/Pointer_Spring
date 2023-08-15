@@ -77,16 +77,14 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
         );
-        String publicId = profileImage.getImageUrl();
-        String profileImageUrl = cloudinary.url().generate(publicId);
+        String profileImageUrl = profileImage.getImageUrl();
 
         Image backgroundImage = imageRepository.findByUserUserIdAndImageSortAndStatus(userId, ImageType.BACKGROUND, STATUS).orElseThrow(
                 () -> {
                     throw new CustomException(ExceptionCode.IMAGE_NOT_FOUND);
                 }
         );
-        publicId = backgroundImage.getImageUrl();
-        String backgroundImageUrl = cloudinary.url().generate(publicId);
+        String backgroundImageUrl = backgroundImage.getImageUrl();
 
         return new ImageUrlResponse(profileImageUrl, backgroundImageUrl);
     }
@@ -100,7 +98,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
                 }
         );
         image.updateImageUrl(DEFAULT_PROFILE_IMG_PATH);// + extension
-        return new ResponseImage(ExceptionCode.USER_IMAGE_UPDATE_SUCCESS , cloudinary.url().generate(DEFAULT_PROFILE_IMG_PATH));
+        return new ResponseImage(ExceptionCode.USER_IMAGE_UPDATE_SUCCESS , DEFAULT_PROFILE_IMG_PATH);
     }
     @Override
     public ResponseImage changeDefaultBackgroundImage(Long userId) throws IOException{//private deleteImage 호출 + defualt이미지로 바꾸기
@@ -113,7 +111,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         );
         image.updateImageUrl(DEFAULT_BACKGROUND_IMG_PATH);// + extension
 
-        return new ResponseImage(ExceptionCode.BACKGROUND_IMAGE_UPDATE_SUCCESS, cloudinary.url().generate(DEFAULT_BACKGROUND_IMG_PATH));
+        return new ResponseImage(ExceptionCode.BACKGROUND_IMAGE_UPDATE_SUCCESS, DEFAULT_BACKGROUND_IMG_PATH);
     }
 
 
@@ -139,7 +137,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
             deleteImageInCloudinary(userId, imageType);
             foundImage.updateImageUrl(filePath);
         }else {
-            Image image = new Image(filePath, imageType, userRepository.findById(userId).get());
+            Image image = new Image(imageUrl, imageType, userRepository.findById(userId).get());
             imageRepository.save(image);
         }
 
@@ -163,8 +161,8 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
     }
     private boolean isDefaultImage(String imagePublicId){
         int slashIndex = imagePublicId.lastIndexOf("/");
-        String folderNm = imagePublicId.substring(0, slashIndex);
-        return folderNm.equalsIgnoreCase("default");
+        String folderNm = imagePublicId.substring(1, slashIndex);
+        return folderNm.contains("default");
     }
     private String checkExtension(MultipartFile multipartFile){
         if (multipartFile.isEmpty()) {
