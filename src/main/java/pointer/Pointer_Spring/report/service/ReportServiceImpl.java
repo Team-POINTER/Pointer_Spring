@@ -43,10 +43,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Transactional
-    public ReportDto.UserReportResponse saveUserReport(ReportDto.UserReportRequest reportRequest) {
+    public ReportDto.UserReportResponse saveUserReport(Long reportingUserId, ReportDto.UserReportRequest reportRequest) {
         User targetUser = userRepository.findById(reportRequest.getTargetUserId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
-        Long reportingUserId = reportRequest.getReportingUserId();
         UserReport userReport = UserReport.builder()
                 .targetUser(targetUser)
                 .reportingUserId(reportingUserId)
@@ -70,10 +69,9 @@ public class ReportServiceImpl implements ReportService {
     }
     @Override
     @Transactional
-    public ReportDto.ReportResponse saveReport(ReportDto.ReportRequest reportRequest) {
+    public ReportDto.ReportResponse saveReport(Long reportingUserId,ReportDto.ReportRequest reportRequest) {
         User targetUser = userRepository.findById(reportRequest.getTargetUserId())
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
-        Long reportingUserId = reportRequest.getReportingUserId();
         Long dataId = reportRequest.getDataId();
 
         String data = reportRequest.getType() == Report.ReportType.HINT?
@@ -148,7 +146,7 @@ public class ReportServiceImpl implements ReportService {
             throw new CustomException(ExceptionCode.ALREADY_REPORT);
         }
         blockedUserRepository.save(new BlockedUser(user.getEmail(), user.getId()));
-        user.setStatus(0);
+
     }
     @Override
     @Transactional
@@ -240,4 +238,36 @@ public class ReportServiceImpl implements ReportService {
             return new ReportDto.ReportResponse(report, data);
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public ReportDto.UserReportResponse getUserReportByUserReportId(Long userReportId){
+        UserReport userReport = userReportRepository.findById(userReportId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND)
+        );
+        return new ReportDto.UserReportResponse(userReport);
+    }
+
+    @Override
+    public ReportDto.ReportResponse getReportByReportId(Long reportId){
+        Report report = reportRepository.findById(reportId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND));
+        String data = report.getType() == Report.ReportType.HINT
+                ? voteRepository.findById(report.getDataId()).get().getHint()
+                : questionRepository.findById(report.getDataId()).get().getQuestion();
+        return new ReportDto.ReportResponse(report, data);
+    }
+
+    @Override
+    public ReportDto.BlockedUserResponse getBlockedUserReportByBlockedUserId(Long blockedUserId){
+        BlockedUser blockedUser =  blockedUserRepository.findById(blockedUserId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND));
+        return new ReportDto.BlockedUserResponse(blockedUser);
+    }
+    public ReportDto.RestrictedUserResponse getReportByRestrictedUserRestrictUserId(Long restrictedUserId){
+        RestrictedUser restrictedUser = restrictedUserRepository.findById(restrictedUserId).orElseThrow(
+                () -> new CustomException(ExceptionCode.REPORT_NOT_FOUND));
+        return new ReportDto.RestrictedUserResponse(restrictedUser);
+    }
+
+
 }

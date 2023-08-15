@@ -7,6 +7,10 @@ import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.UserReport;
 import pointer.Pointer_Spring.report.dto.ReportDto;
 import pointer.Pointer_Spring.report.service.ReportService;
+import pointer.Pointer_Spring.security.CurrentUser;
+import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.service.AuthService;
+import pointer.Pointer_Spring.user.service.UserService;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 import pointer.Pointer_Spring.vote.dto.VoteDto;
 
@@ -19,15 +23,16 @@ import java.util.Optional;
 public class ReportController {
 
     private final ReportService reportService;
+    private final AuthService authService;
 
     //user가 실행하는 api
     @PostMapping("/user-report/create/")//done
-    public BaseResponse<ReportDto.UserReportResponse> saveUserReport(@RequestBody ReportDto.UserReportRequest userReportRequest){
-        return new BaseResponse<>(ExceptionCode.REPORT_CREATE_SUCCESS ,reportService.saveUserReport(userReportRequest));
+    public BaseResponse<ReportDto.UserReportResponse> saveUserReport(@CurrentUser UserPrincipal userPrincipal, @RequestBody ReportDto.UserReportRequest userReportRequest){
+        return new BaseResponse<>(ExceptionCode.REPORT_CREATE_SUCCESS ,reportService.saveUserReport(userPrincipal.getId(), userReportRequest));
     }
     @PostMapping("/report/create/")//done
-    public BaseResponse<ReportDto.ReportResponse> saveUserReport(@RequestBody ReportDto.ReportRequest ReportRequest){
-        return new BaseResponse<>(ExceptionCode.REPORT_CREATE_SUCCESS ,reportService.saveReport(ReportRequest));
+    public BaseResponse<ReportDto.ReportResponse> saveUserReport(@CurrentUser UserPrincipal userPrincipal, @RequestBody ReportDto.ReportRequest ReportRequest){
+        return new BaseResponse<>(ExceptionCode.REPORT_CREATE_SUCCESS ,reportService.saveReport(userPrincipal.getId(), ReportRequest));
     }
 
     //관리자 모드에서 실행할 api
@@ -37,8 +42,9 @@ public class ReportController {
         return new BaseResponse<>(ExceptionCode.REPORT_HANDLE_SUCCESS);
     }
     @PostMapping("/user-report/block/user/{userReportId}")//done
-    public BaseResponse<ExceptionCode> permanentRestrictionByUserReport(@PathVariable Long userReportId){
+    public BaseResponse<ExceptionCode> permanentRestrictionByUserReport(@CurrentUser UserPrincipal userPrincipal , @PathVariable Long userReportId){
         reportService.permanentRestrictionByUserReport(userReportId);
+        authService.resign(userPrincipal);//탈퇴 처리
         return new BaseResponse<>(ExceptionCode.REPORT_HANDLE_SUCCESS);
     }
     @PostMapping("/report/block/user/{reportId}")//done
@@ -71,12 +77,31 @@ public class ReportController {
     public BaseResponse<List<ReportDto.ReportResponse>> getReports(@PathVariable Long userId){
         return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getReports(userId));
     }
-//    @GetMapping("/report/{userId}/{targetId}")
-//    public void getReport(@PathVariable Long userId, @PathVariable Long targetId){
-//        reportService.getReport(userId, targetId);
-//    }
     @GetMapping("/reports/target/{targetId}") // -> done
     public BaseResponse<List<ReportDto.ReportResponse>> getReportsByTarget(@PathVariable Long targetId){
         return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getReportsByTarget(targetId));
+    }
+    //update
+//    @GetMapping("/reports") //질문, 힌트, 차단된 유저 리스트 조회
+//    public BaseResponse<List<ReportDto.ReportResponse>> getReportsByReportType(@RequestParam Report.ReportType reportType){
+//        return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService);
+//    }
+    @GetMapping("/report")//reportId로 레포트get
+    public BaseResponse<ReportDto.ReportResponse> getReportByReportId(@PathVariable Long reportId){
+        return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getReportByReportId(reportId));
+    }
+    @GetMapping("/user-report")//userReportId로 유저레포트 get
+    public BaseResponse<ReportDto.UserReportResponse> getUserReportByUserReportId(@PathVariable Long userReportId){
+        return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getUserReportByUserReportId(userReportId));
+    }
+    //차단 유저 1개 get
+    @GetMapping("/block-user-report")//blockesUserId 레포트get
+    public BaseResponse<ReportDto.BlockedUserResponse> getReportByBlockUsreId(@PathVariable Long blockedUserId){
+        return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getBlockedUserReportByBlockedUserId(blockedUserId));
+    }
+    //제한 유저 1개 get
+    @GetMapping("/restriction/report")//reportId로 레포트get
+    public BaseResponse<ReportDto.RestrictedUserResponse> getReportByRestrictUserId(@PathVariable Long restrictedUserId){
+        return new BaseResponse<>(ExceptionCode.REPORT_GET_SUCCESS, reportService.getReportByRestrictedUserRestrictUserId(restrictedUserId));
     }
 }
