@@ -17,14 +17,6 @@ public class FriendController {
 
     private final FriendService friendService;
 
-    // 프로필
-    @GetMapping("/users/friend") // 상대친구 조회
-    public UserDto.UserListResponse getFriendFriendList(@CurrentUser UserPrincipal userPrincipal,
-                                                        @RequestParam Long userId, @RequestParam int lastPage ) {
-        FriendDto.FindFriendFriendDto dto = new FriendDto.FindFriendFriendDto(userId, lastPage);
-        return friendService.getFriendFriendList(userPrincipal, dto);
-    }
-
     // 조회 및 검색
 
     @PostMapping("/search") // 유저 검색
