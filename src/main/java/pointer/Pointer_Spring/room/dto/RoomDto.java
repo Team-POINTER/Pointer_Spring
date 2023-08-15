@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.room.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class RoomDto {
         LocalDateTime limitedAt;
         //String topUserId;
 
-        public ListRoom(RoomMember roomMember, Long questionId, String question, String userNm, boolean isVoted) {
+        public ListRoom(RoomMember roomMember, Long questionId, String question, String userNm, boolean isVoted, LocalDateTime limitedAt) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
             this.memberCnt = roomMember.getRoom().getMemberNum();
@@ -48,7 +49,7 @@ public class RoomDto {
             this.question = question;
             this.topUserName = userNm;
             this.voted = isVoted;
-            this.limitedAt = roomMember.getRoom().getCreatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = limitedAt;//얼마나 남았는지 보내기
             //this.topUserId = user.getId();
         }
 
@@ -90,22 +91,22 @@ public class RoomDto {
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room, String privateRoomNm, Question question, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, String privateRoomNm, Question question, List<RoomMemberResopnose> roomMembers, LocalDateTime limtedAt) {
             this.roomId = room.getRoomId();
             this.privateRoomNm =  privateRoomNm;
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
-            this.limitedAt = room.getCreatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = limtedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
             this.question = question.getQuestion();
             this.questionCreatorId = question.getCreatorId();
             this.roomMembers = roomMembers;
         }
-        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers, LocalDateTime limitedAt) {
             this.roomId = room.getRoomId();
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
-            this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = limitedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
             this.question = question.getQuestion();
             this.questionCreatorId = question.getCreatorId();

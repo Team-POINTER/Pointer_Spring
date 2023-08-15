@@ -62,15 +62,17 @@ public class AlarmDto {
     public static class GetAlarmResponse {
         private Long alarmId;
         private Long sendUserId;
+        private Long needId;
         private String sendUserName;
         private String sendUserProfile;
         private String content;
         private String type;
 
         @Builder
-        public GetAlarmResponse(Long alarmId, Long sendUserId, String sendUserName, String sendUserProfile, String content, String type) {
+        public GetAlarmResponse(Long alarmId, Long sendUserId, Long needId, String sendUserName, String sendUserProfile, String content, String type) {
             this.alarmId = alarmId;
             this.sendUserId = sendUserId;
+            this.needId = needId;
             this.sendUserName = sendUserName;
             this.sendUserProfile = sendUserProfile;
             this.content = content;

@@ -78,7 +78,14 @@ public class RoomServiceImpl implements RoomService {
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
                         boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userId, latestQuestion.getId(), STATUS);
-                        return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
+                        Optional<Question> o = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(room.getRoomId(), STATUS);
+                        LocalDateTime questionCreateDate = LocalDateTime.now();
+                        if(o.isPresent()){
+                            Question question = o.get();
+                            questionCreateDate = question.getCreatedAt().plusDays(1);
+                        }
+
+                        return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
                     }).toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, STATUS).stream()
@@ -98,7 +105,14 @@ public class RoomServiceImpl implements RoomService {
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
                         boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userId, latestQuestion.getId(), STATUS);
-                        return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted);
+                        Optional<Question> o = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(room.getRoomId(), STATUS);
+                        LocalDateTime questionCreateDate = LocalDateTime.now();
+                        if(o.isPresent()){
+                            Question question = o.get();
+                            questionCreateDate = question.getCreatedAt().plusDays(1);
+                        }
+
+                        return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
                     })
                     .collect(Collectors.toList());
         }
@@ -143,7 +157,7 @@ public class RoomServiceImpl implements RoomService {
                 .map(RoomMemberResopnose::new).toList();
         String targetUserPrivateRoomNm = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(foundRoom.getRoomId(), targetUserId, STATUS)
                 .orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST)).getPrivateRoomNm();
-        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, targetUserPrivateRoomNm, latestQuestion, roomMemberResopnoseList));
+        return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new DetailResponse(foundRoom, targetUserPrivateRoomNm, latestQuestion, roomMemberResopnoseList, latestQuestion.getCreatedAt().plusDays(1)));
     }
 
 
@@ -185,7 +199,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoomAndStatus(savedRoom, STATUS).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList));
+        CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList, question.getCreatedAt().plusDays(1)));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
     private String createCode(Room room) {
