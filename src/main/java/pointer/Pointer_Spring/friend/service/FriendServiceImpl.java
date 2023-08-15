@@ -75,9 +75,9 @@ public class FriendServiceImpl implements FriendService {
         for (User user : userList) {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
             if (image.isPresent()) {
-                friendList.add(new UserDto.UserList(user, null).setFile(image.get().getImageUrl()));
+                friendList.add(new UserDto.UserList(user).setFile(image.get().getImageUrl()));
             } else {
-                friendList.add(new UserDto.UserList(user, null));
+                friendList.add(new UserDto.UserList(user));
             }
         }
 
