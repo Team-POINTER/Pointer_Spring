@@ -128,16 +128,8 @@ public class UserDto {
         Long userId;
         String id;
         String userName;
-        @JsonInclude(NON_NULL)
-        Friend.Relation relationship;
         String file;
 
-        public UserList(User user, Friend.Relation relationship) {
-            this.userId = user.getUserId();
-            this.id = user.getId();
-            this.userName = user.getName();
-            this.relationship = relationship;
-        }
         public UserList(User user) {
             this.userId = user.getUserId();
             this.id = user.getId();

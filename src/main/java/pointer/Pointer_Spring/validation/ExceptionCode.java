@@ -149,6 +149,7 @@ public enum ExceptionCode {
     HINT_NOT_FOUND(INVALID_ACCESS, "K004", "힌트를 찾을 수 없습니다."),
     INVALID_QUESTION_CREATION(INVALID_ACCESS, "K005", "질문을 생성할 수 없는 상태"),
     HINT_DELETE_OK(SUCCESS, "K006", "힌트 삭제"),
+    QUESTION_GET_LOCK_FAIL(SUCCESS, "K007", "질문 락 얻기 실패"),
 
 
     /**
