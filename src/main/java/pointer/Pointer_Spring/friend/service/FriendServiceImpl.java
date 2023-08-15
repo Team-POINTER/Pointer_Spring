@@ -90,7 +90,7 @@ public class FriendServiceImpl implements FriendService {
         List<User> userList = fetchPagesOffsetUser(userPrincipal, dto); // 본인 제외
         List<UserDto.UserInfoList2> friendList = new ArrayList<>();
         for (User user : userList) {
-            System.out.println(user.getUserId());
+
             Optional<Friend> friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
             Friend.Relation relationship;
             if (friend.isPresent()) {

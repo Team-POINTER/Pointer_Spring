@@ -9,7 +9,7 @@ import java.util.List;
 public interface VoteService {
     List<VoteDto.CreateResponse> createVote(UserPrincipal userPrincipal, VoteDto.CreateRequest dto);
 
-    VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, VoteDto.CheckRequest dto);
+    VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, Long questionId);
 
     VoteDto.GetResponse getQuestionVoteCnt(UserPrincipal userPrincipal, Long roomId);
 
