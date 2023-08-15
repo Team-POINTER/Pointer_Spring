@@ -48,7 +48,7 @@ public class RoomDto {
             this.question = question;
             this.topUserName = userNm;
             this.voted = isVoted;
-            this.limitedAt = roomMember.getRoom().getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = roomMember.getRoom().getCreatedAt().plusDays(1);//얼마나 남았는지 보내기
             //this.topUserId = user.getId();
         }
 
@@ -95,7 +95,7 @@ public class RoomDto {
             this.privateRoomNm =  privateRoomNm;
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
-            this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
+            this.limitedAt = room.getCreatedAt().plusDays(1);//얼마나 남았는지 보내기
             this.questionId = question.getId();
             this.question = question.getQuestion();
             this.questionCreatorId = question.getCreatorId();
