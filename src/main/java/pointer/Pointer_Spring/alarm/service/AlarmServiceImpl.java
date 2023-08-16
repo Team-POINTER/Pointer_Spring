@@ -87,6 +87,7 @@ public class AlarmServiceImpl implements AlarmService {
                         .sendUserId(user.getUserId())
                         .receiveUserId(member.getUserId())
                         .needId(question.getRoom().getRoomId())
+                        .title(user.getName()+Alarm.AlarmType.POKE.getTitle())
                         .content(Alarm.AlarmType.POKE.getMessage())
                         .build();
 
@@ -195,7 +196,7 @@ public class AlarmServiceImpl implements AlarmService {
 
         // 30개씩 페이징
         PageRequest pageable = PageRequest.of(0, PAGE_SIZE, Sort.by("id").descending());
-        List<Alarm> alarms = alarmRepository.findAllByReceiveUserIdAndIdLessThanOrderByIdDesc(userPrincipal.getId(), cursorId, pageable);
+        List<Alarm> alarms = alarmRepository.findAllByReceiveUserIdAndTypeNotAndIdLessThanOrderByIdDesc(userPrincipal.getId(), Alarm.AlarmType.FRIEND_REQUEST, cursorId, pageable);
 
         List<AlarmDto.GetAlarmResponse> alarmResponses = new ArrayList<>();
         for(Alarm alarm : alarms) {
@@ -211,9 +212,8 @@ public class AlarmServiceImpl implements AlarmService {
                     .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
                     .content(alarm.getContent())
                     .type(alarm.getType().name())
+                    .createdAt(alarm.getCreatedAt().toString())
                     .build();
-
-
 
             alarmResponses.add(response);
         }

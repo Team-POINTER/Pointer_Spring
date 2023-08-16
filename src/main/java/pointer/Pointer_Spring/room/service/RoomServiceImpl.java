@@ -199,7 +199,14 @@ public class RoomServiceImpl implements RoomService {
 
         List<RoomMemberResopnose> roomMemberResopnoseList = roomMemberRepository.findAllByRoomAndStatus(savedRoom, STATUS).stream()
                 .map(RoomMemberResopnose::new).toList();
-        CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList, question.getCreatedAt().plusDays(1)));
+
+        Optional<Question> o = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(savedRoom.getRoomId(), STATUS);
+        LocalDateTime questionCreateDate = LocalDateTime.now();
+        if(o.isPresent()){
+            Question topQuestion = o.get();
+            questionCreateDate = topQuestion.getCreatedAt().plusDays(1);
+        }
+        CreateResponse createResponse = new CreateResponse( new DetailResponse(savedRoom, question, roomMemberResopnoseList, questionCreateDate));
         return new ResponseRoom(ExceptionCode.ROOM_CREATE_SUCCESS, createResponse);
     }
     private String createCode(Room room) {

@@ -67,9 +67,10 @@ public class AlarmDto {
         private String sendUserProfile;
         private String content;
         private String type;
+        private String createdAt;
 
         @Builder
-        public GetAlarmResponse(Long alarmId, Long sendUserId, Long needId, String sendUserName, String sendUserProfile, String content, String type) {
+        public GetAlarmResponse(Long alarmId, Long sendUserId, Long needId, String sendUserName, String sendUserProfile, String content, String type, String createdAt) {
             this.alarmId = alarmId;
             this.sendUserId = sendUserId;
             this.needId = needId;
@@ -77,6 +78,7 @@ public class AlarmDto {
             this.sendUserProfile = sendUserProfile;
             this.content = content;
             this.type = type;
+            this.createdAt = createdAt;
         }
     }
 

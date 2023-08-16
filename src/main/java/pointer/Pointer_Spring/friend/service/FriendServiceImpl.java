@@ -217,7 +217,8 @@ public class FriendServiceImpl implements FriendService {
                         .sendUserId(user.getUserId())
                         .receiveUserId(friend.getUserId())
                         .type(Alarm.AlarmType.FRIEND_REQUEST)
-                        .content(friendUser.getUser().getName()+Alarm.AlarmType.FRIEND_REQUEST.getMessage())
+                        .title(friendUser.getUser().getName()+Alarm.AlarmType.FRIEND_REQUEST.getTitle())
+                        .content(Alarm.AlarmType.FRIEND_REQUEST.getMessage())
                         .build();
                 alarmRepository.save(alarm);
 
@@ -268,8 +269,9 @@ public class FriendServiceImpl implements FriendService {
                     .sendUserId(dto.getMemberId())
                     .receiveUserId(findFriendUser.getUser().getUserId())
                     .type(Alarm.AlarmType.FRIEND_ACCEPT)
-                    .content(findFriendUser.getUser().getName()
-                            +Alarm.AlarmType.FRIEND_ACCEPT.getMessage())
+                    .title(findFriendUser.getUser().getName()
+                            +Alarm.AlarmType.FRIEND_ACCEPT.getTitle())
+                    .content(Alarm.AlarmType.FRIEND_ACCEPT.getMessage())
                     .build();
             alarmRepository.save(alarm);
 
