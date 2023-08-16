@@ -94,6 +94,11 @@ public class AuthController {
         return new ResponseEntity<>(tokenDto, HttpStatus.OK);
     }
 
+    @GetMapping("/user/check")
+    public ResponseEntity<Object> tokenCheck() {
+        return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.TOKEN_SUCCESS), HttpStatus.OK);
+    }
+
     @GetMapping("/user")
     public ResponseEntity<Object> test2() {
         return new ResponseEntity<>("success!", HttpStatus.OK);

@@ -19,7 +19,6 @@ public class TestDataRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
 
         Optional<VersionPoint> version = versionPointerRepository.findByVersion("0.0.0");
-        System.out.println("version = " + version);
 
         if (version.isEmpty()) {
             VersionPoint versionPoint = VersionPoint.builder()
