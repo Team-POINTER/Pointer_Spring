@@ -98,13 +98,13 @@ public class FriendDto {
         String id;
         String friendName;
         String file;
-        Friend.Relation relationship;
+        int relationship;
 
         public FriendInfoList(Friend friend, User user, Friend.Relation relationship) {
             this.friendId = user.getUserId();
             this.id = user.getId();
             this.friendName = friend.getFriendName();
-            this.relationship = relationship;
+            this.relationship = relationship.ordinal();
         }
 
         public FriendInfoList setFile(String file) {
