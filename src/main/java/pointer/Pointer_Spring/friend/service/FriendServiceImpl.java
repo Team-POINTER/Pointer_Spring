@@ -131,7 +131,7 @@ public class FriendServiceImpl implements FriendService {
         }
 
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
-        Long total = friendRepository.countUsersByFriendCriteria(userPrincipal.getId(), dto.getKeyword(), STATUS);
+        Long total = friendRepository.countUsersByFriendCriteria(dto.getUserId(), dto.getKeyword(), STATUS);
         return new FriendDto.FriendInfoListResponse(ExceptionCode.FRIEND_SEARCH_OK, user.getName(), total, friendInfoList, dto.getLastPage());
     }
 
@@ -413,9 +413,7 @@ public class FriendServiceImpl implements FriendService {
             Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
                     userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
 
-            if(o.isPresent()) {
-                alarmRepository.delete(o.get());
-            }
+            o.ifPresent(alarmRepository::delete);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
     }

@@ -1,18 +1,16 @@
 package pointer.Pointer_Spring.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.report.repository.BlockedUserRepository;
 import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
@@ -30,6 +28,7 @@ import java.util.Optional;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
+@PropertySource("classpath:application.properties")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
@@ -42,6 +41,11 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final AppleAuthServiceImpl appleAuthService;
 
+    @Value("${default.profile.image.path}")
+    private String profileImg;
+
+    @Value("${default.background.image.path}")
+    private String backgroundImg;
 
     @Transactional
     @PostMapping("/auth/test")
@@ -59,6 +63,10 @@ public class AuthController {
                 return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID), HttpStatus.OK);
             }
             user = authServiceImpl.signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
+
+            imageRepository.save(new Image(profileImg, Image.ImageType.PROFILE, user));
+            imageRepository.save(new Image(backgroundImg, Image.ImageType.BACKGROUND, user));
+
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
             return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL), HttpStatus.OK);
