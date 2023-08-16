@@ -91,17 +91,17 @@ public class AlarmDto {
         private String sendUserId;
         private String sendUserName;
         private String sendUserProfile;
-        private String friendStatus;
+        private int relationship;
         private String type;
 
         @Builder
-        public GetFriendAlarmResponse(Long alarmId, Long userId, String sendUserId, String sendUserName, String sendUserProfile, String friendStatus, String type) {
+        public GetFriendAlarmResponse(Long alarmId, Long userId, String sendUserId, String sendUserName, String sendUserProfile, int relationship, String type) {
             this.alarmId = alarmId;
             this.userId = userId;
             this.sendUserId = sendUserId;
             this.sendUserName = sendUserName;
             this.sendUserProfile = sendUserProfile;
-            this.friendStatus = friendStatus;
+            this.relationship = relationship;
             this.type = type;
         }
     }

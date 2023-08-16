@@ -291,7 +291,7 @@ public class AlarmServiceImpl implements AlarmService {
                     .sendUserId(sendUser.getId())
                     .sendUserName(sendUser.getName())
                     .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
-                    .friendStatus(friend.getRelationship().name())
+                    .relationship(friend.getRelationship().ordinal())
                     .type(alarm.getType().name())
                     .build();
             responses.add(response);
