@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.report.domain.UserReport;
@@ -24,5 +25,5 @@ public interface UserReportRepository extends JpaRepository<UserReport, Long> {
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM UserReport WHERE target_user_id = :userId", nativeQuery = true)
-    void deleteAllByTargetUserUserId(Long userId);
+    void deleteAllByTargetUserUserId(@Param("userId") Long userId);
 }
