@@ -150,13 +150,13 @@ public class UserDto {
         String id;
         String userName;
         String file;
-        Friend.Relation relationship;
+        int relationship;
 
         public UserInfoList2(User user, Friend.Relation relationship) {
             this.userId = user.getUserId();
             this.id = user.getId();
             this.userName = user.getName();
-            this.relationship = relationship;
+            this.relationship = relationship.ordinal();
         }
 
         public UserInfoList2 setFile(String file) {
