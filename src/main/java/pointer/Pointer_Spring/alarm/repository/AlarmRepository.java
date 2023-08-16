@@ -26,4 +26,6 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     List<Alarm> findAllByReceiveUserIdAndTypeAndIdLessThanOrderByIdDesc(Long userId, Alarm.AlarmType alarmType, Long cursorId, PageRequest pageable);
 
     Optional<Alarm> findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(Long sendUserId, Long receiveUserId, Alarm.AlarmType type);
+
+    List<Alarm> findAllByReceiveUserIdAndTypeNotAndIdLessThanOrderByIdDesc(Long id, Alarm.AlarmType alarmType, Long cursorId, PageRequest pageable);
 }

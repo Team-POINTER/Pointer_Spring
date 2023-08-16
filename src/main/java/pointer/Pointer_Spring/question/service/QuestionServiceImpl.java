@@ -117,6 +117,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .receiveUserId(member.getUserId())
                     .needId(question.getRoom().getRoomId())
                     .type(Alarm.AlarmType.QUESTION)
+                    .title(room.getName()+ Alarm.AlarmType.QUESTION.getTitle())
                     .content(Alarm.AlarmType.QUESTION.getMessage())
                     .build();
 
