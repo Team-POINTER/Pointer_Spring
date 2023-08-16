@@ -29,13 +29,14 @@ public class VersionPointServiceImpl implements VersionPointService {
                 .build();
 
         if (version.isPresent()) {
-            VersionPoint now = versionPoint;
-            versionPointerRepository.save(now);
+            version.get().setPhrase(dto.getPhrase());
+            version.get().setPoint(dto.getPoint());
+            versionPointerRepository.save(version.get());
         } else {
             versionPointerRepository.save(versionPoint);
         }
 
-        return new VersionPointResponse(ExceptionCode.SAVE_POINT_VERSION);
+        return new VersionPointDto.VersionPointResponse(ExceptionCode.SAVE_POINT_VERSION, versionPoint.getPoint(), , versionPoint.getPhrase());
     }*/
 
     @Override
