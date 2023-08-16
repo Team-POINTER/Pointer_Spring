@@ -44,7 +44,7 @@ public interface VoteRepository extends JpaRepository<VoteHistory, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM VoteHistory WHERE WHERE room_room_id = :roomId", nativeQuery = true)
+    @Query(value = "DELETE FROM VotingHistory WHERE room_id = :roomId", nativeQuery = true)
     void deleteAllByRoomId(@Param("roomId") Long roomId);
 
 }

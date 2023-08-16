@@ -36,4 +36,9 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     @Modifying
     @Query(value = "DELETE FROM RoomMember WHERE user_user_id = :userUserId", nativeQuery = true)
     void deleteAllByUserUserId(@Param("userUserId") Long userUserId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM RoomMember WHERE Room_room_id = :roomId", nativeQuery = true)
+    void deleteAllByRoomRoomrId(@Param("roomId") Long roomId);
 }
