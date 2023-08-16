@@ -28,7 +28,6 @@ import java.util.Optional;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
-@PropertySource("classpath:application.properties")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthServiceImpl authServiceImpl;
@@ -40,12 +39,6 @@ public class AuthController {
     private final ImageRepository imageRepository;
     private final AuthenticationManager authenticationManager;
     private final AppleAuthServiceImpl appleAuthService;
-
-    @Value("${default.profile.image.path}")
-    private String profileImg;
-
-    @Value("${default.background.image.path}")
-    private String backgroundImg;
 
     @Transactional
     @PostMapping("/auth/test")
@@ -63,9 +56,6 @@ public class AuthController {
                 return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID), HttpStatus.OK);
             }
             user = authServiceImpl.signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
-
-            imageRepository.save(new Image(profileImg, Image.ImageType.PROFILE, user));
-            imageRepository.save(new Image(backgroundImg, Image.ImageType.BACKGROUND, user));
 
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
