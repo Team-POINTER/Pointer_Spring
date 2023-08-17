@@ -522,16 +522,18 @@ public class AuthServiceImpl implements AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(null);
 
-        AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
-                .uuid(user.getId())
-                .pushToken(user.getPushToken())
-                .pushType(user.getPushToken())
-                .build();
+        if(user.getPushToken()!=null) {
+            AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
+                    .uuid(user.getId())
+                    .pushToken(user.getPushToken())
+                    .pushType("apns")
+                    .build();
 
-        kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
-        user.setPushToken(null);
-        user.setDeviceId(null);
-        user.setApnsEnv(null);
+            kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
+            user.setPushToken(null);
+            user.setDeviceId(null);
+            user.setApnsEnv(null);
+        }
         userRepository.save(user);
 
         return new UserDto.UserResponse(ExceptionCode.RESIGN_OK);
