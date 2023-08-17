@@ -78,15 +78,17 @@ public class RoomServiceImpl implements RoomService {
                         String msgForTopUserNm = getTopUserNm(room, latestQuestion.getId());
 
                         boolean isVoted = voteRepository.existsByMemberIdAndQuestionIdAndStatus(userId, latestQuestion.getId(), STATUS);
-                        Optional<Question> o = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(room.getRoomId(), STATUS);
+                        Optional<Question> topQuestion = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(room.getRoomId(), STATUS);
                         LocalDateTime questionCreateDate = LocalDateTime.now();
-                        if(o.isPresent()){
-                            Question question = o.get();
+                        if(topQuestion.isPresent()){
+                            Question question = topQuestion.get();
                             questionCreateDate = question.getCreatedAt().plusDays(1);
                         }
 
                         return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
-                    }).toList();
+                    })
+                    .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
+                    .toList();
         } else {
             roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, STATUS).stream()
                     .filter(roomMember -> {
@@ -114,6 +116,7 @@ public class RoomServiceImpl implements RoomService {
 
                         return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
                     })
+                    .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .collect(Collectors.toList());
         }
         return new ResponseRoom(ExceptionCode.ROOM_FOUND_OK, new ListResponse(roomListDto));
