@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import pointer.Pointer_Spring.alarm.domain.Alarm;
 
@@ -21,7 +22,7 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM Alarm WHERE receive_user_id = :receiveUserId OR send_user_id = :sendUserId", nativeQuery = true)
-    void deleteAllByReceiveUserIdOrSendUserId(Long receiveUserId, Long sendUserId);
+    void deleteAllByReceiveUserIdOrSendUserId(@Param("receiveUserId") Long receiveUserId, @Param("sendUserId") Long sendUserId);
 
     List<Alarm> findAllByReceiveUserIdAndTypeAndIdLessThanOrderByIdDesc(Long userId, Alarm.AlarmType alarmType, Long cursorId, PageRequest pageable);
 
