@@ -148,8 +148,11 @@ public class VoteServiceImpl implements VoteService {
         System.out.println(roomMembers.size());
         System.out.println(votedUserCnt);
 
+        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(question.getRoom().getRoomId(), user.getUserId(), STATUS)
+                .orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+
         return VoteDto.GetResponse.builder()
-                .roomName(question.getRoom().getName())
+                .roomName(roomMember.getPrivateRoomNm())
                 .question(question.getQuestion())
                 .members(memberResponses)
                 .targetUser(targetUser)
