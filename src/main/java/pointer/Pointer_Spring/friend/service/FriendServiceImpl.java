@@ -118,15 +118,31 @@ public class FriendServiceImpl implements FriendService {
 
         List<Friend> objects = fetchPagesOffsetUserFriend(findUser, dto);
         List<FriendDto.FriendInfoList> friendInfoList = new ArrayList<>();
-        for (Friend friend : objects) {
-            User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
-            Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+        if (userPrincipal.getId().equals(dto.getUserId())) {
+            for (Friend friend : objects) {
+                User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+                Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
 
-            if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship())
-                        .setFile(image.get().getImageUrl()));
-            } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship()));
+                if (image.isPresent()) {
+                    friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship())
+                            .setFile(image.get().getImageUrl()));
+                } else {
+                    friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship()));
+                }
+            }
+        } else {
+            for (Friend friend : objects) {
+                User user = userRepository.findByUserIdAndStatus(friend.getUserFriendId(), STATUS).get();
+                Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
+
+                if (image.isPresent()) {
+                    friendInfoList.add(new FriendDto.FriendInfoList(user,
+                            friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS).get().getRelationship())
+                            .setFile(image.get().getImageUrl()));
+                } else {
+                    friendInfoList.add(new FriendDto.FriendInfoList(user,
+                            friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS).get().getRelationship()));
+                }
             }
         }
 
@@ -144,10 +160,10 @@ public class FriendServiceImpl implements FriendService {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
 
             if (image.isPresent()) {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship())
+                friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship())
                         .setFile(image.get().getImageUrl()));
             } else {
-                friendInfoList.add(new FriendDto.FriendInfoList(friend, user, friend.getRelationship()));
+                friendInfoList.add(new FriendDto.FriendInfoList(user, friend.getRelationship()));
             }
         }
 
