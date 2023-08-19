@@ -19,29 +19,33 @@ public class FriendController {
 
     // 조회 및 검색
 
-    @PostMapping("/search") // 유저 검색
+    /*@PostMapping("/search") // 유저 검색
     public UserDto.UserListResponse getUserList(@CurrentUser UserPrincipal userPrincipal,
                                                 @RequestBody FriendDto.FindFriendDto dto) {
         return friendService.getUserList(userPrincipal, dto);
-    }
+    }*/
 
-    @PostMapping("/user/search") // 유저 검색 : 관계 포함
+    @GetMapping("/user/search") // 유저 검색 : 관계 포함
     public UserDto.UserInfoListResponse getUserInfoList(@CurrentUser UserPrincipal userPrincipal,
-                                                @RequestBody FriendDto.FindFriendDto dto) {
-        return friendService.getUserInfoList(userPrincipal, dto);
+                                                        @RequestParam String keyword,
+                                                        @RequestParam int lastPage) {
+        return friendService.getUserInfoList(userPrincipal, keyword, lastPage);
     }
 
-    @PostMapping("/friend/search") // 친구 중 검색 : 기준 userId 추가
+    @GetMapping("/friend/search") // 친구 중 검색 : 기준 userId 추가
     public FriendDto.FriendInfoListResponse getUserFriendList(@CurrentUser UserPrincipal userPrincipal,
-                                                              @RequestBody FriendDto.FindFriendDto dto) {
-        return friendService.getUserFriendList(userPrincipal, dto);
+                                                              @RequestParam Long userId,
+                                                              @RequestParam String keyword,
+                                                              @RequestParam int lastPage) {
+        return friendService.getUserFriendList(userPrincipal, userId, keyword, lastPage);
     }
 
 
-    @PostMapping("/friend/block/search") // 차단친구 중 검색
+    @GetMapping("/friend/block/search") // 차단친구 중 검색
     public FriendDto.FriendInfoListResponse getUserBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
-                                                                   @RequestBody FriendDto.FindFriendDto dto) {
-        return friendService.getUserBlockFriendList(userPrincipal, dto);
+                                                                   @RequestParam String keyword,
+                                                                   @RequestParam int lastPage) {
+        return friendService.getUserBlockFriendList(userPrincipal, keyword, lastPage);
     }
 
     // 친구 관계 설정

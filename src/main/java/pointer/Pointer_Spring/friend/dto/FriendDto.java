@@ -100,10 +100,10 @@ public class FriendDto {
         String file;
         int relationship;
 
-        public FriendInfoList(Friend friend, User user, Friend.Relation relationship) {
+        public FriendInfoList(User user, Friend.Relation relationship) {
             this.friendId = user.getUserId();
             this.id = user.getId();
-            this.friendName = friend.getFriendName();
+            this.friendName = user.getName();
             this.relationship = relationship.ordinal();
         }
 
