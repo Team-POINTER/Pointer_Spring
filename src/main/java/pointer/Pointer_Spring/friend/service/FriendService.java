@@ -7,13 +7,10 @@ import pointer.Pointer_Spring.user.dto.UserDto;
 
 public interface FriendService {
 
-    UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
-    UserDto.UserInfoListResponse getUserInfoList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
-
-
-    FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
-
-    FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+    //UserDto.UserListResponse getUserList(UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+    UserDto.UserInfoListResponse getUserInfoList(UserPrincipal userPrincipal, String keyword, int lastPage);
+    FriendDto.FriendInfoListResponse getUserFriendList(UserPrincipal userPrincipal, Long targetId, String keyword, int lastPage);
+    FriendDto.FriendInfoListResponse getUserBlockFriendList(UserPrincipal userPrincipal, String keyword, int lastPage);
 
     ResponseFriend requestFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto);
     ResponseFriend acceptFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto);
@@ -27,6 +24,6 @@ public interface FriendService {
     //FriendDto.FriendInfoListResponse getFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto);
     //FriendDto.FriendInfoListResponse getBlockFriendList(UserPrincipal userPrincipal, FriendDto.FriendUserDto dto);
 
-    FriendDto.RoomFriendListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, FriendDto.FindFriendDto dto);
+    FriendDto.RoomFriendListResponse getRoomFriendList(Long roomId, UserPrincipal userPrincipal, String keyword, int lastPage);
 
 }

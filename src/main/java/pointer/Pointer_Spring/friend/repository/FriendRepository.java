@@ -52,6 +52,28 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
                                     @Param("keyword") String keyword,
                                     @Param("status") int status);
 
+    // 본인 - 친구의 친구 검색 (본인 제외)
+
+    @Query("SELECT f FROM Friend f JOIN f.user u " +
+            "WHERE f.userFriendId IN (SELECT u.userId FROM User u WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
+            "AND f.userFriendId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :meId AND f.relationship = 0 AND u.status = :status) " + // 차단된 유저
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND NOT f.userFriendId = :meId AND f.status = :status " +
+            "ORDER BY u.name")
+    List<Friend> findTargetAndFriends(@Param("userUserId") Long userUserId,
+                                      @Param("keyword") String keyword,
+                                      @Param("meId") Long meId,
+                                      @Param("status") int status,
+                                      PageRequest pageRequest);
+
+    @Query("SELECT COUNT(f) FROM Friend f JOIN f.user u " +
+            "WHERE f.userFriendId IN (SELECT u.userId FROM User u WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
+            "AND f.userFriendId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :meId AND f.relationship = 0 AND u.status = :status) " + // 차단된 유저
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND NOT f.userFriendId = :meId AND f.status = :status ")
+    Long countTargetByFriendCriteria(@Param("userUserId") Long userUserId,
+                                    @Param("keyword") String keyword,
+                                    @Param("meId") Long meId,
+                                    @Param("status") int status);
+
     // 상대 친구 조회
     @Query("SELECT f FROM Friend f JOIN f.user u " +
             "WHERE NOT f.relationship = 0 AND f.user.userId = :userUserId AND f.status = :status " +

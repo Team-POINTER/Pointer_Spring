@@ -73,8 +73,9 @@ public class RoomController {
     @GetMapping("/{room-id}/friends")
     public Object getRoomFriendList(@PathVariable(name = "room-id") Long roomId,
                                     @CurrentUser UserPrincipal userPrincipal,
-                                    @RequestBody FriendDto.FindFriendDto dto) {
-        return friendService.getRoomFriendList(roomId, userPrincipal, dto);
+                                    @RequestParam String keyword,
+                                    @RequestParam int lastPage) {
+        return friendService.getRoomFriendList(roomId, userPrincipal, keyword, lastPage);
     }
 
      //초대 링크 조회
