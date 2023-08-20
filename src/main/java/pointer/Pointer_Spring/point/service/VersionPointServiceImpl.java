@@ -5,6 +5,9 @@ import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.point.domain.VersionPoint;
 import pointer.Pointer_Spring.point.dto.VersionPointDto;
 import pointer.Pointer_Spring.point.repository.VersionPointerRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
+import pointer.Pointer_Spring.user.domain.User;
+import pointer.Pointer_Spring.user.repository.UserRepository;
 import pointer.Pointer_Spring.validation.CustomException;
 import pointer.Pointer_Spring.validation.ExceptionCode;
 
@@ -15,6 +18,11 @@ import java.util.Optional;
 public class VersionPointServiceImpl implements VersionPointService {
 
     private final VersionPointerRepository versionPointerRepository;
+    private final UserRepository userRepository;
+
+    private final Integer STATUS = 1;
+    private final Integer POINT = 0;
+
 
     /*@Override
     public Object saveVersionPoint(VersionPointDto.SaveVersionPointDto dto) {
@@ -43,10 +51,22 @@ public class VersionPointServiceImpl implements VersionPointService {
     public Object findVersionPoint() {
         Optional<VersionPoint> version = versionPointerRepository.findVersionPointWithMaxVersion();
         if (version.isEmpty()) {
-            return new CustomException(ExceptionCode.INVALID_POINT_VERSION);
+            return new VersionPointDto.VersionPointResponse(ExceptionCode.INVALID_POINT_VERSION);
         }
 
         return new VersionPointDto.VersionPointResponse(ExceptionCode.FIND_POINT_VERSION_OK,
                 version.get().getPoint(), version.get().getPhrase());
+    }
+
+    @Override
+    public Object usePoint(UserPrincipal userPrincipal, int point) {
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).get();
+        if (POINT.compareTo((int) (user.getPoint() - point)) > 0) { // 차감시, 음수
+            return new VersionPointDto.PointResponse(ExceptionCode.POINT_CALC_FAIL, Math.toIntExact(user.getPoint()));
+        }
+        user.setPoint(user.getPoint() - point);
+        userRepository.save(user);
+
+        return new VersionPointDto.PointResponse(ExceptionCode.POINT_CALC_OK, Math.toIntExact(user.getPoint()));
     }
 }

@@ -38,4 +38,15 @@ public class VersionPointDto {
             this.phrase = phrase;
         }
     }
+
+    @Getter
+    public static class PointResponse extends ResponseType {
+
+        private int point;
+
+        public PointResponse(ExceptionCode exceptionCode, int point) {
+            super(exceptionCode);
+            this.point = point;
+        }
+    }
 }

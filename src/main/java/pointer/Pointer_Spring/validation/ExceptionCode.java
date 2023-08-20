@@ -171,6 +171,13 @@ public enum ExceptionCode {
     KAKAO_PUSH_SEND_FAIL(INVALID_ACCESS, "L002", "카카오 푸시 전송 실패"),
 
     /**
+     * 포인트 차감
+     */
+
+    POINT_CALC_OK(SUCCESS, "M001", "포인트 차감 성공"),
+    POINT_CALC_FAIL(INVALID_ACCESS, "M002", "포인트 부족"),
+
+    /**
      * 잘못된 ExceptionCode
      */
     INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),

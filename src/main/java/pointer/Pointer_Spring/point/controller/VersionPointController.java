@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.point.dto.VersionPointDto;
 import pointer.Pointer_Spring.point.service.VersionPointService;
+import pointer.Pointer_Spring.security.CurrentUser;
+import pointer.Pointer_Spring.security.UserPrincipal;
 
 @RestController
 @RequestMapping("/point")
@@ -23,5 +25,11 @@ public class VersionPointController {
     @GetMapping
     public Object getVersionPoint() {
         return  new ResponseEntity<>(versionPointService.findVersionPoint(), HttpStatus.OK);
+    }
+
+    // 포링 차감 여부
+    @GetMapping("/{point}")
+    public Object setMinusPoint(@CurrentUser UserPrincipal userPrincipal, @PathVariable int point) {
+        return  new ResponseEntity<>(versionPointService.usePoint(userPrincipal, point), HttpStatus.OK);
     }
 }
