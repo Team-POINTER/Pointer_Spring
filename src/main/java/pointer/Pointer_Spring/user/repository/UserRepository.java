@@ -28,18 +28,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findAllByEventAlarmFlag(boolean b);
 
-    // 유저 검색 (제외: 본인, 차단 친구)
+    // 유저 검색 (제외: 본인)
     @Query("SELECT u FROM User u " +
-            "WHERE u.userId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :userId AND f.relationship = 0 AND f.status = :status) " +
-            "AND NOT u.userId = :userId AND (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status " +
+            // "WHERE u.userId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :userId AND f.relationship = 0 AND f.status = :status) " + // 내가 차단한 친구
+            "WHERE NOT u.userId = :userId AND (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status " +
             "ORDER BY u.name")
     List<User> findUsersWithKeywordAndStatusNotFriendOfUser(@Param("userId")Long userId,
                                                             @Param("keyword")String keyword,
                                                             @Param("status")int status,
                                                             Pageable pageRequest);
     @Query("SELECT COUNT(u) FROM User u " +
-            "WHERE u.userId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :userId AND f.relationship = 0 AND f.status = :status) " +
-            "AND NOT u.userId = :userId AND (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status ")
+            //"WHERE u.userId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :userId AND f.relationship = 0 AND f.status = :status) " +
+            "WHERE NOT u.userId = :userId AND (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status ")
     Long countUsersWithKeywordAndStatusNotFriendOfUser(@Param("userId")Long userId,
                                                        @Param("keyword")String keyword,
                                                        @Param("status")int status);
