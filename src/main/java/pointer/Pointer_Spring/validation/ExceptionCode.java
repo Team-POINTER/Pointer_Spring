@@ -136,6 +136,7 @@ public enum ExceptionCode {
     FIND_POINT_VERSION_OK(SUCCESS, "J014", "포인트 버전 확인"),
     INVALID_POINT_VERSION(NOT_FOUND_VALUE, "J015", "포인트 버전 확인 실패"),
     SAVE_POINT_VERSION(SUCCESS, "J016", "포인트 버전 저장 성공"),
+    ROOMMEMBER_ALREADY(DUPLICATED_VALUE, "J017", "이미 룸 멤버입니다."),
 
 
     /**
@@ -153,22 +154,22 @@ public enum ExceptionCode {
 
 
     /**
-     * 신고
-     */
-    REPORT_CREATE_SUCCESS(CREATED, "L000", "신고 생성 성공"),
-    REPORT_NOT_FOUND(NOT_FOUND_VALUE, "L001", "신고 존재하지 않음"),
-    REPORTED_USER(INVALID_ACCESS, "L002", "일시적 신고 처리된 유저"),
-    ALREADY_REPORT(DUPLICATED_VALUE, "L003", "이미 처리된 신고"),
-    REPORT_GET_SUCCESS(SUCCESS, "L004", "신고 조회 성공"),
-    REPORT_HANDLE_SUCCESS(SUCCESS, "L005", "신고 처리 성공"),
-
-    /**
      * 알림
      */
 
     ACTIVE_ALARM_NOT_FOUND(NOT_FOUND_VALUE, "L000", "활동 알림이 존재하지 않습니다"),
     KAKAO_TOKEN_REGISTER_FAIL(INVALID_ACCESS, "L001", "카카오 토큰 등록 실패"),
     KAKAO_PUSH_SEND_FAIL(INVALID_ACCESS, "L002", "카카오 푸시 전송 실패"),
+
+    /**
+     * 신고
+     */
+    REPORT_CREATE_SUCCESS(CREATED, "M000", "신고 생성 성공"),
+    REPORT_NOT_FOUND(NOT_FOUND_VALUE, "M001", "신고 존재하지 않음"),
+    REPORTED_USER(INVALID_ACCESS, "M002", "일시적 신고 처리된 유저"),
+    ALREADY_REPORT(DUPLICATED_VALUE, "M003", "이미 처리된 신고"),
+    REPORT_GET_SUCCESS(SUCCESS, "M004", "신고 조회 성공"),
+    REPORT_HANDLE_SUCCESS(SUCCESS, "M005", "신고 처리 성공"),
 
     /**
      * 잘못된 ExceptionCode
