@@ -26,16 +26,16 @@ public class VersionPointDto {
     public static class VersionPointResponse extends ResponseType {
 
         private int point;
-        private String phrase;
+        //private String phrase;
 
         public VersionPointResponse(ExceptionCode exceptionCode) {
             super(exceptionCode);
         }
 
-        public VersionPointResponse(ExceptionCode exceptionCode, int point, String phrase) {
+        public VersionPointResponse(ExceptionCode exceptionCode, int point) { //, String phrase) {
             super(exceptionCode);
             this.point = point;
-            this.phrase = phrase;
+            //this.phrase = phrase;
         }
     }
 

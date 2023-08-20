@@ -56,7 +56,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query("SELECT f FROM Friend f JOIN f.user u " +
             "WHERE f.userFriendId IN (SELECT u.userId FROM User u WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
             "AND f.userFriendId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :meId AND f.relationship = 0 AND u.status = :status) " + // 차단된 유저
-            "AND f.relationship = 3 AND f.user.userId = :userUserId AND NOT f.userFriendId = :meId AND f.status = :status " +
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND f.status = :status " + // AND NOT f.userFriendId = :meId
             "ORDER BY u.name")
     List<Friend> findTargetAndFriends(@Param("userUserId") Long userUserId,
                                       @Param("keyword") String keyword,
@@ -67,7 +67,7 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     @Query("SELECT COUNT(f) FROM Friend f JOIN f.user u " +
             "WHERE f.userFriendId IN (SELECT u.userId FROM User u WHERE (u.id LIKE %:keyword% OR u.name LIKE %:keyword%) AND u.status = :status) " +
             "AND f.userFriendId NOT IN (SELECT f.userFriendId FROM Friend f WHERE f.user.userId = :meId AND f.relationship = 0 AND u.status = :status) " + // 차단된 유저
-            "AND f.relationship = 3 AND f.user.userId = :userUserId AND NOT f.userFriendId = :meId AND f.status = :status ")
+            "AND f.relationship = 3 AND f.user.userId = :userUserId AND f.status = :status ") // AND NOT f.userFriendId = :meId
     Long countTargetByFriendCriteria(@Param("userUserId") Long userUserId,
                                     @Param("keyword") String keyword,
                                     @Param("meId") Long meId,

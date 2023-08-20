@@ -28,7 +28,7 @@ public class VersionPointController {
     }
 
     // 포링 차감 여부
-    @GetMapping("/{point}")
+    @PostMapping("/{point}")
     public Object setMinusPoint(@CurrentUser UserPrincipal userPrincipal, @PathVariable int point) {
         return  new ResponseEntity<>(versionPointService.usePoint(userPrincipal, point), HttpStatus.OK);
     }

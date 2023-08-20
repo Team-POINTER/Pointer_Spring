@@ -54,8 +54,7 @@ public class VersionPointServiceImpl implements VersionPointService {
             return new VersionPointDto.VersionPointResponse(ExceptionCode.INVALID_POINT_VERSION);
         }
 
-        return new VersionPointDto.VersionPointResponse(ExceptionCode.FIND_POINT_VERSION_OK,
-                version.get().getPoint(), version.get().getPhrase());
+        return new VersionPointDto.VersionPointResponse(ExceptionCode.FIND_POINT_VERSION_OK, version.get().getPoint());
     }
 
     @Override
