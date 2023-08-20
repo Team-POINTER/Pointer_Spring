@@ -455,10 +455,10 @@ public class FriendServiceImpl implements FriendService {
             // 차단 아닌 친구 상태
             findFriendMember.ifPresent(friendRepository::delete);
 
-            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
-                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
-
-            o.ifPresent(alarmRepository::delete);
+//            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
+//                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
+//
+//            o.ifPresent(alarmRepository::delete);
 
             return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
         }

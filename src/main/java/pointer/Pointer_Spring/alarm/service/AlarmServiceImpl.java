@@ -207,6 +207,7 @@ public class AlarmServiceImpl implements AlarmService {
 
             AlarmDto.GetAlarmResponse response = AlarmDto.GetAlarmResponse.builder()
                     .alarmId(alarm.getId())
+                    .needId(alarm.getNeedId())
                     .sendUserId(alarm.getSendUserId())
                     .sendUserName(requestUser!=null?requestUser.getName():null)
                     .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
