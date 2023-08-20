@@ -371,6 +371,7 @@ public class FriendServiceImpl implements FriendService {
             }
             // 내 알림에서 친구 관련 알림 모두 숨김
             findFriendUser.get().setRelationship(Friend.Relation.BLOCK);
+            friendRepository.save(findFriendUser.get());
         } else {
             User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
                     () -> {
