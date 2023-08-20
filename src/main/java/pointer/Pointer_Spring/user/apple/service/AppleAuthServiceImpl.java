@@ -133,13 +133,20 @@ public class AppleAuthServiceImpl {
         User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), 1)
                 .orElseThrow(() -> new CustomException(ExceptionCode.USER_NOT_FOUND));
 
+        if(user.getPushToken()!=null) {
         AlarmDto.KakaoTokenDeRegisterRequest kakaoTokenDeRegisterRequest = AlarmDto.KakaoTokenDeRegisterRequest.builder()
                 .uuid(user.getId())
                 .pushToken(user.getPushToken())
-                .pushType(user.getPushToken())
+                .pushType("apns")
                 .build();
 
         kakaoPushNotiService.deRegisterKakaoToken(user.getUserId(), kakaoTokenDeRegisterRequest);
+
+        user.setPushToken(null);
+        user.setDeviceId(null);
+        user.setApnsEnv(null);
+
+        }
 
         return new UserDto.UserResponse(ExceptionCode.LOGOUT_OK);
     }

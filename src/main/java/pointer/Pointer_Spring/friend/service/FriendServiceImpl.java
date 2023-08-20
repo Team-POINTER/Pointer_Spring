@@ -301,8 +301,8 @@ public class FriendServiceImpl implements FriendService {
             findFriendMember.setRelationship(Friend.Relation.SUCCESS);
 
             Alarm alarm = Alarm.builder()
-                    .sendUserId(dto.getMemberId())
-                    .receiveUserId(findFriendUser.getUser().getUserId())
+                    .sendUserId(findFriendUser.getUser().getUserId())
+                    .receiveUserId(findFriendMember.getUser().getUserId())
                     .type(Alarm.AlarmType.FRIEND_ACCEPT)
                     .title(findFriendUser.getUser().getName()
                             +Alarm.AlarmType.FRIEND_ACCEPT.getTitle())
@@ -319,10 +319,10 @@ public class FriendServiceImpl implements FriendService {
             AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                     .forApns(AlarmDto.PushType.builder()
                             .message(alarm.getContent())
-                            .apnsEnv(findFriendUser.getUser().getApnsEnv())
+                            .apnsEnv(findFriendMember.getUser().getApnsEnv())
                             .build())
                     .build();
-            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendUser.getUser().getUserId())), kakaoPushRequest);
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendMember.getUser().getUserId())), kakaoPushRequest);
             return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_NOT);
@@ -428,11 +428,17 @@ public class FriendServiceImpl implements FriendService {
                 friendRepository.delete(findFriendMember);
             }
             // 상대 알림에서 친구 요청 삭제
+            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
+                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
+
+            o.ifPresent(alarmRepository::delete);
+
             return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_NOT);
     }
 
+    @Transactional
     @Override
     public ResponseFriend cancelFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriendUser = friendRepository
@@ -448,13 +454,15 @@ public class FriendServiceImpl implements FriendService {
             friendRepository.delete(findFriendUser);
             // 차단 아닌 친구 상태
             findFriendMember.ifPresent(friendRepository::delete);
-            return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
-        } else if (findFriendUser.getRelationship().equals(Friend.Relation.REQUEST)) {
+
             Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
                     userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
 
             o.ifPresent(alarmRepository::delete);
+
+            return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
         }
+
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
     }
 
