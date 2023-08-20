@@ -149,12 +149,16 @@ public class FriendServiceImpl implements FriendService {
 
                 // 나 - 친구의 친구 관계
                 Friend.Relation relationship;
-                Optional<Friend> optionalFriend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
-
-                if (optionalFriend.isEmpty()) {
-                    relationship = Friend.Relation.NONE;
+                if (user.getUserId().equals(userPrincipal.getId())) {
+                    relationship = Friend.Relation.ME;
                 } else {
-                    relationship = optionalFriend.get().getRelationship();
+                    Optional<Friend> optionalFriend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), user.getUserId(), STATUS);
+
+                    if (optionalFriend.isEmpty()) {
+                        relationship = Friend.Relation.NONE;
+                    } else {
+                        relationship = optionalFriend.get().getRelationship();
+                    }
                 }
 
                 if (image.isPresent()) {
