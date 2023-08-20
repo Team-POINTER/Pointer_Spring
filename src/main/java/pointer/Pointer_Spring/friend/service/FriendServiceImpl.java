@@ -363,8 +363,11 @@ public class FriendServiceImpl implements FriendService {
         }
 
         if (findFriendUser.isPresent()) { // 관계 존재 : request, requested, success
-            if (findFriendUser.get().getRelationship().equals(Friend.Relation.BLOCK)) {
+            Friend.Relation now = findFriendUser.get().getRelationship();
+            if (now.equals(Friend.Relation.BLOCK)) {
                 return new ResponseFriend(ExceptionCode.FRIEND_BLOCK_CANCEL_NOT);
+            } else if (now.equals(Friend.Relation.SUCCESS)) {
+                friendRepository.deleteByUserFriendIdAndUserUserId(findFriendUser.get().getId(), findFriendUser.get().getUserFriendId()); // 친구 관계 삭제
             }
             // 내 알림에서 친구 관련 알림 모두 숨김
             findFriendUser.get().setRelationship(Friend.Relation.BLOCK);
