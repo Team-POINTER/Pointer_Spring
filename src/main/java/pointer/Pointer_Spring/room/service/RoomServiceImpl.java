@@ -254,7 +254,10 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepository.findById(roomId).orElseThrow(()->new CustomException(ExceptionCode.ROOM_NOT_FOUND));//roomMember에서 roomId로도 비교하기 때문에 무조건 존재해야 넘어옴
         room.updateMemberNum(room.getMemberNum()-1);
         if(room.getMemberNum()<=0){
-            room.setStatus(0);
+            questionRepository.deleteAllByRoomId(room.getRoomId());
+            voteRepository.deleteAllByRoomId(room.getRoomId());
+            roomMemberRepository.delete(roomMember);
+            roomRepository.delete(room);
         }
         //voteRepository.findAllByRoomId(roomId).setStatus(0);
         roomMember.setStatus(0);
@@ -321,7 +324,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public ResponseRoom isInviteMembersList(UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request){
         Long userId = userPrincipal.getId();
-        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, 1)){//초대하려는 유저가 룸 멤버가 아닐 때
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(userId, roomId, 1)){//초대하려는 유저가 룸 멤버가 아닐 때
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }
         //pageSize는 상수로
@@ -406,11 +409,15 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepository.findByCode(IdCode).orElseThrow(
                 ()->new CustomException(ExceptionCode.ROOM_NOT_FOUND)
         );
-    User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
+        User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
                 ()->new CustomException(ExceptionCode.USER_NOT_FOUND)
         );
-        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(room.getRoomId(), user.getUserId(), STATUS)){
+        
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(user.getUserId(), room.getRoomId(), STATUS)){
+            System.out.println(roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(room.getRoomId(), user.getUserId(), STATUS));
             inviteMembers(new InviteRequest(room.getRoomId(), List.of(user.getUserId())));
+        }else{
+            throw new CustomException(ExceptionCode.ROOMMEMBER_ALREADY);
         }
 
         return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(userPrincipal.getId(), room.getRoomId()));
@@ -420,7 +427,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public ResponseRoom findLink(Long userId, Long roomId) throws NoSuchAlgorithmException {
-        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatusEquals(userId, roomId, STATUS)){
+        if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(userId, roomId, STATUS)){
             throw new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST);
         }
         final String URL_PREFIX = "http://pointer2024.com/invitation-link/";
