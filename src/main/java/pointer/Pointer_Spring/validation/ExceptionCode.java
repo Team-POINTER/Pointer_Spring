@@ -172,6 +172,13 @@ public enum ExceptionCode {
     REPORT_HANDLE_SUCCESS(SUCCESS, "M005", "신고 처리 성공"),
 
     /**
+     * 포인트 차감
+     */
+
+    POINT_CALC_OK(SUCCESS, "N001", "포인트 차감 성공"),
+    POINT_CALC_FAIL(INVALID_ACCESS, "N002", "포인트 부족"),
+
+    /**
      * 잘못된 ExceptionCode
      */
     INVALID_FORM(INVALID_ACCESS, "Z000", "형식에 어긋난 이름"),
