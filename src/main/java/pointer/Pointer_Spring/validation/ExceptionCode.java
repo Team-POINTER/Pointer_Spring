@@ -115,31 +115,6 @@ public enum ExceptionCode {
 
 
     /**
-     * room
-     */
-    ROOMNAME_VERIFY_OK(SUCCESS, "J000", "룸 이름 변경 성공"),
-    ROOMMEMBER_NOT_EXIST(INVALID_ACCESS, "J001", "룸 멤버 존재하지 않음"),
-    ROOM_CREATE_SUCCESS(CREATED, "J002", "룸 생성 성공"),
-    ROOM_CREATE_FAIL(INVALID_ACCESS, "J003", "룸 생성 실패"),
-    ROOM_FOUND_OK(SUCCESS, "J0010", "룸 조회 성공"),
-    ROOM_NOT_FOUND(NOT_FOUND_VALUE, "J004", "룸 조회 실패"),
-    ROOM_CREATE_OVER_LIMIT(INVALID_ACCESS, "J005", "룸 생성 가능 개수 초과"),
-    ROOM_EXIT_SUCCESS(SUCCESS, "J006", "룸 나가기 성공"),
-    ROOM_NAME_INVALID(INVALID_ACCESS, "J007", "형식에 맞지 않는 룸 이름"),
-    ROOM_NAME_INVITATION(SUCCESS, "J008", "초대 성공"),
-    ROOMMEMBER_DUPLICATE_VALUE(INVALID_ACCESS, "J009", "sql 룸 멤버 중복 에러"),
-    ROOMMEMBER_GET_SUCCESS(SUCCESS, "J0011", "룸 멤버 조회 성공"),
-    INVITATION_LIST_GET_SUCCESS(SUCCESS, "J0012", "초대 목록 조회 성공"),
-
-    ROOM_FRIEND_OK(SUCCESS, "J013", "룸 초대 가능 친구 목록"),
-
-    FIND_POINT_VERSION_OK(SUCCESS, "J014", "포인트 버전 확인"),
-    INVALID_POINT_VERSION(NOT_FOUND_VALUE, "J015", "포인트 버전 확인 실패"),
-    SAVE_POINT_VERSION(SUCCESS, "J016", "포인트 버전 저장 성공"),
-    ROOMMEMBER_ALREADY(DUPLICATED_VALUE, "J017", "이미 룸 멤버입니다."),
-
-
-    /**
      * 질문
      */
     QUESTION_CREATED_FAILED(INVALID_ACCESS, "K000", "질문 생성 실패"),
@@ -177,6 +152,31 @@ public enum ExceptionCode {
 
     POINT_CALC_OK(SUCCESS, "N001", "포인트 차감 성공"),
     POINT_CALC_FAIL(INVALID_ACCESS, "N002", "포인트 부족"),
+
+    /**
+     * room
+     */
+    ROOMNAME_VERIFY_OK(SUCCESS, "P000", "룸 이름 변경 성공"),
+    ROOMMEMBER_NOT_EXIST(INVALID_ACCESS, "P001", "룸 멤버 존재하지 않음"),
+    ROOM_CREATE_SUCCESS(CREATED, "P002", "룸 생성 성공"),
+    ROOM_CREATE_FAIL(INVALID_ACCESS, "P003", "룸 생성 실패"),
+    ROOM_FOUND_OK(SUCCESS, "P0010", "룸 조회 성공"),
+    ROOM_NOT_FOUND(NOT_FOUND_VALUE, "P004", "룸 조회 실패"),
+    ROOM_CREATE_OVER_LIMIT(INVALID_ACCESS, "P005", "룸 생성 가능 개수 초과"),
+    ROOM_EXIT_SUCCESS(SUCCESS, "P006", "룸 나가기 성공"),
+    ROOM_NAME_INVALID(INVALID_ACCESS, "P007", "형식에 맞지 않는 룸 이름"),
+    ROOM_NAME_INVITATION(SUCCESS, "P008", "초대 성공"),
+    ROOMMEMBER_OVER_LIMIT(INVALID_ACCESS, "P009", "룸 인원이 초과되었습니다."),
+    ROOMMEMBER_GET_SUCCESS(SUCCESS, "P0011", "룸 멤버 조회 성공"),
+    INVITATION_LIST_GET_SUCCESS(SUCCESS, "P0012", "초대 목록 조회 성공"),
+
+    ROOM_FRIEND_OK(SUCCESS, "P013", "룸 초대 가능 친구 목록"),
+
+    FIND_POINT_VERSION_OK(SUCCESS, "P014", "포인트 버전 확인"),
+    INVALID_POINT_VERSION(NOT_FOUND_VALUE, "P015", "포인트 버전 확인 실패"),
+    SAVE_POINT_VERSION(SUCCESS, "P016", "포인트 버전 저장 성공"),
+    ROOMMEMBER_ALREADY(DUPLICATED_VALUE, "P017", "이미 초대된 멤버가 있습니다."),
+
 
     /**
      * 잘못된 ExceptionCode

@@ -279,7 +279,7 @@ public class RoomServiceImpl implements RoomService {
             Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getUserFriendIdList().size();
 
             if (totalRoomMemberNum > 50) {//초대 가능 인원 수 제한
-                throw new CustomException(ExceptionCode.ROOM_CREATE_OVER_LIMIT);
+                throw new CustomException(ExceptionCode.ROOMMEMBER_OVER_LIMIT);
             } // 룸 자체적으로 초대 가능한지
             foundRoom.updateMemberNum(totalRoomMemberNum);
         }
