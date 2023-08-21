@@ -127,7 +127,7 @@ public enum ExceptionCode {
     ROOM_EXIT_SUCCESS(SUCCESS, "J006", "룸 나가기 성공"),
     ROOM_NAME_INVALID(INVALID_ACCESS, "J007", "형식에 맞지 않는 룸 이름"),
     ROOM_NAME_INVITATION(SUCCESS, "J008", "초대 성공"),
-    ROOMMEMBER_DUPLICATE_VALUE(INVALID_ACCESS, "J009", "sql 룸 멤버 중복 에러"),
+    ROOMMEMBER_OVER_LIMIT(INVALID_ACCESS, "J009", "룸 인원이 초과되었습니다."),
     ROOMMEMBER_GET_SUCCESS(SUCCESS, "J0011", "룸 멤버 조회 성공"),
     INVITATION_LIST_GET_SUCCESS(SUCCESS, "J0012", "초대 목록 조회 성공"),
 
@@ -136,7 +136,8 @@ public enum ExceptionCode {
     FIND_POINT_VERSION_OK(SUCCESS, "J014", "포인트 버전 확인"),
     INVALID_POINT_VERSION(NOT_FOUND_VALUE, "J015", "포인트 버전 확인 실패"),
     SAVE_POINT_VERSION(SUCCESS, "J016", "포인트 버전 저장 성공"),
-    ROOMMEMBER_ALREADY(DUPLICATED_VALUE, "J017", "이미 룸 멤버입니다."),
+    ROOMMEMBER_ALREADY(DUPLICATED_VALUE, "J017", "이미 초대된 멤버가 있습니다."),
+
 
 
     /**
