@@ -100,7 +100,7 @@ public class RoomDto {
             this.votingNum = room.getVotingNum();
             this.limitedAt = limtedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
-            this.questionCreatorId = question.getId();
+            this.questionCreatorId = question.getCreatorId();
             this.question = question.getQuestion();
             this.roomMembers = roomMembers;
         }
