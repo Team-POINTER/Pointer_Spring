@@ -87,7 +87,7 @@ public class RoomServiceImpl implements RoomService {
                             questionCreateDate = question.getCreatedAt().plusDays(1);
                         }
 
-                        return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
+                        return new ListRoom(roomMember, latestQuestion, msgForTopUserNm, isVoted, questionCreateDate);
                     })
                     .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .toList();
@@ -116,7 +116,7 @@ public class RoomServiceImpl implements RoomService {
                             questionCreateDate = question.getCreatedAt().plusDays(1);
                         }
 
-                        return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
+                        return new ListRoom(roomMember, latestQuestion, msgForTopUserNm, isVoted, questionCreateDate);
                     })
                     .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .collect(Collectors.toList());
