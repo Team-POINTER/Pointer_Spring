@@ -69,6 +69,16 @@ public class Room extends BaseEntity {
         this.memberNum = 1;
         this.votingNum = 0;
     }
+    //test
+    @Builder
+    public Room(Long roomId, Long creatorId, String name, Integer memNum) {
+        this.roomId = roomId;
+        this.creatorId = creatorId;
+        this.name = name;
+        this.memberNum = 1;
+        this.votingNum = 0;
+        this.memberNum = memNum;
+    }
 
     public void updateCode(String code){
         this.code = code;
