@@ -486,22 +486,19 @@ public class FriendServiceImpl implements FriendService {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
 
             if (roomMembers.stream().anyMatch(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId()))) {
-                FriendDto.FriendRoomInfoList.Reason reason = FriendDto.FriendRoomInfoList.Reason.ALREADY;
                 
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0, reason).setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0, reason));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0));
                 }
             } else {
-                FriendDto.FriendRoomInfoList.Reason reason = user.getRoomLimit() < 30 ?
-                        null : FriendDto.FriendRoomInfoList.Reason.OVERLIMIT;
-                int status = reason == null ? 1 : 0;
+                int status = user.getRoomLimit() < 30 ? 1 : 0;
 
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status, reason).setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status, reason));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status));
                 }
             }
         }

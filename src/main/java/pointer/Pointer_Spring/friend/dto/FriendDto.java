@@ -122,19 +122,7 @@ public class FriendDto {
         String friendName;
         String file;
         int status; //초대 가능한지
-        public enum Reason{
-            OVERLIMIT, ALREADY
-        }
-        @JsonInclude(JsonInclude.Include.NON_NULL)
-        FriendDto.FriendRoomInfoList.Reason reason;
 
-        public FriendRoomInfoList(User user, int status, Reason reason) {
-            this.friendId = user.getUserId();
-            this.id = user.getId();
-            this.friendName = user.getName();
-            this.status = status;
-            this.reason = reason;
-        }
         public FriendRoomInfoList(User user, int status) {
             this.friendId = user.getUserId();
             this.id = user.getId();
