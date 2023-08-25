@@ -229,9 +229,8 @@ public class AuthServiceImpl implements AuthService {
         );*/
         Optional<User> findUser = userRepository.findByIdAndStatus(userInfo.getId(), STATUS);
         if (findUser.isPresent()) { // 상대 id
-            return new UserDto.DuplicateUserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
+            return new UserDto.DuplicateUserResponse(ExceptionCode.USER_DUPLICATED_ID); // ID 중복
         }
-
         else if (user.getCheckId() == 1) {
             try {
                 user.setId(userInfo.getId(), COMPLETE);
@@ -242,8 +241,9 @@ public class AuthServiceImpl implements AuthService {
             // DB에 저장된 id
             String realId = userRepository.findByIdAndStatus(userInfo.getId(), STATUS).get().getId();
             return new UserDto.DuplicateUserResponse(ExceptionCode.USER_SAVE_ID_OK, realId);
+        } else {
+            return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
         }
-        return new UserDto.UserResponse(ExceptionCode.USER_NO_CHECK_ID); // ID 중복
     }
 
     @Override
