@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -85,7 +87,7 @@ public class RoomServiceImpl implements RoomService {
                             questionCreateDate = question.getCreatedAt().plusDays(1);
                         }
 
-                        return new ListRoom(roomMember, latestQuestion.getId() , latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
+                        return new ListRoom(roomMember, latestQuestion, msgForTopUserNm, isVoted, questionCreateDate);
                     })
                     .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .toList();
@@ -114,7 +116,7 @@ public class RoomServiceImpl implements RoomService {
                             questionCreateDate = question.getCreatedAt().plusDays(1);
                         }
 
-                        return new ListRoom(roomMember, latestQuestion.getId(), latestQuestion.getQuestion(), msgForTopUserNm, isVoted, questionCreateDate);
+                        return new ListRoom(roomMember, latestQuestion, msgForTopUserNm, isVoted, questionCreateDate);
                     })
                     .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .collect(Collectors.toList());
@@ -273,42 +275,41 @@ public class RoomServiceImpl implements RoomService {
                 }
         );
 
-        Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getUserFriendIdList().size();
-        if (totalRoomMemberNum>50) {//초대 가능 인원 수 제한
-            throw new CustomException(ExceptionCode.ROOM_CREATE_OVER_LIMIT);
-        } // 룸 자체적으로 초대 가능한지
-        foundRoom.updateMemberNum(totalRoomMemberNum);
+        synchronized (foundRoom) {
+            Integer totalRoomMemberNum = foundRoom.getMemberNum() + inviteDto.getUserFriendIdList().size();
 
+            if (totalRoomMemberNum > 50) {//초대 가능 인원 수 제한
+                throw new CustomException(ExceptionCode.ROOMMEMBER_OVER_LIMIT);
+            } // 룸 자체적으로 초대 가능한지
+            foundRoom.updateMemberNum(totalRoomMemberNum);
+        }
 
-        //RoomMember저장
+            //RoomMember저장
         List<RoomMember> roomMembers;
         roomMembers = inviteDto.getUserFriendIdList().stream()
                 .map((userFriendId) -> {
-                        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus
-                                (inviteDto.getRoomId(), userFriendId, 0).orElse(null);
-                        if(roomMember != null){
-                            roomMember.setStatus(1);
-                            return null;
-                        }
-                        else {
-                            User foundUser = userRepository.findById(userFriendId).orElseThrow( // 이미 fetchpage에서 status 0인거로 골라옴
-                                    () -> new CustomException(ExceptionCode.USER_NOT_FOUND));
-                            foundUser.updateRoomLimit(foundUser.getRoomLimit() + 1);
-                            return new RoomMember(foundRoom, foundUser);
-                        }
+                    RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus
+                            (inviteDto.getRoomId(), userFriendId, 0).orElse(null);
+                    if (roomMember != null) {
+                        roomMember.setStatus(1);
+                        return null;
+                    } else {
+                        User foundUser = userRepository.findById(userFriendId).orElseThrow( // 이미 fetchpage에서 status 0인거로 골라옴
+                                () -> new CustomException(ExceptionCode.USER_NOT_FOUND));
+                        foundUser.updateRoomLimit(foundUser.getRoomLimit() + 1);
+                        return new RoomMember(foundRoom, foundUser);
+                    }
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        roomMemberRepository.saveAllAndFlush(roomMembers);
+        try {
+            roomMemberRepository.saveAllAndFlush(roomMembers);
+        }catch (DataIntegrityViolationException e){
+            throw new CustomException(ExceptionCode.ROOMMEMBER_ALREADY);
+        }
 
-        List<RoomMember> invitedRoomMemberInfoList = roomMemberRepository.findAllByRoomAndStatus(foundRoom, STATUS);
-        List<InviteMember> invitedMemberList = invitedRoomMemberInfoList.stream()
-                .map(RoomDto.InviteMember::new).toList();
 
-        InviteResponse inviteResponse = new InviteResponse(invitedMemberList);
-
-        //초대한 사람 목록에 원래 존재하던 사람 제외 필요
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION,inviteResponse);
+        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION);
     }
 
     //이미 초대된 멤버 get(getRoomMember)

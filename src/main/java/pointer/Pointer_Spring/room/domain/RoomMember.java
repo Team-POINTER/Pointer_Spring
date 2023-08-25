@@ -15,7 +15,8 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "RoomMember")
-@Table(name = "RoomMember")
+@Table(name = "RoomMember", uniqueConstraints = {
+        @UniqueConstraint(name = "UniqueRoomAndUser", columnNames = {"Room_room_id", "User_user_id"})})
 public class RoomMember extends BaseEntity {
 
     @Id

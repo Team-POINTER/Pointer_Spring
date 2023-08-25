@@ -33,6 +33,7 @@ public class RoomDto {
         Long roomId;
         String roomNm;
         Long questionId;
+        Long questionCreatorId;
         String question;
         int memberCnt;
         String topUserName;
@@ -41,12 +42,13 @@ public class RoomDto {
         LocalDateTime limitedAt;
         //String topUserId;
 
-        public ListRoom(RoomMember roomMember, Long questionId, String question, String userNm, boolean isVoted, LocalDateTime limitedAt) {
+        public ListRoom(RoomMember roomMember, Question question, String userNm, boolean isVoted, LocalDateTime limitedAt) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
             this.memberCnt = roomMember.getRoom().getMemberNum();
-            this.questionId = questionId;
-            this.question = question;
+            this.questionId = question.getId();
+            this.questionCreatorId = question.getCreatorId();
+            this.question = question.getQuestion();
             this.topUserName = userNm;
             this.voted = isVoted;
             this.limitedAt = limitedAt;//얼마나 남았는지 보내기
@@ -85,8 +87,8 @@ public class RoomDto {
         private Integer memberNum;
         private Integer votingNum;
         Long questionId;
-        String question;
         Long questionCreatorId;
+        String question;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
@@ -98,8 +100,8 @@ public class RoomDto {
             this.votingNum = room.getVotingNum();
             this.limitedAt = limtedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
-            this.question = question.getQuestion();
             this.questionCreatorId = question.getCreatorId();
+            this.question = question.getQuestion();
             this.roomMembers = roomMembers;
         }
         public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers, LocalDateTime limitedAt) {
@@ -109,7 +111,6 @@ public class RoomDto {
             this.limitedAt = limitedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
             this.question = question.getQuestion();
-            this.questionCreatorId = question.getCreatorId();
             this.roomMembers = roomMembers;
         }
     }

@@ -207,6 +207,7 @@ public class AlarmServiceImpl implements AlarmService {
 
             AlarmDto.GetAlarmResponse response = AlarmDto.GetAlarmResponse.builder()
                     .alarmId(alarm.getId())
+                    .needId(alarm.getNeedId())
                     .sendUserId(alarm.getSendUserId())
                     .sendUserName(requestUser!=null?requestUser.getName():null)
                     .sendUserProfile(profileImg!=null?profileImg.getImageUrl():null)
@@ -268,7 +269,7 @@ public class AlarmServiceImpl implements AlarmService {
         List<AlarmDto.GetFriendAlarmResponse> responses = new ArrayList<>();
         for(Alarm alarm :alarms) {
             Friend friend = friendRepository.findByUserUserIdAndUserFriendIdAndStatus(
-                    alarm.getSendUserId(), alarm.getReceiveUserId(), 1)
+                    alarm.getReceiveUserId(), alarm.getSendUserId(), 1)
                     .orElseThrow(() -> {
                         throw new CustomException(ExceptionCode.FRIEND_INVALID);
                     });

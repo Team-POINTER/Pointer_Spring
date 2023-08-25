@@ -305,8 +305,8 @@ public class FriendServiceImpl implements FriendService {
             findFriendMember.setRelationship(Friend.Relation.SUCCESS);
 
             Alarm alarm = Alarm.builder()
-                    .sendUserId(dto.getMemberId())
-                    .receiveUserId(findFriendUser.getUser().getUserId())
+                    .sendUserId(findFriendUser.getUser().getUserId())
+                    .receiveUserId(findFriendMember.getUser().getUserId())
                     .type(Alarm.AlarmType.FRIEND_ACCEPT)
                     .title(findFriendUser.getUser().getName()
                             +Alarm.AlarmType.FRIEND_ACCEPT.getTitle())
@@ -323,10 +323,10 @@ public class FriendServiceImpl implements FriendService {
             AlarmDto.KakaoPushRequest kakaoPushRequest = AlarmDto.KakaoPushRequest.builder()
                     .forApns(AlarmDto.PushType.builder()
                             .message(alarm.getContent())
-                            .apnsEnv(findFriendUser.getUser().getApnsEnv())
+                            .apnsEnv(findFriendMember.getUser().getApnsEnv())
                             .build())
                     .build();
-            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendUser.getUser().getUserId())), kakaoPushRequest);
+            kakaoPushNotiService.sendKakaoPush(List.of(String.valueOf(findFriendMember.getUser().getUserId())), kakaoPushRequest);
             return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_ACCEPT_NOT);
@@ -433,11 +433,17 @@ public class FriendServiceImpl implements FriendService {
                 friendRepository.delete(findFriendMember);
             }
             // 상대 알림에서 친구 요청 삭제
+            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
+                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
+
+            o.ifPresent(alarmRepository::delete);
+
             return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_OK);
         }
         return new ResponseFriend(ExceptionCode.FRIEND_REQUEST_CANCEL_NOT);
     }
 
+    @Transactional
     @Override
     public ResponseFriend cancelFriend(UserPrincipal userPrincipal, FriendDto.RequestFriendDto dto) {
         Friend findFriendUser = friendRepository
@@ -453,13 +459,15 @@ public class FriendServiceImpl implements FriendService {
             friendRepository.delete(findFriendUser);
             // 차단 아닌 친구 상태
             findFriendMember.ifPresent(friendRepository::delete);
-            return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
-        } else if (findFriendUser.getRelationship().equals(Friend.Relation.REQUEST)) {
-            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
-                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
 
-            o.ifPresent(alarmRepository::delete);
+//            Optional<Alarm> o = alarmRepository.findTopBySendUserIdAndReceiveUserIdAndTypeOrderByIdDesc(
+//                    userPrincipal.getId(), dto.getMemberId(), Alarm.AlarmType.FRIEND_REQUEST);
+//
+//            o.ifPresent(alarmRepository::delete);
+
+            return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_OK);
         }
+
         return new ResponseFriend(ExceptionCode.FRIEND_CANCEL_NOT);
     }
 
@@ -478,22 +486,19 @@ public class FriendServiceImpl implements FriendService {
             Optional<Image> image = imageRepository.findByUserUserIdAndImageSortAndStatus(user.getUserId(), PROFILE_TYPE, STATUS);
 
             if (roomMembers.stream().anyMatch(m-> Objects.equals(m.getUser().getUserId(), friend.getUserFriendId()))) {
-                FriendDto.FriendRoomInfoList.Reason reason = FriendDto.FriendRoomInfoList.Reason.ALREADY;
                 
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0, reason).setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0, reason));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,0));
                 }
             } else {
-                FriendDto.FriendRoomInfoList.Reason reason = user.getRoomLimit() < 30 ?
-                        null : FriendDto.FriendRoomInfoList.Reason.OVERLIMIT;
-                int status = reason == null ? 1 : 0;
+                int status = user.getRoomLimit() < 30 ? 1 : 0;
 
                 if (image.isPresent()) {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status, reason).setFile(image.get().getImageUrl()));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status).setFile(image.get().getImageUrl()));
                 } else {
-                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status, reason));
+                    friendInfoList.add(new FriendDto.FriendRoomInfoList(user,status));
                 }
             }
         }
