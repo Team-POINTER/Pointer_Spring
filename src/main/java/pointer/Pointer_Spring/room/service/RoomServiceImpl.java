@@ -69,7 +69,7 @@ public class RoomServiceImpl implements RoomService {
         List<RoomDto.ListRoom> roomListDto = new ArrayList<>();
         Long userId = userPrincipal.getId();
         if (kwd == null) {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId,  STATUS)
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsAndStatusOrderByRoom_UpdatedAtAsc(userId,  STATUS, STATUS)
                     .stream()
                     .map(roomMember -> {
                         Room room = roomMember.getRoom();
@@ -92,7 +92,7 @@ public class RoomServiceImpl implements RoomService {
                     .sorted(Comparator.comparing(room -> room.getLimitedAt(), Comparator.reverseOrder()))
                     .toList();
         } else {
-            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsOrderByRoom_UpdatedAtAsc(userId, STATUS).stream()
+            roomListDto = roomMemberRepository.findAllByUserUserIdAndRoom_StatusEqualsAndStatusOrderByRoom_UpdatedAtAsc(userId, STATUS, STATUS).stream()
                     .filter(roomMember -> {
                         Room room = roomMember.getRoom();
                         Optional<Question> latestQuestion = room.getQuestions().stream()
