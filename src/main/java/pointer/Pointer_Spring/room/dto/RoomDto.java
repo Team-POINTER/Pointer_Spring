@@ -87,6 +87,7 @@ public class RoomDto {
         private Integer memberNum;
         private Integer votingNum;
         Long questionId;
+        Long questionCreatorId;
         String question;
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
@@ -99,6 +100,7 @@ public class RoomDto {
             this.votingNum = room.getVotingNum();
             this.limitedAt = limtedAt;//얼마나 남았는지 보내기
             this.questionId = question.getId();
+            this.questionCreatorId = question.getCreatorId();
             this.question = question.getQuestion();
             this.roomMembers = roomMembers;
         }
