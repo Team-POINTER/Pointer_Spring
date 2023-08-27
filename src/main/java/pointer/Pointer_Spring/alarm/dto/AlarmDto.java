@@ -195,4 +195,16 @@ public class AlarmDto {
             this.pushToken = pushToken;
         }
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class GetNewAlarmResponse {
+        private int newAlarmCnt;
+
+        @Builder
+        public GetNewAlarmResponse(int newAlarmCnt) {
+            this.newAlarmCnt = newAlarmCnt;
+        }
+    }
 }

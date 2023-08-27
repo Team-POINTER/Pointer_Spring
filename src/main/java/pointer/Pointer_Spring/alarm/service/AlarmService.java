@@ -23,4 +23,6 @@ public interface AlarmService {
     void eventAlarm(AlarmDto.EventAlarmRequest request);
 
     List<AlarmDto.GetFriendAlarmResponse> getFriendAlarm(UserPrincipal userPrincipal, Long cursorId);
+
+    AlarmDto.GetNewAlarmResponse getNewAlarm(UserPrincipal userPrincipal);
 }
