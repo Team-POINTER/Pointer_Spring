@@ -23,4 +23,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Modifying
     @Query(value = "DELETE FROM Question WHERE room_room_id = :roomId", nativeQuery = true)
     void deleteAllByRoomId(@Param("roomId") Long roomId);
+
+    Optional<Question> findTopByCreatedAtAfterAndRoomRoomIdAndStatus(LocalDateTime now, Long roomId, Integer status);
 }

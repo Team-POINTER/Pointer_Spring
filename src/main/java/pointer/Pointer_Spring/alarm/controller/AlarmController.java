@@ -102,5 +102,10 @@ public class AlarmController {
         return new BaseResponse<>(alarmService.getFriendAlarm(userPrincipal, cursorId));
     }
 
+    @GetMapping("/unread")
+    public BaseResponse<AlarmDto.GetNewAlarmResponse> getNewAlarm(@CurrentUser UserPrincipal userPrincipal) {
+        return new BaseResponse<>(alarmService.getNewAlarm(userPrincipal));
+    }
+
 
 }

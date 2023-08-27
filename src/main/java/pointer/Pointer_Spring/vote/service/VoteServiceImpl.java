@@ -141,6 +141,13 @@ public class VoteServiceImpl implements VoteService {
                     .build());
         }
 
+        memberResponses.sort((a, b) -> b.getVotedMemberCnt() - a.getVotedMemberCnt());
+
+        // 상위 3개의 항목만 선택
+        if (memberResponses.size() > 3) {
+            memberResponses = memberResponses.subList(0, 3);
+        }
+
         // 투표안한 유저 개수
         int votedUserCnt = voteRepository.countDistinctUserByQuestionAndStatus(question.getId(), STATUS);
         int notVotedCnt = roomMembers.size() - votedUserCnt;

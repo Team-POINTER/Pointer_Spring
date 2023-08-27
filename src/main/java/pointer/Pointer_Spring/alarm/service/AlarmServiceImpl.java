@@ -302,4 +302,18 @@ public class AlarmServiceImpl implements AlarmService {
 
         return responses;
     }
+
+    @Override
+    public AlarmDto.GetNewAlarmResponse getNewAlarm(UserPrincipal userPrincipal) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
+                .orElseThrow(() -> {
+                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+                });
+
+        int newAlarmCnt = alarmRepository.countByReceiveUserIdAndReadCheck(user.getUserId(), false);
+
+        return AlarmDto.GetNewAlarmResponse.builder()
+                .newAlarmCnt(newAlarmCnt)
+                .build();
+    }
 }

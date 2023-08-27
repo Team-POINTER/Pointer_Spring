@@ -192,7 +192,7 @@ public class QuestionServiceImpl implements QuestionService {
             throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
         });
 
-        Question currentQuestion = questionRepository.findByCreatedAtAfterAndRoomRoomIdAndStatus(now, roomId, STATUS).orElseThrow(() -> {
+        Question currentQuestion = questionRepository.findTopByCreatedAtAfterAndRoomRoomIdAndStatus(now, roomId, STATUS).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.CURRENT_QUESTION_NOT_FOUND);
         });
 
