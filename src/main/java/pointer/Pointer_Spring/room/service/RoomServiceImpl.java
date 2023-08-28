@@ -261,7 +261,6 @@ public class RoomServiceImpl implements RoomService {
             roomMemberRepository.delete(roomMember);
             roomRepository.delete(room);
         }
-        //voteRepository.findAllByRoomId(roomId).setStatus(0);
         roomMember.setStatus(0);
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }
@@ -309,7 +308,7 @@ public class RoomServiceImpl implements RoomService {
         }
 
 
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION);
+        return new ResponseRoom(ExceptionCode.ROOM_INVITATION_SUCCESS);
     }
 
     //이미 초대된 멤버 get(getRoomMember)
@@ -417,12 +416,10 @@ public class RoomServiceImpl implements RoomService {
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(user.getUserId(), room.getRoomId(), STATUS)){
             System.out.println(roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(room.getRoomId(), user.getUserId(), STATUS));
             inviteMembers(new InviteRequest(room.getRoomId(), List.of(user.getUserId())));
+            return new ResponseRoom(ExceptionCode.ROOM_INVITATION_SUCCESS, getRoom(userPrincipal.getId(), room.getRoomId()));
         }else{
             throw new CustomException(ExceptionCode.ROOMMEMBER_ALREADY);
         }
-
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(userPrincipal.getId(), room.getRoomId()));
-
     }
 
 
