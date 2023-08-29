@@ -20,6 +20,7 @@ import pointer.Pointer_Spring.friend.domain.Friend;
 import pointer.Pointer_Spring.friend.repository.FriendRepository;
 import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
+import pointer.Pointer_Spring.report.repository.ReportRepository;
 import pointer.Pointer_Spring.room.util.Base62Util;
 import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
@@ -54,6 +55,7 @@ public class RoomServiceImpl implements RoomService {
     private final FriendRepository friendRepository;
     private final VoteRepository voteRepository;
     private final QuestionRepository questionRepository;
+    private final ReportRepository reportRepository;
     private final ImageRepository imageRepository;
     private final AuthService authService;
     private final Base62Util base62Util;
@@ -258,10 +260,10 @@ public class RoomServiceImpl implements RoomService {
         if(room.getMemberNum()<=0){
             questionRepository.deleteAllByRoomId(room.getRoomId());
             voteRepository.deleteAllByRoomId(room.getRoomId());
-            roomMemberRepository.delete(roomMember);
+            roomMemberRepository.deleteAllByRoom_RoomId(room.getRoomId());
+            reportRepository.deleteAllByRoom_RoomId(room.getRoomId());
             roomRepository.delete(room);
         }
-        //voteRepository.findAllByRoomId(roomId).setStatus(0);
         roomMember.setStatus(0);
         return new ResponseRoom(ExceptionCode.ROOM_EXIT_SUCCESS);
     }
@@ -309,7 +311,7 @@ public class RoomServiceImpl implements RoomService {
         }
 
 
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION);
+        return new ResponseRoom(ExceptionCode.ROOM_INVITATION_SUCCESS);
     }
 
     //이미 초대된 멤버 get(getRoomMember)
@@ -417,12 +419,10 @@ public class RoomServiceImpl implements RoomService {
         if(!roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(user.getUserId(), room.getRoomId(), STATUS)){
             System.out.println(roomMemberRepository.existsByUserUserIdAndRoomRoomIdAndStatus(room.getRoomId(), user.getUserId(), STATUS));
             inviteMembers(new InviteRequest(room.getRoomId(), List.of(user.getUserId())));
+            return new ResponseRoom(ExceptionCode.ROOM_INVITATION_SUCCESS, getRoom(userPrincipal.getId(), room.getRoomId()));
         }else{
             throw new CustomException(ExceptionCode.ROOMMEMBER_ALREADY);
         }
-
-        return new ResponseRoom(ExceptionCode.ROOM_NAME_INVITATION, getRoom(userPrincipal.getId(), room.getRoomId()));
-
     }
 
 

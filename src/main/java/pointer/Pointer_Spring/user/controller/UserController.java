@@ -38,13 +38,9 @@ public class UserController {
             throw new CustomException(ExceptionCode.INVALID_FORM);
         }
         Long userId = userPrincipal.getId();
-        System.out.println(updateUserInfoRequest.isProfileImageDefaultChange());
-        System.out.println(updateUserInfoRequest.isBackgroundImageDefaultChange());
         if(profileImage != null){
             cloudinaryService.uploadProfileImage(userId, profileImage);
-            System.out.println(updateUserInfoRequest.isProfileImageDefaultChange());
         } else if(updateUserInfoRequest.isProfileImageDefaultChange()){
-            System.out.println(updateUserInfoRequest.isProfileImageDefaultChange());
             cloudinaryService.changeDefaultProfileImage(userId);
         }
 

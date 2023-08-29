@@ -135,7 +135,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
 
         if(foundImage != null){
             deleteImageInCloudinary(userId, imageType);
-            foundImage.updateImageUrl(filePath);
+            foundImage.updateImageUrl(imageUrl);
         }else {
             Image image = new Image(imageUrl, imageType, userRepository.findById(userId).get());
             imageRepository.save(image);

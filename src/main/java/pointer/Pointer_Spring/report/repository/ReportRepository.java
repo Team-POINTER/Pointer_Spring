@@ -24,6 +24,7 @@ public interface ReportRepository  extends JpaRepository<Report, Long> {
     @Modifying
     @Query(value = "DELETE FROM Report WHERE room_room_id = :roomRoomId", nativeQuery = true)
     void deleteAllByRoomRoomId(@Param("roomRoomId") Long roomRoomId);
+    void deleteAllByRoom_RoomId(Long roomId);
 
     List<Report> findAllByReportIdLessThanAndTypeAndStatusOrderByReportIdDesc(Long lastReportId, ReportType reportType, int status, Pageable pageable);
     Report findFirstByTypeOrderByReportIdDesc(ReportType reportType);
