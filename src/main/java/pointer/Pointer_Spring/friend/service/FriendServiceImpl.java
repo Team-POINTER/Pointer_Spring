@@ -219,7 +219,7 @@ public class FriendServiceImpl implements FriendService {
             return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
         }
 
-        if (findFriendUser.isEmpty()) { // 요청 삭제 -> 요청
+        if (findFriendUser.isEmpty()) { // 거절인 경우에는 요청 삭제 -> 요청
             User user = userRepository.findByUserIdAndStatus(userPrincipal.getId(), STATUS).orElseThrow(
                     () -> {
                         throw new CustomException(ExceptionCode.USER_NOT_FOUND);
@@ -295,12 +295,8 @@ public class FriendServiceImpl implements FriendService {
                     throw new CustomException(ExceptionCode.USER_FRIEND_NOT_FOUND);
                 });
 
-        if (userPrincipal.getId().equals(dto.getMemberId())) {
-            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
-        }
-
         if (findFriendUser.getRelationship().equals(Friend.Relation.REQUESTED)) { // 수락
-            // 차단 : 알림을 받지 못해서 자동으로 요청 불가
+            // 거절, 차단 : 알림을 받지 못해서 자동으로 요청 불가
             findFriendUser.setRelationship(Friend.Relation.SUCCESS);
             findFriendMember.setRelationship(Friend.Relation.SUCCESS);
 
@@ -339,11 +335,7 @@ public class FriendServiceImpl implements FriendService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
 
-        if (userPrincipal.getId().equals(dto.getMemberId())) {
-            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
-        }
-
-        if (findFriend.getRelationship().equals(Friend.Relation.REQUEST)) { // 관계 존재
+        if (findFriend.getRelationship().equals(Friend.Relation.REQUESTED)) { // 관계 존재
             findFriend.setRelationship(Friend.Relation.REFUSE);
             friendRepository.save(findFriend);
 
@@ -362,16 +354,19 @@ public class FriendServiceImpl implements FriendService {
         Optional<Friend> findFriendUser = friendRepository
                 .findByUserUserIdAndUserFriendIdAndStatus(userPrincipal.getId(), dto.getMemberId(), STATUS);
 
-        if (userPrincipal.getId().equals(dto.getMemberId())) {
-            return new ResponseFriend(ExceptionCode.FRIEND_INVALID);
-        }
+        Optional<Friend> findFriend = friendRepository
+                .findByUserUserIdAndUserFriendIdAndStatus(dto.getMemberId(), userPrincipal.getId(), STATUS);
 
-        if (findFriendUser.isPresent()) { // 관계 존재 : request, requested, success
+        if (findFriendUser.isPresent()) { // 관계 존재 : request, requested, success, refuse
             Friend.Relation now = findFriendUser.get().getRelationship();
-            if (now.equals(Friend.Relation.BLOCK)) {
-                return new ResponseFriend(ExceptionCode.FRIEND_BLOCK_CANCEL_NOT);
-            } else if (now.equals(Friend.Relation.SUCCESS)) {
-                friendRepository.deleteByUserFriendIdAndUserUserId(findFriendUser.get().getId(), findFriendUser.get().getUserFriendId()); // 친구 관계 삭제
+//            if (now.equals(Friend.Relation.BLOCK)) { // 차단 친구 : 차단 요청 불가
+//                return new ResponseFriend(ExceptionCode.FRIEND_BLOCK_CANCEL_NOT);
+//            }
+            if (now.equals(Friend.Relation.SUCCESS)) {
+                friendRepository.deleteByUserFriendIdAndUserUserId(dto.getMemberId(), userPrincipal.getId()); // 친구 관계 삭제
+            }
+            else if (now.equals(Friend.Relation.REQUEST) && findFriend.isPresent() && findFriend.get().getRelationship().equals(Friend.Relation.REQUESTED)) {
+                friendRepository.deleteByUserFriendIdAndUserUserId(dto.getMemberId(), userPrincipal.getId()); // 친구 관계 삭제
             }
             // 내 알림에서 친구 관련 알림 모두 숨김
             findFriendUser.get().setRelationship(Friend.Relation.BLOCK);
