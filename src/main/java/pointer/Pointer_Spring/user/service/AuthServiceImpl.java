@@ -492,7 +492,7 @@ public class AuthServiceImpl implements AuthService {
         for (RoomMember member : roomMembers) {
             member.getRoom().minusMemberNum();
             member.delete();
-            roomMemberRepository.save(member);
+            //roomMemberRepository.save(member);
         }
 
         // 위 내용에 의해 빈 room이 생성된 경우, room 삭제
