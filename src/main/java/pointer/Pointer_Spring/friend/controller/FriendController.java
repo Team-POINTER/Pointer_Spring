@@ -5,77 +5,96 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pointer.Pointer_Spring.friend.dto.FriendDto;
 import pointer.Pointer_Spring.friend.service.FriendService;
+import pointer.Pointer_Spring.security.CurrentUser;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.dto.UserDto;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
+//@CrossOrigin(origins = "http://localhost:3000")
 public class FriendController {
 
     private final FriendService friendService;
 
-    @GetMapping("/search") // 유저 검색
-    public UserDto.UserListResponse getUserList(@RequestBody FriendDto.FindFriendDto dto,
-                                                HttpServletRequest request) {
-        return friendService.getUserList(dto, request);
+    // 조회 및 검색
+
+    /*@PostMapping("/search") // 유저 검색
+    public UserDto.UserListResponse getUserList(@CurrentUser UserPrincipal userPrincipal,
+                                                @RequestBody FriendDto.FindFriendDto dto) {
+        return friendService.getUserList(userPrincipal, dto);
+    }*/
+
+    @GetMapping("/user/search") // 유저 검색 : 관계 포함
+    public UserDto.UserInfoListResponse getUserInfoList(@CurrentUser UserPrincipal userPrincipal,
+                                                        @RequestParam String keyword,
+                                                        @RequestParam int lastPage) {
+        return friendService.getUserInfoList(userPrincipal, keyword, lastPage);
     }
 
-    @GetMapping("/friend") // 친구 목록 조회
-    public FriendDto.FriendInfoListResponse getFriendList(@RequestBody FriendDto.FriendUserDto dto,
-                                                          HttpServletRequest request) {
-        return friendService.getFriendList(dto, request);
+    @GetMapping("/friend/search") // 친구 중 검색 : 기준 userId 추가
+    public FriendDto.FriendInfoListResponse getUserFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                                              @RequestParam Long userId,
+                                                              @RequestParam String keyword,
+                                                              @RequestParam int lastPage) {
+        return friendService.getUserFriendList(userPrincipal, userId, keyword, lastPage);
+    }
+
+
+    @GetMapping("/friend/block/search") // 차단친구 중 검색
+    public FriendDto.FriendInfoListResponse getUserBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                                                   @RequestParam String keyword,
+                                                                   @RequestParam int lastPage) {
+        return friendService.getUserBlockFriendList(userPrincipal, keyword, lastPage);
     }
 
     // 친구 관계 설정
 
     @PostMapping("/friend/request") // 친구 요청
-    public Object requestFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                                HttpServletRequest request) {
-        return friendService.requestFriend(dto, request);
+    public Object requestFriend(@CurrentUser UserPrincipal userPrincipal,
+                                @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.requestFriend(userPrincipal, dto);
     }
 
     @PostMapping("/friend/accept") // 친구 수락
-    public Object acceptFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                               HttpServletRequest request) {
-        return friendService.acceptFriend(dto, request);
-    }
-
-    @PutMapping("/friend/request") // 친구 요청 취소
-    public Object cancelRequestFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                                      HttpServletRequest request) {
-        return friendService.cancelRequest(dto, request);
+    public Object acceptFriend(@CurrentUser UserPrincipal userPrincipal,
+                               @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.acceptFriend(userPrincipal, dto);
     }
 
     // 취소와 거절 설정
 
-    @PostMapping("/friend/cancel") // 친구 취소 : 관계 끊어짐
-    public Object cancelFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                               HttpServletRequest request) {
-        return friendService.cancelFriend(dto, request);
+    @PutMapping("/friend/request") // 친구 요청 취소
+    public Object cancelRequestFriend(@CurrentUser UserPrincipal userPrincipal,
+                                      @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.cancelRequest(userPrincipal, dto);
+    }
+
+    @PutMapping("/friend") // 친구 취소 : 관계 끊어짐
+    public Object cancelFriend(@CurrentUser UserPrincipal userPrincipal,
+                               @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.cancelFriend(userPrincipal, dto);
     }
 
     @PostMapping("/friend/refuse") // 친구 거절 : 알림 삭제
-    public Object refuseFriend(@RequestBody FriendDto.RequestFriendDto dto,
-                               HttpServletRequest request) {
-        return friendService.refuseFriend(dto, request);
+    public Object refuseFriend(@CurrentUser UserPrincipal userPrincipal,
+                               @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.refuseFriend(userPrincipal, dto);
     }
+
 
     // 차단 : 상대의 차단전 마지막 상태 유지
 
-    @GetMapping("/friend/block") // 차단 친구 조회
-    public FriendDto.FriendInfoListResponse getRefuseFriendList(@RequestBody FriendDto.FriendUserDto dto,
-                                                                HttpServletRequest request) {
-        return friendService.getBlockFriendList(dto, request);
-    }
-
     @PostMapping("/friend/block") // 차단
-    public Object getBlockFriendList(@RequestBody FriendDto.RequestFriendDto dto,
-                                     HttpServletRequest request) {
-        return friendService.blockFriend(dto, request);
+    public Object getBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                     @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.blockFriend(userPrincipal, dto);
     }
 
+    @PutMapping("/friend/block") // 차단 해제
+    public Object cancelBlockFriendList(@CurrentUser UserPrincipal userPrincipal,
+                                        @RequestBody FriendDto.RequestFriendDto dto) {
+        return friendService.cancelBlockFriend(userPrincipal, dto);
+    }
 
-    // 친구 초대 링크 : 50명 이하인 총인원 경우만
 }

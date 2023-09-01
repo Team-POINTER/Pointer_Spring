@@ -1,10 +1,13 @@
 package pointer.Pointer_Spring.vote.service;
 
 import org.springframework.stereotype.Service;
+import pointer.Pointer_Spring.common.response.BaseResponse;
 import pointer.Pointer_Spring.question.domain.Question;
+import pointer.Pointer_Spring.report.repository.RestrictedUserRepository;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.room.repository.RoomMemberRepository;
 import pointer.Pointer_Spring.room.repository.RoomRepository;
+import pointer.Pointer_Spring.security.UserPrincipal;
 import pointer.Pointer_Spring.user.domain.User;
 import pointer.Pointer_Spring.question.repository.QuestionRepository;
 import pointer.Pointer_Spring.user.repository.UserRepository;
@@ -27,18 +30,22 @@ public class VoteServiceImpl implements VoteService {
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
     private final RoomMemberRepository roomMemberRepository;
+    private final RestrictedUserRepository restrictedUserRepository;
 
-    public VoteServiceImpl(VoteRepository voteRepository, QuestionRepository questionRepository, UserRepository userRepository, RoomRepository roomRepository, RoomMemberRepository roomMemberRepository) {
+    private final Integer STATUS = 1;
+
+    public VoteServiceImpl(VoteRepository voteRepository, QuestionRepository questionRepository, UserRepository userRepository, RoomRepository roomRepository, RoomMemberRepository roomMemberRepository, RestrictedUserRepository restrictedUserRepository) {
         this.voteRepository = voteRepository;
         this.questionRepository = questionRepository;
         this.userRepository = userRepository;
         this.roomRepository = roomRepository;
         this.roomMemberRepository = roomMemberRepository;
+        this.restrictedUserRepository = restrictedUserRepository;
     }
 
     @Transactional
     @Override
-    public List<VoteDto.CreateResponse> createVote(VoteDto.CreateRequest dto) {
+    public List<VoteDto.CreateResponse> createVote(UserPrincipal userPrincipal, VoteDto.CreateRequest dto) {
         // 질문 validation
         Question question = questionRepository.findById(dto.getQuestionId())
                 .orElseThrow(() -> {
@@ -46,10 +53,15 @@ public class VoteServiceImpl implements VoteService {
                 });
 
         // 유저 validation check
-        User user = userRepository.findByUserId(dto.getUserId())
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
+
+//        //신고 당한 유저인지
+        if(user.isHintRestricted()){
+            throw new CustomException(ExceptionCode.REPORTED_USER);//한 턴 동안만 막아야해
+        }//생성이 안되니까 신고 당한 유저가 있을 시 룸 멤버 수보다 투표 가능 인원 수 가 더 적게 나옴
 
         // 투표 생성
         List<VoteDto.CreateResponse> response = new ArrayList<>();
@@ -62,10 +74,11 @@ public class VoteServiceImpl implements VoteService {
 
             VoteHistory vote = VoteHistory.builder()
                     .questionId(dto.getQuestionId())
-                    .memberId(dto.getUserId())
+                    .memberId(userPrincipal.getId())
                     .candidateId(userId)
                     .candidateName(voteUser.getName())
                     .hint(dto.getHint())
+                    .roomId(question.getRoom().getRoomId())
                     .build();
 
             voteRepository.save(vote);
@@ -82,9 +95,20 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetResponse getQuestionVoteCnt(Long userId, Long questionId) {
+    public VoteDto.CheckResponse isVote(UserPrincipal userPrincipal, Long questionId) {
+
+        Question question = questionRepository.findById(questionId).orElseThrow(() -> {
+            throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
+        });
+
+        boolean vote = voteRepository.existsByQuestionIdAndMemberIdAndStatus(questionId, userPrincipal.getId(), STATUS);
+        return new VoteDto.CheckResponse(vote);
+    }
+
+    @Override
+    public VoteDto.GetResponse getQuestionVoteCnt(UserPrincipal userPrincipal, Long questionId) {
         // 유저 validation check
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -93,7 +117,7 @@ public class VoteServiceImpl implements VoteService {
         });
 
         // 해당 유저 정보 조회
-        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
+        int allVoteCnt = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);
         int targetVotedCnt = voteRepository.countByQuestionIdAndCandidateId(question.getId(), user.getUserId());
         VoteDto.GetMemberResponse targetUser = VoteDto.GetMemberResponse.builder()
                 .userId(user.getUserId())
@@ -102,7 +126,7 @@ public class VoteServiceImpl implements VoteService {
                 .votedMemberCnt(targetVotedCnt)
                 .build();
 
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(question.getRoom(), STATUS);
 
         // 룸 유저들 정보 조회
         List<VoteDto.GetMemberResponse> memberResponses = new ArrayList<>();
@@ -117,14 +141,26 @@ public class VoteServiceImpl implements VoteService {
                     .build());
         }
 
+        memberResponses.sort((a, b) -> b.getVotedMemberCnt() - a.getVotedMemberCnt());
+
+        // 상위 3개의 항목만 선택
+        if (memberResponses.size() > 3) {
+            memberResponses = memberResponses.subList(0, 3);
+        }
+
         // 투표안한 유저 개수
-        int votedUserCnt = voteRepository.countDistinctUserByQuestion(question.getId());
+        int votedUserCnt = voteRepository.countDistinctUserByQuestionAndStatus(question.getId(), STATUS);
         int notVotedCnt = roomMembers.size() - votedUserCnt;
 
         System.out.println(roomMembers.size());
         System.out.println(votedUserCnt);
 
+        RoomMember roomMember = roomMemberRepository.findByRoom_RoomIdAndUser_UserIdAndStatus(question.getRoom().getRoomId(), user.getUserId(), STATUS)
+                .orElseThrow(()->new CustomException(ExceptionCode.ROOMMEMBER_NOT_EXIST));
+
         return VoteDto.GetResponse.builder()
+                .roomName(roomMember.getPrivateRoomNm())
+                .question(question.getQuestion())
                 .members(memberResponses)
                 .targetUser(targetUser)
                 .notNotedMemberCnt(notVotedCnt)
@@ -139,11 +175,11 @@ public class VoteServiceImpl implements VoteService {
             throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
         });
         // 쿼리문 변경 예정
-        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(question.getRoom());
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoomAndStatus(question.getRoom(), STATUS);
         List<VoteDto.GetNotVotedMember> notVotedMembers = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
             User member = roomMember.getUser();
-            boolean vote = voteRepository.existsByMemberId(member.getUserId());
+            boolean vote = voteRepository.existsByMemberIdAndStatus(member.getUserId(), STATUS);
             if (!vote) {
                 notVotedMembers.add(VoteDto.GetNotVotedMember.builder()
                         .userId(member.getUserId())
@@ -156,8 +192,8 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteDto.GetHintResponse getHintResponse(Long userId, Long questionId) {
-        User user = userRepository.findByUserId(userId)
+    public VoteDto.GetHintResponse getHintResponse(UserPrincipal userPrincipal, Long questionId) {
+        User user = userRepository.findByUserId(userPrincipal.getId())
                 .orElseThrow(() -> {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 });
@@ -166,18 +202,31 @@ public class VoteServiceImpl implements VoteService {
         });
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy.MM.dd");
 
-        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());
-        int allVoteCnt = voteRepository.countByQuestionId(question.getId());
-        List<String> hints = new ArrayList<>();
+        List<VoteHistory> voteHistories = voteRepository.findAllByQuestionIdAndCandidateId(question.getId(), user.getUserId());//해당 user를 투표한 인원
+        int allVoteCnt = voteRepository.countByQuestionIdAndStatus(question.getId(), STATUS);//해당 질문에 대해 투표한 사람의 수
+
+        List<VoteDto.VoterInfo> voters = new ArrayList<>();
         for(VoteHistory vote : voteHistories) {
-            hints.add(vote.getHint());
+            if (vote.getHint() == null || vote.getHint().equals(" ")) continue;
+
+            User votingUser = userRepository.findByUserId(vote.getMemberId()).get();
+            voters.add(new VoteDto.VoterInfo(vote.getVoteHistoryId(), votingUser.getUserId(), votingUser.getName(), vote.getHint()));
         }
 
         return VoteDto.GetHintResponse.builder()
                 .targetVotedCnt(voteHistories.size())
                 .allVoteCnt(allVoteCnt)
-                .hint(hints)
+                .voter(voters)
                 .createdAt(question.getCreatedAt().format(formatter))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public BaseResponse<Void> deleteHint(UserPrincipal userPrincipal, VoteDto.DeleteHintRequest deleteHintRequest){
+        VoteHistory vote = voteRepository.findByQuestionIdAndCandidateIdAndMemberId(deleteHintRequest.getQuestionId(), userPrincipal.getId() ,deleteHintRequest.getVoterId())
+                .orElseThrow(()-> new CustomException(ExceptionCode.HINT_NOT_FOUND));
+        vote.updateHint(" ");
+        return new BaseResponse<>(ExceptionCode.HINT_DELETE_OK);
     }
 }

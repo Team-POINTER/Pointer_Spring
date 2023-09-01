@@ -2,14 +2,13 @@ package pointer.Pointer_Spring.user.domain;
 
 import javax.persistence.*;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import pointer.Pointer_Spring.config.BaseEntity;
+import pointer.Pointer_Spring.user.dto.UserDto;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "User")
 public class User extends BaseEntity {
@@ -20,12 +19,24 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true) // 탈퇴된 회원과 새로 가입한 회원 = status가 다른 동일 email 존재할 수 이씀
     private String email;
 
     @Column(name = "name", nullable = false)
     private String name;
     private String password;
+
+    @Column(name = "chat_alarm_flag")
+    private boolean chatAlarmFlag;
+
+    @Column(name = "active_alarm_flag")
+    private boolean activeAlarmFlag;
+
+    @Column(name = "event_alarm_flag")
+    private boolean eventAlarmFlag;
+
+    @Column(name = "all_alarm_flag")
+    private boolean allAlarmFlag;
 
 
     // social login
@@ -53,12 +64,34 @@ public class User extends BaseEntity {
     private boolean marketing;
 
     @Column(name = "room_limit")
+    @ColumnDefault("0")
     private Integer roomLimit;
 
-    @Column(length = 1000)
+    @Column(length = 400)
     private String token;
 
+    @Column(length = 400)
+    private String socialToken;
+
+    @ColumnDefault("false")
+    private boolean tokenExpired;
+
+    @ColumnDefault("0")
     private Long point;
+
+    @Column(name = "question_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isQuestionRestricted;
+    @Column(name = "hint_restriction_flag", columnDefinition = "boolean default false")
+    private boolean isHintRestricted;
+
+    @Column(name = "device_id")
+    private String deviceId;
+
+    @Column(name = "push_token")
+    private String pushToken;
+
+    @Column(name = "apns_env")
+    private String apnsEnv;
 
     // builder
     @Builder
@@ -67,16 +100,39 @@ public class User extends BaseEntity {
         this.email = email;
         this.name = name;
         this.type = type;
+        this.tokenExpired = false;
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        //this.roomLimit = 0;
+    }
+
+    // test builder
+    @Builder
+    public User(String id, String email, String name, String password) {
+        this.id = id;
+        this.email = email;
+        this.name = name;
+        this.password = password;
+        //this.roomLimit = 0;
     }
 
 
-    @Builder(builderMethodName = "KakaoBuilder")
-    public User(String email, String id, String name, String password, SignupType type) {
+    //@Builder(builderMethodName = "KakaoBuilder")
+    public User(String email, String id, String name, String password, SignupType type, String socialToken) {
         this.email = email;
         this.id = id;
         this.name = name;
         this.password = password;
+        this.socialToken = socialToken;
+        this.tokenExpired = false;
         this.type = type;
+        this.chatAlarmFlag = true;
+        this.activeAlarmFlag = true;
+        this.eventAlarmFlag = true;
+        this.allAlarmFlag = true;
+        this.roomLimit = 0;
     }
 
     @Builder(builderMethodName = "AuthorityBuilder")
@@ -86,10 +142,10 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void setService(boolean serviceAgree, boolean serviceAge, boolean marketing) {
-        this.serviceAge = serviceAge;
-        this.serviceAgree = serviceAgree;
-        this.marketing = marketing;
+    public void setService(UserDto.UserAgree agree) {
+        this.serviceAge = agree.isServiceAge();
+        this.serviceAgree = agree.isServiceAgree();
+        this.marketing = agree.isMarketing();
     }
 
     public void changeName(String newName) {
@@ -103,7 +159,16 @@ public class User extends BaseEntity {
     }
 
     public void setToken(String token) {
+        this.tokenExpired = false;
         this.token = token;
+    }
+
+    public void setTokenExpired() { // 로그아웃 : 토큰 만료
+        this.tokenExpired = true;
+    }
+
+    public void setSocialToken(String token) {
+        this.socialToken = token;
     }
 
     public void setId(String id, int checkId) {
@@ -115,8 +180,23 @@ public class User extends BaseEntity {
         this.checkId = checkId;
     }
 
+    public void setMarketing(boolean marketing) {
+        this.marketing = marketing;
+    }
+
     public void updateRoomLimit(Integer roomLimit) {
         this.roomLimit = roomLimit;
     }
+    public void updateIsQuestionRestricted(boolean isQuestionRestricted){
+        this.isQuestionRestricted = isQuestionRestricted;
+    }
+    public void updateIsHintRestricted(boolean isHintRestricted){
+        this.isHintRestricted = isHintRestricted;
+    }
 
+    @PrePersist
+    public void prePersist() {
+        this.roomLimit = 0;
+        this.point = 0L;
+    }
 }

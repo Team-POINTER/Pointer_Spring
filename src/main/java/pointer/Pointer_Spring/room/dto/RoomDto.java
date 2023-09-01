@@ -1,18 +1,21 @@
 package pointer.Pointer_Spring.room.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.springframework.lang.Nullable;
 import pointer.Pointer_Spring.friend.domain.Friend;
+import pointer.Pointer_Spring.question.domain.Question;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.room.domain.RoomMember;
 import pointer.Pointer_Spring.user.domain.User;
 
 public class RoomDto {
-    @Data
-    public static class FindRoomRequest{
-        Long userId;
-    }
 
     @Data
     public static class ListResponse {
@@ -29,13 +32,27 @@ public class RoomDto {
 
         Long roomId;
         String roomNm;
+        Long questionId;
+        Long questionCreatorId;
         String question;
         int memberCnt;
+        String topUserName;
+        boolean voted;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+        LocalDateTime limitedAt;
+        //String topUserId;
 
-        public ListRoom(RoomMember roomMember, String question) {
+        public ListRoom(RoomMember roomMember, Question question, String userNm, boolean isVoted, LocalDateTime limitedAt) {
             this.roomId = roomMember.getRoom().getRoomId();
             this.roomNm = roomMember.getPrivateRoomNm();
-            this.question = question;
+            this.memberCnt = roomMember.getRoom().getMemberNum();
+            this.questionId = question.getId();
+            this.questionCreatorId = question.getCreatorId();
+            this.question = question.getQuestion();
+            this.topUserName = userNm;
+            this.voted = isVoted;
+            this.limitedAt = limitedAt;//얼마나 남았는지 보내기
+            //this.topUserId = user.getId();
         }
 
         public void setRoomInfo() {
@@ -48,21 +65,15 @@ public class RoomDto {
 
     @Data
     public static class CreateRequest {
-        Long userId;
         String roomNm;//roomName
     }
 
     @Data
     public static class CreateResponse {
 
-        String accessToken;
-        String refreshToken;
         DetailResponse detailResponse;
 
-        public CreateResponse(String accessToken, String refreshToken,
-            DetailResponse detailResponse) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public CreateResponse(DetailResponse detailResponse) {
             this.detailResponse = detailResponse;
         }
     }
@@ -71,20 +82,35 @@ public class RoomDto {
     public static class DetailResponse {
 
         Long roomId;
-        String roomNm;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        String privateRoomNm;
         private Integer memberNum;
         private Integer votingNum;
+        Long questionId;
+        Long questionCreatorId;
         String question;
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime limitedAt;
         private List<RoomMemberResopnose> roomMembers;
 
-        public DetailResponse(Room room, String question, List<RoomMemberResopnose> roomMembers) {
+        public DetailResponse(Room room, String privateRoomNm, Question question, List<RoomMemberResopnose> roomMembers, LocalDateTime limtedAt) {
             this.roomId = room.getRoomId();
-            this.roomNm = room.getName(); // defaultname
+            this.privateRoomNm =  privateRoomNm;
             this.memberNum = room.getMemberNum();
             this.votingNum = room.getVotingNum();
-            this.limitedAt = room.getUpdatedAt().plusDays(1);//얼마나 남았는지 보내기
-            this.question = question;
+            this.limitedAt = limtedAt;//얼마나 남았는지 보내기
+            this.questionId = question.getId();
+            this.questionCreatorId = question.getCreatorId();
+            this.question = question.getQuestion();
+            this.roomMembers = roomMembers;
+        }
+        public DetailResponse(Room room, Question question, List<RoomMemberResopnose> roomMembers, LocalDateTime limitedAt) {
+            this.roomId = room.getRoomId();
+            this.memberNum = room.getMemberNum();
+            this.votingNum = room.getVotingNum();
+            this.limitedAt = limitedAt;//얼마나 남았는지 보내기
+            this.questionId = question.getId();
+            this.question = question.getQuestion();
             this.roomMembers = roomMembers;
         }
     }
@@ -101,29 +127,23 @@ public class RoomDto {
             this.privateRoomNm = roomMember.getPrivateRoomNm();
         }
     }
-    @Data
-    public static class ExitRequest{//나중에 token으로 user 구분 시 없애기
-        Long userId;//user 고유 string id
-    }
 
     @Data
     public static class InviteRequest {
-        Long userId;//초대하는 유저
+        //Long userId;//초대하는 유저
         Long roomId;
         List<Long> userFriendIdList;
+
+        public InviteRequest(Long roomId, List<Long> userId) {
+            this.roomId = roomId;
+            this.userFriendIdList = userId;
+        }
     }
 
     @Data
     public static class InviteResponse {
-
-        String accessToken;
-        String refreshToken;
         List<InviteMember> inviteMemberList;
-
-        public InviteResponse(String accessToken, String refreshToken,
-            List<InviteMember> inviteMemberList) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public InviteResponse(List<InviteMember> inviteMemberList) {
             this.inviteMemberList = inviteMemberList;
         }
     }
@@ -147,13 +167,14 @@ public class RoomDto {
             INVITE, OVERLIMIT, ALREADY
         }
         Reason reason;
-        Long userId;
+        //Long userId;
         String nickNm;
+        String id;
         LocalDateTime updateAt;
 
         public IsInviteMember( User user, Friend f) {
             this.isInvite = true;
-            this.userId = user.getUserId();
+            this.id = user.getId();
             this.nickNm = f.getFriendName();
             this.reason = Reason.INVITE;
             this.updateAt = f.getUpdatedAt();

@@ -13,7 +13,7 @@ public class QuestionDto extends BaseEntity {
     @NoArgsConstructor
     public static class CreateRequest {
         private Long roomId;
-        private Long userId;
+        //private Long userId;
         private String content;
     }
 
@@ -34,13 +34,15 @@ public class QuestionDto extends BaseEntity {
     @Getter
     @NoArgsConstructor
     public static class GetCurrentResponse {
+        private String roomName;
         private Long questionId;
         private boolean isVoted;
         private String content;
         private List<GetMemberResponse> members;
 
         @Builder
-        public GetCurrentResponse(Long questionId, boolean isVoted, String content, List<GetMemberResponse> members) {
+        public GetCurrentResponse(String roomName, Long questionId, boolean isVoted, String content, List<GetMemberResponse> members) {
+            this.roomName = roomName;
             this.questionId = questionId;
             this.isVoted = isVoted;
             this.content = content;
@@ -64,6 +66,7 @@ public class QuestionDto extends BaseEntity {
     @Getter
     @NoArgsConstructor
     public static class GetResponse {
+        private String roomName;
         private Long questionId;
         private String question;
         private Integer allVoteCnt;
@@ -71,7 +74,8 @@ public class QuestionDto extends BaseEntity {
         private String createdAt;
 
         @Builder
-        public GetResponse(Long questionId, String question, Integer allVoteCnt, Integer votedMemberCnt, String createdAt) {
+        public GetResponse(String roomName, Long questionId, String question, Integer allVoteCnt, Integer votedMemberCnt, String createdAt) {
+            this.roomName = roomName;
             this.questionId = questionId;
             this.question = question;
             this.allVoteCnt = allVoteCnt;

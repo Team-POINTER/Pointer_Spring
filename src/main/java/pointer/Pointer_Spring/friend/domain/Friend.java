@@ -16,7 +16,7 @@ public class Friend extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "friend_id")
+    @Column(name = "friend_id", unique = true)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,13 +25,12 @@ public class Friend extends BaseEntity {
     @Column(name = "friend_name", nullable = false)
     private String friendName;
 
-
     @Column(name = "user_friend_id", nullable = false)
     private Long userFriendId;
 
     // relation
     public enum Relation {
-        BLOCK, REQUEST, REQUESTED, SUCCESS,
+        BLOCK, REQUEST, REQUESTED, SUCCESS, REFUSE, NONE, ME
     }
 
     @Column(nullable = false)
@@ -52,5 +51,3 @@ public class Friend extends BaseEntity {
     }
 
 }
-
-

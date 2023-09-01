@@ -3,6 +3,7 @@ package pointer.Pointer_Spring.vote.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -15,21 +16,24 @@ public class VoteDto {
     public static class CreateRequest {
         @NotNull(message = "questionId를 입력해주세요.")
         private Long questionId;
-        @NotNull(message = "userId를 입력해주세요.")
-        private Long userId;
         @Size(min = 1, message = "votedUserIds는 최소 1개 이상이어야 합니다.")
         private List<Long> votedUserIds;
         @NotNull(message = "hint를 입력해주세요.")
         private String hint;
 
         @Builder
-        public CreateRequest(Long questionId, Long userId, List<Long> votedUserIds, String hint) {
+        public CreateRequest(Long questionId, List<Long> votedUserIds, String hint) {
             this.questionId = questionId;
-            this.userId = userId;
             this.votedUserIds = votedUserIds;
             this.hint = hint;
         }
 
+    }
+
+    @Getter
+    @NoArgsConstructor
+    public static class CheckRequest {
+        private Long questionId;
     }
 
     @Getter
@@ -53,15 +57,29 @@ public class VoteDto {
     }
 
     @Getter
+    public static class CheckResponse{
+        private boolean vote;
+
+        public CheckResponse(boolean vote) {
+            this.vote = vote;
+        }
+
+    }
+
+    @Getter
     @NoArgsConstructor
     public static class GetResponse {
+        private String roomName;
+        private String question;
         private GetMemberResponse targetUser;
         private List<GetMemberResponse> members;
         private int notNotedMemberCnt;
         private int notReadChatCnt;
 
         @Builder
-        public GetResponse(GetMemberResponse targetUser, List<GetMemberResponse> members, int notNotedMemberCnt, int notReadChatCnt) {
+        public GetResponse(String roomName, String question, GetMemberResponse targetUser, List<GetMemberResponse> members, int notNotedMemberCnt, int notReadChatCnt) {
+            this.roomName = roomName;
+            this.question = question;
             this.targetUser = targetUser;
             this.members = members;
             this.notNotedMemberCnt = notNotedMemberCnt;
@@ -102,18 +120,45 @@ public class VoteDto {
     @Getter
     @NoArgsConstructor
     public static class GetHintResponse {
-        private List<String> hint;
+        private List<VoterInfo> voters;
         private int allVoteCnt;
         private int targetVotedCnt;
         private String createdAt;
 
         @Builder
-        public GetHintResponse(List<String> hint, int allVoteCnt, int targetVotedCnt, String createdAt) {
-            this.hint = hint;
+        public GetHintResponse(List<VoterInfo> voter,  int allVoteCnt, int targetVotedCnt, String createdAt) {
+            this.voters = voter;
             this.allVoteCnt = allVoteCnt;
             this.targetVotedCnt = targetVotedCnt;
             this.createdAt = createdAt;
         }
 
     }
+
+    @Getter
+    public static class VoterInfo{
+        private Long voteHistoryId;
+        private Long voterId;
+        private String voterNm;
+        private String hint;
+
+        public VoterInfo(Long voteHistoryId, Long userId, String name, String hint) {
+            this.voteHistoryId = voteHistoryId;
+            this.voterId = userId;
+            this.voterNm = name;
+            this.hint = hint;
+        }
+    }
+
+    @Getter
+    public static class DeleteHintRequest{
+        Long questionId;
+        Long voterId;//투표한 사람
+
+        public DeleteHintRequest(Long questionId, Long voterId){
+            this.questionId = questionId;
+            this.voterId = voterId;
+        }
+    }
+
 }
