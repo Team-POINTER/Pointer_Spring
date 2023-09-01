@@ -41,6 +41,9 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
 
     private final Integer STATUS = 1;
 
+    private final String PROFILE_FOLDER = "profile-photos";
+    private final String BACKGROUND_FOLDER = "background-photos";
+
     public CloudinaryServiceImpl(UserRepository userRepository, ImageRepository imageRepository, @Value("${cloudinary.cloud.name}") String cloudinaryName,
                                  @Value("${cloudinary.apikey}") String cloudinaryApiKey,
                                  @Value("${cloudinary.api.secret}") String cloudinaryApiSecret) {
@@ -57,7 +60,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
          if(!userRepository.existsById(userId)){
              throw new CustomException(ExceptionCode.USER_NOT_FOUND);
          }
-        String publicId = uploadImageInCloudinary(userId, "profile-photos", multipartFile);
+        String publicId = uploadImageInCloudinary(userId, PROFILE_FOLDER, multipartFile);
         String extension = checkExtension(multipartFile);
         return new ResponseImage( ExceptionCode.USER_IMAGE_UPDATE_SUCCESS , uploadImage(userId, publicId, extension, ImageType.PROFILE));
     }
@@ -66,7 +69,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         if(!userRepository.existsById(userId)){
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         }
-        String publicId = uploadImageInCloudinary(userId, "background-photos", multipartFile);
+        String publicId = uploadImageInCloudinary(userId, BACKGROUND_FOLDER, multipartFile);
         String extension = checkExtension(multipartFile);
         return new ResponseImage(ExceptionCode.BACKGROUND_IMAGE_UPDATE_SUCCESS , uploadImage(userId, publicId, extension, ImageType.BACKGROUND));
     }
@@ -151,11 +154,16 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
                 }
         );
         if (!isDefaultImage(image.getImageUrl())) { // 이미지가 default가 아닌 경우에만 삭제
-            String filePath = image.getImageUrl();
+            String imageUrl = image.getImageUrl();
 
-            int dotIndex = filePath.lastIndexOf(".");
-            String publicId = filePath.substring(0, dotIndex);
-
+            int dotIndex = imageUrl.lastIndexOf(".");
+            int FileNmIndex = imageUrl.lastIndexOf("/");
+            String publicId;
+            if(imageType == ImageType.PROFILE){
+                publicId =PROFILE_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
+            }else{
+                publicId =BACKGROUND_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
+            }
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         }
     }
