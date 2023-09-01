@@ -40,6 +40,9 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
 
 
 
+    private final String PROFILE_FOLDER = "profile-photos";
+    private final String BACKGROUND_FOLDER = "background-photos";
+
     public CloudinaryServiceImpl(UserRepository userRepository, ImageRepository imageRepository, @Value("${cloudinary.cloud.name}") String cloudinaryName,
                                  @Value("${cloudinary.apikey}") String cloudinaryApiKey,
                                  @Value("${cloudinary.api.secret}") String cloudinaryApiSecret) {
@@ -56,7 +59,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
          if(!userRepository.existsById(userId)){
              throw new CustomException(ExceptionCode.USER_NOT_FOUND);
          }
-        String publicId = uploadImageInCloudinary(userId, "profile-photos", multipartFile);
+        String publicId = uploadImageInCloudinary(userId, PROFILE_FOLDER, multipartFile);
         String extension = checkExtension(multipartFile);
         return uploadImage(userId, publicId, extension, ImageType.PROFILE);
     }
@@ -65,7 +68,7 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
         if(!userRepository.existsById(userId)){
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         }
-        String publicId = uploadImageInCloudinary(userId, "background-photos", multipartFile);
+        String publicId = uploadImageInCloudinary(userId, BACKGROUND_FOLDER, multipartFile);
         String extension = checkExtension(multipartFile);
         return uploadImage(userId, publicId, extension, ImageType.BACKGROUND);
     }
@@ -153,11 +156,19 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
                 }
         );
         if (!isDefaultImage(image.getImageUrl())) { // 이미지가 default가 아닌 경우에만 삭제
-            String filePath = image.getImageUrl();
+            String imageUrl = image.getImageUrl();
 
-            int dotIndex = filePath.lastIndexOf(".");
-            String publicId = filePath.substring(0, dotIndex);
-
+            int dotIndex = imageUrl.lastIndexOf(".");
+            int FileNmIndex = imageUrl.lastIndexOf("/");
+            String publicId;
+            if(imageType == ImageType.PROFILE){
+                publicId =PROFILE_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
+                System.out.println(publicId);
+            }else{
+                publicId =BACKGROUND_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
+                System.out.println(publicId);
+            }
+//http://res.cloudinary.com/dazzzimsm/image/upload/v1/background-photos/4_bd83f249-3e23-42bc-a19f-e1adf8167ad5.jpeg
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         }
     }
