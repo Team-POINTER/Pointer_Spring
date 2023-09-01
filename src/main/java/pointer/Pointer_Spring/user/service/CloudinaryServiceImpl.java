@@ -161,12 +161,9 @@ public class CloudinaryServiceImpl implements CloudinaryService{//기존 이미�
             String publicId;
             if(imageType == ImageType.PROFILE){
                 publicId =PROFILE_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
-                System.out.println(publicId);
             }else{
                 publicId =BACKGROUND_FOLDER + "/" + imageUrl.substring(FileNmIndex+1, dotIndex);
-                System.out.println(publicId);
             }
-//http://res.cloudinary.com/dazzzimsm/image/upload/v1/background-photos/4_bd83f249-3e23-42bc-a19f-e1adf8167ad5.jpeg
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         }
     }
