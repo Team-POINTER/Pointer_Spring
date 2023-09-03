@@ -1,10 +1,9 @@
 package pointer.Pointer_Spring.report.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
-import pointer.Pointer_Spring.report.ReportReason;
+import pointer.Pointer_Spring.report.enumeration.ReportReason;
 import pointer.Pointer_Spring.report.domain.BlockedUser;
 import pointer.Pointer_Spring.report.domain.Report;
 import pointer.Pointer_Spring.report.domain.RestrictedUser;

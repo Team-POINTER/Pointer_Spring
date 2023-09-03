@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
-import pointer.Pointer_Spring.report.ReportReason;
+import pointer.Pointer_Spring.report.enumeration.ReportReason;
 import pointer.Pointer_Spring.report.enumeration.ReportType;
 import pointer.Pointer_Spring.room.domain.Room;
 import pointer.Pointer_Spring.user.domain.User;
