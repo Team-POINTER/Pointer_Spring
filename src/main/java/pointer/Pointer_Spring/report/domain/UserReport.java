@@ -4,8 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pointer.Pointer_Spring.config.BaseEntity;
-import pointer.Pointer_Spring.report.ReportReason;
-import pointer.Pointer_Spring.report.dto.ReportDto;
+import pointer.Pointer_Spring.report.enumeration.ReportReason;
 import pointer.Pointer_Spring.user.domain.User;
 
 import javax.persistence.*;
