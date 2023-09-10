@@ -11,7 +11,7 @@ public interface QuestionService {
 
     QuestionDto.GetCurrentResponse getCurrentQuestion(UserPrincipal userPrincipal, Long roomId);
 
-    List<QuestionDto.GetResponse> getQuestions(UserPrincipal userPrincipal, Long roomId);
+    List<QuestionDto.GetResponse> getQuestions(UserPrincipal userPrincipal, Long roomId, Long lastQuestionId, int size);
 
     void modifyQuestion(UserPrincipal userPrincipal, Long questionId, QuestionDto.ModifyRequest request);
 

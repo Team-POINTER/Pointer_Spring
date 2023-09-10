@@ -41,8 +41,8 @@ public class QuestionController {
 
     // 질문 전체 조회
     @GetMapping("/{roomId}")
-    public BaseResponse<List<QuestionDto.GetResponse>> getQuestions(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long roomId) {
-        return new BaseResponse<>(questionService.getQuestions(userPrincipal, roomId));
+    public BaseResponse<List<QuestionDto.GetResponse>> getQuestions(@CurrentUser UserPrincipal userPrincipal, @PathVariable Long roomId, @RequestParam(required = false) Long lastQuestionId, @RequestParam int size) {
+        return new BaseResponse<>(questionService.getQuestions(userPrincipal, roomId, lastQuestionId, size));
     }
 
 

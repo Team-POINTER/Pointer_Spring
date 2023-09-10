@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.question.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Repository;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findTopByRoomRoomIdAndStatusOrderByIdDesc(Long roomId, int status);
     Optional<Question> findByCreatedAtAfterAndRoomRoomIdAndStatus(LocalDateTime now, Long roomId, int status);
-    List<Question> findAllByRoomAndStatusOrderByCreatedAtDesc(Room room, int status);
+    List<Question> findAllByIdLessThanAndRoomAndStatusOrderByCreatedAtDesc(Long questionId, Room room, int status, Pageable pageable);
     List<Question> findAllByQuestionContainingAndStatus(String kwd, int status);
 
     @Transactional
