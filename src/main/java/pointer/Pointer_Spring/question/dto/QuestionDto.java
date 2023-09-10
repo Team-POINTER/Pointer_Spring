@@ -1,5 +1,6 @@
 package pointer.Pointer_Spring.question.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -66,6 +67,7 @@ public class QuestionDto extends BaseEntity {
     @Getter
     @NoArgsConstructor
     public static class GetResponse {
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private String roomName;
         private Long questionId;
         private String question;

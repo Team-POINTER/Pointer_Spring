@@ -1,6 +1,8 @@
 package pointer.Pointer_Spring.question.service;
 
 import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import pointer.Pointer_Spring.alarm.domain.Alarm;
 import pointer.Pointer_Spring.alarm.dto.AlarmDto;
@@ -29,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class QuestionServiceImpl implements QuestionService {
@@ -216,7 +219,9 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<QuestionDto.GetResponse> getQuestions(UserPrincipal userPrincipal, Long roomId) {
+    public List<QuestionDto.GetResponse> getQuestions(UserPrincipal userPrincipal, Long roomId, Long lastQuestionId, int size) {
+        Pageable pageable = PageRequest.of(0, size);
+
         User user = userRepository.findById(userPrincipal.getId()).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.USER_NOT_FOUND);
         });
@@ -224,8 +229,13 @@ public class QuestionServiceImpl implements QuestionService {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> {
             throw new CustomException(ExceptionCode.ROOM_NOT_FOUND);
         });
-
-        List<Question> questions = questionRepository.findAllByRoomAndStatusOrderByCreatedAtDesc(room, STATUS);
+        if (Optional.ofNullable(lastQuestionId).isEmpty()){
+            lastQuestionId = questionRepository.findTopByRoomRoomIdAndStatusOrderByIdDesc(roomId, STATUS).orElseThrow(
+                    () -> {
+                        throw new CustomException(ExceptionCode.QUESTION_NOT_FOUND);
+                    }).getId() + 1;
+        }
+        List<Question> questions = questionRepository.findAllByIdLessThanAndRoomAndStatusOrderByCreatedAtDesc(lastQuestionId, room, STATUS, pageable);
         List<QuestionDto.GetResponse> response = new ArrayList<>();
         for(Question question : questions) {
             //int roomMemberCount = roomMemberRepository.countByRoom(room);
