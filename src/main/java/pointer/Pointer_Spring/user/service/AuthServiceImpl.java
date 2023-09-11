@@ -283,10 +283,7 @@ public class AuthServiceImpl implements AuthService {
                 return new UserDto.UserResponse(ExceptionCode.SIGNUP_LIMITED_ID);
             }
             user = signup(kakaoDto, User.SignupType.KAKAO.name()+kakaoDto.getEmail(), password);
-        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
-            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
-        }
-        else {
+        } else {
             user = findUser.get();
             user.setSocialToken(code);
         }
@@ -380,8 +377,6 @@ public class AuthServiceImpl implements AuthService {
             }
             user = signup(kakaoDto, id, password);
             user.setId(id, COMPLETE);
-        } else if (findUser.get().getType().equals(User.SignupType.APPLE)) { // email 중복
-            return new UserDto.UserResponse(ExceptionCode.SIGNUP_DUPLICATED_EMAIL);
         }
         else {
             user = findUser.get();
