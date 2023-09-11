@@ -40,6 +40,9 @@ public class Friend extends BaseEntity {
     public void setRelationship(Relation relationship) {
         this.relationship = relationship;
     }
+    public void setFriendName(String friendName) {
+        this.friendName = friendName;
+    }
 
     // builder
     @Builder
