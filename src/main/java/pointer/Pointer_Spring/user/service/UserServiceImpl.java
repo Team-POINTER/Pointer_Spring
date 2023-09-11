@@ -44,6 +44,8 @@ public class UserServiceImpl implements UserService {
                     throw new CustomException(ExceptionCode.USER_NOT_FOUND);
                 }
         );
+        friendRepository.findAllByUserFriendId(userId).stream().forEach(
+                ((friend) -> friend.setFriendName(userNm)));
         user.changeName(userNm);
         return new ResponseUser(ExceptionCode.USER_UPDATE_OK);
     }
