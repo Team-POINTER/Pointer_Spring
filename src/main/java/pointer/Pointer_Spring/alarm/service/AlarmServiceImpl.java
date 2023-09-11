@@ -284,6 +284,7 @@ public class AlarmServiceImpl implements AlarmService {
                 continue;
             }
 
+            alarm.setReadCheck(true);
             User sendUser = o.get();
             Image profileImg = imageRepository.findByUserAndImageSort(sendUser, Image.ImageType.PROFILE).orElse(null);
             AlarmDto.GetFriendAlarmResponse response = AlarmDto.GetFriendAlarmResponse.builder()
