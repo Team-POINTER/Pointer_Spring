@@ -19,7 +19,7 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true)
     private String id;
-    @Column(nullable = false, unique = true) // 탈퇴된 회원과 새로 가입한 회원 = status가 다른 동일 email 존재할 수 이씀
+    @Column(nullable = false) // 탈퇴된 회원과 새로 가입한 회원 = status가 다른 동일 email 존재할 수 이씀
     private String email;
 
     @Column(name = "name", nullable = false)
