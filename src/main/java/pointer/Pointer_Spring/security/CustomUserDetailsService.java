@@ -26,9 +26,9 @@ public class CustomUserDetailsService implements UserDetailsService { // 로그�
         //System.out.println("CustomUserDetailsService.loadUserByUsername");
 
         User user = userRepository.findByEmailAndStatus(email, STATUS)
-                .orElseThrow(() -> {
-                    throw new CustomException(ExceptionCode.USER_NOT_FOUND);
-                });
+                .orElseThrow(() -> {throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+            });
+
 
         return UserPrincipal.create(user);
     }

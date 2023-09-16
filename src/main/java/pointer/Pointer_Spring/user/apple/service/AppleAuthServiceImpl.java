@@ -73,7 +73,7 @@ public class AppleAuthServiceImpl {
         String sub = (String) claims.get("sub"); // apple user id
         String email = (String) claims.get("email");
 
-        Optional<User> findUser = userRepository.findByEmailAndTypeAndStatus(email, User.SignupType.APPLE,1);
+        Optional<User> findUser = userRepository.findByEmailAndStatus(email, 1);
         User user;
         if(findUser.isEmpty()) {
             if (blockedUserRepository.existsByEmail(email)) {
@@ -94,8 +94,7 @@ public class AppleAuthServiceImpl {
 
         ExceptionCode exception;
 
-        if ((user.getId().equals(user.getEmail()) || user.getCheckId() < COMPLETE)
-                && user.getType()== User.SignupType.APPLE) { // 회원가입 : email
+        if (user.getId().equals(user.getEmail()) || user.getCheckId() < COMPLETE) { // 회원가입 : email
             exception = ExceptionCode.SIGNUP_CREATED_OK;
         }
         else {
