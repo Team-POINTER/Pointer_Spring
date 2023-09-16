@@ -25,12 +25,10 @@ public class CustomUserDetailsService implements UserDetailsService { // 로그�
             throws UsernameNotFoundException {
         //System.out.println("CustomUserDetailsService.loadUserByUsername");
 
-        User user = userRepository.findByEmailAndTypeAndStatus(email, User.SignupType.APPLE, STATUS).orElse(null);
-        if(user == null) {
-            user = userRepository.findByEmailAndTypeAndStatus(email, User.SignupType.KAKAO, STATUS).orElseThrow(() -> {
-                throw new CustomException(ExceptionCode.USER_NOT_FOUND);
+        User user = userRepository.findByEmailAndStatus(email, STATUS)
+                .orElseThrow(() -> {throw new CustomException(ExceptionCode.USER_NOT_FOUND);
             });
-        }
+
 
         return UserPrincipal.create(user);
     }
