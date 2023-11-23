@@ -10,7 +10,7 @@ import pointer.Pointer_Spring.security.CurrentUser;
 import pointer.Pointer_Spring.security.UserPrincipal;
 
 @RestController
-@RequestMapping("/point")
+@RequestMapping("/api/v1/points")
 @RequiredArgsConstructor
 public class VersionPointController {
     private final VersionPointService versionPointService;
@@ -28,8 +28,8 @@ public class VersionPointController {
     }
 
     // 포링 차감 여부
-    @PostMapping("/{point}")
-    public Object setMinusPoint(@CurrentUser UserPrincipal userPrincipal, @PathVariable int point) {
+    @PostMapping("/{point-id}")
+    public Object setMinusPoint(@CurrentUser UserPrincipal userPrincipal, @PathVariable("point-id") int point) {
         return  new ResponseEntity<>(versionPointService.usePoint(userPrincipal, point), HttpStatus.OK);
     }
 }

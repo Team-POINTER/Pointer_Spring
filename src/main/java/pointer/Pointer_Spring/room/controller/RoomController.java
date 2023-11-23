@@ -54,7 +54,7 @@ public class RoomController {
         return roomService.inviteMembers(dto);
     }
 
-    @GetMapping("/paging/friend/invitation")
+    @GetMapping("/paging/friends/invitation")
     public Object invitationFriendList(@CurrentUser UserPrincipal userPrincipal, Long roomId, Integer currentPage, int pageSize, String kwd, HttpServletRequest request) {
         return roomService.isInviteMembersList(userPrincipal, roomId, currentPage, pageSize,kwd, request); //여기 kwd는 Nickname에 있는가 없는가
     }
@@ -70,7 +70,7 @@ public class RoomController {
     }
 
     // 초대 가능 친구 목록
-    @GetMapping("/{room-id}/friends")
+    @GetMapping("/{room-id}/friendss")
     public Object getRoomFriendList(@PathVariable(name = "room-id") Long roomId,
                                     @CurrentUser UserPrincipal userPrincipal,
                                     @RequestParam String keyword,

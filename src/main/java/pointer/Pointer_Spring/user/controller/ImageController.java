@@ -12,7 +12,7 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/image")
+@RequestMapping("api/v1/image")
 @RequiredArgsConstructor
 //@CrossOrigin(origins = "http://localhost:3000")
 public class ImageController {

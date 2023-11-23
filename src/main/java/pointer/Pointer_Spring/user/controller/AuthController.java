@@ -26,7 +26,7 @@ import pointer.Pointer_Spring.validation.ExceptionCode;
 
 import java.util.Optional;
 
-@RestController
+@RestController("/api/v1")
 //@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AuthController {
@@ -84,12 +84,12 @@ public class AuthController {
         return new ResponseEntity<>(tokenDto, HttpStatus.OK);
     }
 
-    @GetMapping("/user/check")
+    @GetMapping("/users/check")
     public ResponseEntity<Object> tokenCheck() {
         return new ResponseEntity<>(new UserDto.UserResponse(ExceptionCode.TOKEN_SUCCESS), HttpStatus.OK);
     }
 
-    @GetMapping("/user")
+    @GetMapping("/users")
     public ResponseEntity<Object> test2() {
         return new ResponseEntity<>("success!", HttpStatus.OK);
     }
@@ -122,43 +122,43 @@ public class AuthController {
         return new ResponseEntity<>(appleAuthService.login(appleLoginRequest.getIdentityToken()),  HttpStatus.OK);
     }
 
-    @PostMapping("/user/reissue") // token 재발급
+    @PostMapping("/users/reissue") // token 재발급
     public ResponseEntity<Object> reissue(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.reissue(userPrincipal), HttpStatus.OK);
     }
 
-    @PostMapping("/user/agree") // 동의
+    @PostMapping("/users/agree") // 동의
     public ResponseEntity<Object> saveAgree(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.UserAgree agree) {
         return new ResponseEntity<>(authServiceImpl.saveAgree(userPrincipal, agree), HttpStatus.OK);
     }
 
-    @PostMapping("/user/marketing") // 마케팅 상태 변경
+    @PostMapping("/users/marketing") // 마케팅 상태 변경
     public ResponseEntity<Object> updateMarketing(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.UserMarketing marketing) {
         return new ResponseEntity<>(authServiceImpl.updateMarketing(userPrincipal, marketing), HttpStatus.OK);
     }
 
-    @PostMapping("/user/id") // id 저장
+    @PostMapping("/users/id") // id 저장
     public ResponseEntity<Object> saveId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.saveId(userPrincipal, info), HttpStatus.OK);
     }
 
-    @PostMapping("/user/checkId") // 중복 확인
+    @PostMapping("/users/check") // 중복 확인
     public ResponseEntity<Object> checkId(@CurrentUser UserPrincipal userPrincipal, @RequestBody UserDto.BasicUser info) {
         return new ResponseEntity<>(authServiceImpl.checkId(userPrincipal, info), HttpStatus.OK);
     }
 
-    @PostMapping("/user/logout") // 로그아웃
+    @PostMapping("/users/logout") // 로그아웃
     public ResponseEntity<Object> logout(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.logout(userPrincipal), HttpStatus.OK);
     }
 
-//    @PostMapping("/user/logout/apple")
+//    @PostMapping("/users/logout/apple")
 //    public ResponseEntity<Object> logoutApple(@CurrentUser UserPrincipal userPrincipal) {
 //
 //        return new ResponseEntity<>(appleAuthService.logout(userPrincipal), HttpStatus.OK);
 //    }
 
-    @DeleteMapping("/user/resign") // 회원 탈퇴
+    @DeleteMapping("/users/resign") // 회원 탈퇴
     public ResponseEntity<Object> resign(@CurrentUser UserPrincipal userPrincipal) {
         return new ResponseEntity<>(authServiceImpl.resign(userPrincipal), HttpStatus.OK);
     }

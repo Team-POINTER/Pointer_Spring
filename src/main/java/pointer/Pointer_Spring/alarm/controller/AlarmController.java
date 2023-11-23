@@ -11,7 +11,7 @@ import pointer.Pointer_Spring.security.UserPrincipal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/alarm")
+@RequestMapping("/api/v1/alarm")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class AlarmController {
 
@@ -96,7 +96,7 @@ public class AlarmController {
 
     }
 
-    @GetMapping("/friend/{cursorId}")
+    @GetMapping("/friends/{cursorId}")
     public BaseResponse<List<AlarmDto.GetFriendAlarmResponse>> getFriendAlarm(@CurrentUser UserPrincipal userPrincipal,
                                                                               @PathVariable("cursorId") Long cursorId) {
         return new BaseResponse<>(alarmService.getFriendAlarm(userPrincipal, cursorId));

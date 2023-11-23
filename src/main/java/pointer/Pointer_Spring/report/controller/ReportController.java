@@ -18,7 +18,7 @@ import pointer.Pointer_Spring.vote.dto.VoteDto;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@RestController("/api/v1")
 @RequestMapping
 @RequiredArgsConstructor
 public class ReportController {

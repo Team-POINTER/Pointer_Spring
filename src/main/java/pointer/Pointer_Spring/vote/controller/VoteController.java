@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/votes")
+@RequestMapping("api/v1/votes")
 //@CrossOrigin(origins = "http://localhost:3000")
 public class VoteController {
 
